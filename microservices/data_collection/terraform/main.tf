@@ -4,7 +4,7 @@ provider "aws" {
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "${path.module}/../src/cisascrapper/cisa.py"
+  source_file = "${path.module}/../src/cisa.py"
   output_path = "${path.module}/lambda.zip"
 }
 
