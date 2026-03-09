@@ -3,7 +3,7 @@ import pytest
 from moto import mock_aws
 import boto3
 import json
-from microservices.data_collection.src.cisascrapper.cisa import cisascrapper
+from microservices.data_collection.src.cisa import cisascrapper
 
 @pytest.fixture(autouse=True)
 def aws_credentials():
