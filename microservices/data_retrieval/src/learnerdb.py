@@ -26,11 +26,16 @@ try:
 	risk_rating text not null,
 	earliest_vuln_date date);'''
 
+    createCompaniesSimple = '''create table companies (
+    id serial primary key,
+    company_name text unique not null
+    );'''
 
     createVulnerabilitiesQuery = '''create table vulnerabilities(
-    cveId varchar(20) primary key,
+    cve_id varchar(20) primary key,
+    company_id integer not null,
+    foreign key (company_id) references companies(id),
     vulnerability_name text not null,
-    company_name text not null,
     description text not null,
     date_added date not null,
     due_date date not null,
@@ -60,4 +65,4 @@ except Exception as e:
     raise
 finally:
     if conn:
-        conn.close()
+       conn.close()
