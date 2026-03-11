@@ -24,22 +24,22 @@ try:
 #     location VARCHAR(100)
 # );''')
     
-    companiesQuery =  '''create table companies(
-	id serial primary key,
-	name varchar(100) not null,
-	numVulnerabilities integer, 
-	avgCVSS integer,
-	avgEPSS integer,
-	riskIndex integer not null,
-	riskRating text not null
-	earliestVulnerabilityDate dateObj?);'''
+    # createCompaniesQuery =  '''create table companies(
+	# id serial primary key,
+	# name text not null,
+	# numVulnerabilities integer, 
+	# avgCVSS numeric,
+	# avgEPSS numeric,
+	# riskIndex numeric not null,
+	# riskRating text not null
+	# earliestVulnerabilityDate date);'''
 
-    createVulnerabilitiesQuery = '''create table vulnerabilities(
-    cveId varchar(primary key
+    # createVulnerabilitiesQuery = '''create table vulnerabilities(
+    # cveId varchar(primary key
     
     
     
-    );'''
+    # );'''
 
     print('success')
 
