@@ -3,6 +3,7 @@ import pytest
 from moto import mock_aws
 import boto3
 import json
+import responses
 from microservices.data_collection.src.reference import nvdscrapper
 
 @pytest.fixture(autouse=True)
