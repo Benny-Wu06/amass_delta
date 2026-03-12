@@ -9,8 +9,10 @@ resource "aws_lambda_function" "reference_scraper" {
   role             = aws_iam_role.cisa_role.arn
   handler          = "reference.nvdscrapper"
   runtime          = "python3.12"
-  filename         = data.archive_file.reference.zip.output_path
-  source_code_hash = data.archive_file.reference.zip.output_base64sha256
+  timeout          = 300
+  memory_size      = 3000
+  filename         = data.archive_file.reference_zip.output_path
+  source_code_hash = data.archive_file.reference_zip.output_base64sha256
 
   environment {
     variables = {
