@@ -3,6 +3,7 @@ import pytest
 from moto import mock_aws
 import boto3
 import json
+import responses
 from microservices.data_collection.src.reference import nvdscrapper
 
 @pytest.fixture(autouse=True)
@@ -21,13 +22,12 @@ def test_reference_uploads_to_s3(aws_credentials):
         Bucket="test-bucket",
         CreateBucketConfiguration={'LocationConstraint': 'ap-southeast-2'}
     )
-
     result = nvdscrapper({}, None)
 
     assert result["statusCode"] == 200
     body = json.loads(result["body"])
     assert body["status"] == "success"
-    obj = s3.get_object(Bucket="test-bucket", Key="reference/nvd/nvdcve-2.0-2026.json.gz")
+    obj = s3.get_object(Bucket="test-bucket", Key="reference/nvdcve-2.0-modified.json.gz")
     assert obj['ContentType'] == 'application/x-gzip'
 
 @mock_aws
