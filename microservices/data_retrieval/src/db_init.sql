@@ -1,3 +1,9 @@
+-- DRAFT, may need to change companies as above into below
+create table companies (
+    id serial primary key,
+    company_name text unique not null
+    );
+
 -- this table needs to be created before vulnerabilities i believe
 create table companies(
 	id serial primary key,
@@ -9,11 +15,6 @@ create table companies(
 	risk_rating text not null,
 	earliest_vuln_date date);
 
--- DRAFT, may need to change companies as above into below
-create table companies (
-    id serial primary key,
-    company_name text unique not null
-    );
 
 create table vulnerabilities(
     cve_id varchar(20) primary key,
@@ -29,3 +30,15 @@ create table vulnerabilities(
     epss_percentile numeric
 );
 
+-- get company summary query
+SELECT 
+    c.company_name as company,
+    COUNT(v.cve_id) as cve_count,
+    AVG(v.epss_score) as avg_epss,
+    AVG(v.cvss_score) as avg_cvss,
+    c.risk_index,
+    c.risk_rating
+FROM companies c
+LEFT JOIN vulnerabilities v ON c.id = v.company_id
+WHERE c.company_name = 'COMPANY_NAME'
+GROUP BY c.id;
