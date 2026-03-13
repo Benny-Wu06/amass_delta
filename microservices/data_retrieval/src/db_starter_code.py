@@ -18,6 +18,8 @@ try:
     )
     cur = conn.cursor()
 
+    # PUT UR CODE HERE ! - tim
+
     cur.execute('SELECT * from vulnerabilities;')
     print(cur.fetchall())
 
