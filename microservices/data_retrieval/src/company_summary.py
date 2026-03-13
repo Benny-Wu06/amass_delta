@@ -2,6 +2,7 @@ import psycopg2
 import boto3
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 password = "testdiddyblud"
 
@@ -9,34 +10,19 @@ conn = None
 
 # /v1/companies/{company_name}
 # get vulnerability statistics (avg cvss, epss) about a company
-
-# EXAMPLE OUTPUT:
-# {
-#   "company": "Microsoft",
-#   "cve_count": 154,
-#   "avg_epss": 0.125,
-#   "avg_cvss": 7.2,
-#   "risk_index": 8.5,
-#   "risk_rating": "Severe",
-#   "time": {
-#     "timestamp": "2026-03-13T05:40:39.063Z",
-#     "timezone": "GMT+11"
-#   }
-# }
 def lambda_handler(event, context):
     path_params = event.get('pathParameters', {})
     target_company = path_params.get('company_name')
-    
-    target_company = 'PedalDynamics'
+
     if not target_company:
         return {
             'statusCode': 400,
             'body': json.dumps({"error": "Company name is required in the URL"})
         }
-    get_company_summary(target_company)
+    return get_company_summary(target_company)
 
 
-def get_company_summary(company):
+def get_company_summary(target_company):
     try:
         conn = psycopg2.connect(
             host='testdb.cjwhnekr8yms.us-east-1.rds.amazonaws.com',
@@ -70,12 +56,15 @@ def get_company_summary(company):
         avg_epss = float(avg_epss)
         avg_cvss = float(avg_cvss)
         risk_index = float(risk_index)
-        time_object = {'timestamp': str(datetime.now()), 'timezone': 'GMT+!11'}
+        tz = ZoneInfo('Australia/Sydney')
+        curr_time = datetime.now(tz)
+        time_object = {'timestamp': str(curr_time), 'timezone': curr_time.strftime('%Z')}
         
         result = json.dumps({
             'company': company,
             'cve_count': cve_count,
             'avg_epss': avg_epss,
+            'avg_cvss': avg_cvss,
             'risk_index': risk_index,
             'risk_rating': risk_rating,
             'time': time_object
@@ -85,7 +74,7 @@ def get_company_summary(company):
         return {
             'statusCode': 200,
             'headers': {'Content-Type': 'application/json'},
-            'body': json.dumps(result)
+            'body': result
         }
     except Exception as e:
         print(f"Database error: {e}")
@@ -97,5 +86,3 @@ def get_company_summary(company):
     finally:
         if conn:
             conn.close()
-
-get_company_summary(1,1)
