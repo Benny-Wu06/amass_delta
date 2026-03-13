@@ -9,6 +9,9 @@ import json
 password = "testdiddyblud"
 
 conn = None
+
+# /v1/companies/{company_name}/vulnerabilities
+# i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
     DB_PASSWORD = os.environ.get('DB_PASSWORD')
     DB_HOST = os.environ.get('DB_HOST')
@@ -35,7 +38,7 @@ def lambda_handler(event, context):
         )
         cur = conn.cursor()
 
-        # Retrieval Query 
+        # Retrieval Query
         query = '''
             SELECT 
                 v.cve_id, 
