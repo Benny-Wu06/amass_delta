@@ -34,6 +34,14 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   depends_on = [aws_lambda_permission.allow_s3_enricher]
 }
 
+resource "aws_lambda_permission" "allow_s3_enricher" {
+  statement_id  = "AllowS3Invoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.enrichment.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = var.raw_bucket_arn
+}
+
 resource "aws_apigatewayv2_integration" "enrichment_integration" {
   api_id           = aws_apigatewayv2_api.lambda_api.id
   integration_type = "AWS_PROXY"
