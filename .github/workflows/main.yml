@@ -29,26 +29,37 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: "ap-southeast-2"
+        BUCKET_NAME: "amass-cisa-bucket-01"
       run: |
-        pytest
+        python3 -m pytest
     - name: Type Checking
       run: |
-        mypy .
+        mypy . --explicit-package-bases --ignore-missing-imports
     - name: Test and Coverage
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "ap-southeast-2"
+          BUCKET_NAME: "amass-cisa-bucket-01"
       run: |
-        pytest --cov=. --cov-fail-under=85
+        python3 -m pytest --cov=. --cov-fail-under=85
 
   terraform-build-check:
     name: Terraform Build Check
     runs-on: ubuntu-latest
     environment: production
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: 'ap-southeast-2'
     strategy:
       matrix:
         directory: [
             "terraform",
-            "microservices/data-collection/terraform",
-            "microservices/data-retrieval/terraform",
-            "microservices/visualisation/terraform"
         ]
     defaults:
         run:
@@ -62,7 +73,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ matrix.directory }}
-        run: terraform init -backend=false
+        run: terraform init
 
       - name: Terraform Format
         working-directory: ${{ matrix.directory }}
