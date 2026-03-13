@@ -9,6 +9,12 @@ create table companies(
 	risk_rating text not null,
 	earliest_vuln_date date);
 
+-- DRAFT, may need to change companies as above into below
+create table companies (
+    id serial primary key,
+    company_name text unique not null
+    );
+
 create table vulnerabilities(
     cve_id varchar(20) primary key,
     company_id integer not null,

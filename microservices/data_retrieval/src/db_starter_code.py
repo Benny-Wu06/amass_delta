@@ -3,6 +3,7 @@ import boto3
 
 password = "testdiddyblud"
 
+# DB CONNECTION STARTER CODE
 conn = None
 try:
     conn = psycopg2.connect(
@@ -15,21 +16,8 @@ try:
         connect_timeout=3,
     sslrootcert='/certs/global-bundle.pem'
     )
-
-    createCompaniesSimple = '''create table companies (
-    id serial primary key,
-    company_name text unique not null
-    );'''
-
     cur = conn.cursor()
 
-    cur.execute(createCompaniesQuery)
-    cur.execute(createVulnerabilitiesQuery)
-
-    conn.commit()
-
-    cur.execute('SELECT * from companies;')
-    print(cur.fetchall())
 
     cur.execute('SELECT * from vulnerabilities;')
     print(cur.fetchall())
