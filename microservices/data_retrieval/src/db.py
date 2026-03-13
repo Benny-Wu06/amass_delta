@@ -22,7 +22,6 @@ def lambda_handler(event, context):
             'body': json.dumps({"error": "Company name is required in the URL"})
         }
     
-# need to add will to the inbound security group so he can connect
     try:
         conn = psycopg2.connect(
             host=DB_HOST,
@@ -63,44 +62,6 @@ def lambda_handler(event, context):
             results.append(row_dict)
             
         cur.close()
-
-    #     cur.execute('''CREATE TABLE departments (
-    #     department_id SERIAL PRIMARY KEY,
-    #     department_name VARCHAR(100) NOT NULL UNIQUE,
-    #     location VARCHAR(100)
-    # );''')
-        
-        # createCompaniesQuery =  '''create table companies(
-        # id serial primary key,
-        # name text not null,
-        # numVulnerabilities integer, 
-        # avgCVSS numeric,
-        # avgEPSS numeric,
-        # riskIndex numeric not null,
-        # riskRating text not null
-        # earliestVulnerabilityDate date);'''
-
-        # createVulnerabilitiesQuery = '''create table vulnerabilities(
-        # cveId varchar(primary key
-        
-        
-        
-        # );'''
-
-        print('success')
-
-        # preprocessing
-        # cur.execute('''INSERT INTO vulnerabilities (cveId, companyName, cvss, epss) VALUES
-        # ('Engineering', 'San Francisco'),
-        # ('Human Resources', 'New York'),
-        # ('Marketing', 'London'),
-        # ('Sales', 'Sydney');''')
-    #     conn.commit()
-
-
-        # cur.execute('select * from departments;')
-        # print(cur.fetchall())
-        # cur.close()
 
         return {
             'statusCode': 200,
