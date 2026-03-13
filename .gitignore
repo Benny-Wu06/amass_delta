@@ -36,4 +36,9 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+<<<<<<< HEAD
 .venv
+=======
+__pycache__/
+*.pyc
+>>>>>>> e1c6378 (Changed gitignore to stop pytest files being added)
