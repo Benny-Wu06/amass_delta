@@ -8,31 +8,31 @@ data "archive_file" "db_lambda_zip" {
 }
 
 
-#
-# IAM Role for Database Access
-#
-resource "aws_iam_role" "db_retrieval_role" {
-  name = "db_retrieval_lambda_role"
+# #
+# # IAM Role for Database Access
+# #
+# resource "aws_iam_role" "db_retrieval_role" {
+#   name = "db_retrieval_lambda_role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = { Service = "lambda.amazonaws.com" }
-    }]
-  })
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [{
+#       Action = "sts:AssumeRole"
+#       Effect = "Allow"
+#       Principal = { Service = "lambda.amazonaws.com" }
+#     }]
+#   })
+# }
 
 
-#
-# Allows Lambda to connect to a VPC to reach RDS
-#
+# #
+# # Allows Lambda to connect to a VPC to reach RDS
+# #
 
-resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
-  role       = aws_iam_role.db_retrieval_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-}
+# resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
+#   role       = aws_iam_role.db_retrieval_role.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+# }
 
 
 #
@@ -46,11 +46,11 @@ resource "aws_lambda_function" "db_retrieval" {
   filename         = data.archive_file.db_lambda_zip.output_path
   source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
 
-  # Networking: Must match your RDS VPC
-  vpc_config {
-    subnet_ids         = var.private_subnet_ids
-    security_group_ids = [var.lambda_sg_id]
-  }
+#   # Networking: Must match your RDS VPC
+#   vpc_config {
+#     subnet_ids         = var.private_subnet_ids
+#     security_group_ids = [var.lambda_sg_id]
+#   }
 
   environment {
     variables = {
@@ -65,31 +65,31 @@ resource "aws_lambda_function" "db_retrieval" {
 }
 
 
-#
-#  API Gateway (HTTP API)
-#
-resource "aws_apigatewayv2_api" "db_api" {
-  name          = "db-retrieval-api"
-  protocol_type = "HTTP"
-}
+# #
+# #  API Gateway (HTTP API)
+# #
+# resource "aws_apigatewayv2_api" "db_api" {
+#   name          = "db-retrieval-api"
+#   protocol_type = "HTTP"
+# }
 
-resource "aws_apigatewayv2_stage" "db_api_stage" {
-  api_id      = aws_apigatewayv2_api.db_api.id
-  name        = "$default"
-  auto_deploy = true
-}
+# resource "aws_apigatewayv2_stage" "db_api_stage" {
+#   api_id      = aws_apigatewayv2_api.db_api.id
+#   name        = "$default"
+#   auto_deploy = true
+# }
 
-resource "aws_apigatewayv2_integration" "db_lambda_int" {
-  api_id           = aws_apigatewayv2_api.db_api.id
-  integration_type = "AWS_PROXY"
-  integration_uri  = aws_lambda_function.db_retrieval.invoke_arn
-}
+# resource "aws_apigatewayv2_integration" "db_lambda_int" {
+#   api_id           = aws_apigatewayv2_api.db_api.id
+#   integration_type = "AWS_PROXY"
+#   integration_uri  = aws_lambda_function.db_retrieval.invoke_arn
+# }
 
-resource "aws_apigatewayv2_route" "db_route" {
-  api_id    = aws_apigatewayv2_api.db_api.id
-  route_key = "GET /v1/companies/{company_name}/vulnerabilities"
-  target    = "integrations/${aws_apigatewayv2_integration.db_lambda_int.id}"
-}
+# resource "aws_apigatewayv2_route" "db_route" {
+#   api_id    = aws_apigatewayv2_api.db_api.id
+#   route_key = "GET /v1/companies/{company_name}/vulnerabilities"
+#   target    = "integrations/${aws_apigatewayv2_integration.db_lambda_int.id}"
+# }
 
 resource "aws_lambda_permission" "db_api_gw_perm" {
   action        = "lambda:InvokeFunction"
