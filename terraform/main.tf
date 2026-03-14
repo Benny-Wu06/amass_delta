@@ -87,17 +87,17 @@ module "data_collection" {
   vpc_id         = aws_vpc.main.id
   raw_bucket_arn = aws_s3_bucket.cisa_bucket.arn
   raw_bucket_id  = aws_s3_bucket.cisa_bucket.id
-  db_name      = aws_db_instance.postgres.db_name
-  db_address   = aws_db_instance.postgres.address
-  db_user      = aws_db_instance.postgres.username
-  db_password  = var.db_password
-  bucket_id    = aws_s3_bucket.cisa_bucket.id
-  subnet_ids   = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  db_name        = aws_db_instance.postgres.db_name
+  db_address     = aws_db_instance.postgres.address
+  db_user        = aws_db_instance.postgres.username
+  db_password    = var.db_password
+  bucket_id      = aws_s3_bucket.cisa_bucket.id
+  subnet_ids     = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
 }
 
 resource "aws_vpc_endpoint" "s3" {
-  vpc_id       = aws_vpc.main.id
-  service_name = "com.amazonaws.ap-southeast-2.s3"
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-southeast-2.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids = [aws_vpc.main.main_route_table_id] 
+  route_table_ids   = [aws_vpc.main.main_route_table_id]
 }
