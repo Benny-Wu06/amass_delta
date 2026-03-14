@@ -13,6 +13,7 @@ conn = None
 # /v1/companies/{company_name}/vulnerabilities
 # i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
+    conn = None
     DB_PASSWORD = os.environ.get('DB_PASSWORD')
     DB_HOST = os.environ.get('DB_HOST')
     cert_path = os.environ.get('CERT_PATH', 'global-bundle.pem')
@@ -42,7 +43,7 @@ def lambda_handler(event, context):
         query = '''
             SELECT 
                 v.cve_id, 
-                c.company_name, 
+                c.company_id, 
                 v.vulnerability_name, 
                 v.cvss_score, 
                 v.cvss_severity
