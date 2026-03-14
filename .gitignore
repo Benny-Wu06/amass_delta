@@ -38,6 +38,5 @@ terraform.rc
 
 __pycache__/
 *.pyc
-=======
 .venv
->>>>>>> 76fbe35 (add .venv to gitignore)
+
