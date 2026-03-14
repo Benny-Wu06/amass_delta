@@ -12,7 +12,7 @@ resource "aws_iam_role" "company_summary_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "company_summary_vpc_access" {
-  role       = aws_iam_role.company_summary_role
+  role       = aws_iam_role.company_summary_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
