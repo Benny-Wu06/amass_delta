@@ -115,7 +115,7 @@ module "data_collection" {
 }
 
 module "data_retrieval" {
-  source         = "../microservices/data_retrieval/terraform"
+  source             = "../microservices/data_retrieval/terraform"
   private_subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
   lambda_sg_id       = aws_security_group.retrieval_lambda_sg.id
   db_password        = var.db_password
