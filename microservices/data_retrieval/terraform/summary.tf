@@ -49,3 +49,32 @@ resource "aws_lambda_function" "company_summary" {
     }
 
 }
+
+# integrate lambda to api gateway
+resource "aws_apigatewayv2_integration" "company_summary_db_integration" {
+  api_id             = aws_apigatewayv2_api.db_api.id 
+  integration_type   = "AWS_PROXY"
+  integration_uri    = aws_lambda_function.company_summary.invoke_arn
+  integration_method = "POST" 
+}
+
+resource "aws_apigatewayv2_route" "company_summary_route" {
+  api_id    = aws_apigatewayv2_api.db_api.id
+  route_key = "GET /v1/companies/{company_name}"
+  target    = "integrations/${aws_apigatewayv2_integration.company_summary_db_integration.id}"
+}
+
+resource "aws_lambda_permission" "apigw_lambda_invoke" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.company_summary.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # uses the execution arn of the API defined in main.tf
+  source_arn = "${aws_apigatewayv2_api.db_api.execution_arn}/*/*" 
+}
+
+output "company_summary_endpoint" {
+  description = "The specific endpoint for getting a company summary"
+  value       = "${aws_apigatewayv2_api.db_api.api_endpoint}/v1/companies/{company_name}"
+}
