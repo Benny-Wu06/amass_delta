@@ -31,3 +31,39 @@ resource "aws_iam_role_policy" "s3_access" {
     ]
   })
 }
+
+resource "aws_iam_role" "enrich_role" {
+  name = "enrich_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = "enrichLambda"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "s3_enrich_access" {
+  name = "s3_enrich_access"
+  role = aws_iam_role.enrich_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject", "s3:GetObject", "s3:ListBucket"
+        ]
+        Resource = "${var.raw_bucket_arn}/*"
+      }
+    ]
+  })
+}
