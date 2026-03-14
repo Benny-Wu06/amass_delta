@@ -34,6 +34,13 @@ resource "aws_security_group" "rds_sg" {
   vpc_id = aws_vpc.main.id
 
   ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.retrieval_lambda_sg.id]
+  }
+
+  ingress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
@@ -46,6 +53,18 @@ resource "aws_security_group" "rds_sg" {
     protocol        = "tcp"
     security_groups = [module.data_collection.lambda_sg_id]
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "retrieval_lambda_sg" {
+  name   = "retrieval-lambda-sg"
+  vpc_id = aws_vpc.main.id
 
   egress {
     from_port   = 0
@@ -93,6 +112,18 @@ module "data_collection" {
   db_password    = var.db_password
   bucket_id      = aws_s3_bucket.cisa_bucket.id
   subnet_ids     = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+}
+
+module "data_retrieval" {
+  source             = "../microservices/data_retrieval/terraform"
+  private_subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  lambda_sg_id       = aws_security_group.retrieval_lambda_sg.id
+  db_password        = var.db_password
+  vpc_id             = aws_vpc.main.id
+  db_address         = aws_db_instance.postgres.address
+  db_name            = aws_db_instance.postgres.db_name
+  db_user            = aws_db_instance.postgres.username
+  bucket_id          = aws_s3_bucket.cisa_bucket.id
 }
 
 resource "aws_vpc_endpoint" "s3" {
