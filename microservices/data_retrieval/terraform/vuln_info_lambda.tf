@@ -1,6 +1,6 @@
-# provider "aws" {
-#   region = "ap-southeast-2"
-# }
+provider "aws" {
+  region = "ap-southeast-2"
+}
 
 # IAM role for Lambda execution
 data "aws_iam_policy_document" "assume_role" {
@@ -34,9 +34,9 @@ resource "aws_lambda_function" "vuln_info_lambda" {
   function_name = "vuln_info_lambda"
   role          = aws_iam_role.vuln_info_role.arn
   handler       = "vulnerability_info.lambda_handler"
-  code_sha256   = data.archive_file.example.output_base64sha256
+  code_sha256   = data.archive_file.vuln_info_archive.output_base64sha256
 
-  runtime = "python3.12"
+  runtime = "python3.14"
 
   environment {
     variables = {
