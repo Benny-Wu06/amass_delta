@@ -41,7 +41,7 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
 resource "aws_lambda_function" "db_retrieval" {
   function_name    = "db_retrieval_service"
   role             = aws_iam_role.db_retrieval_role.arn
-  handler          = "db.lambda_handler"
+  handler          = "company_vulnerabilities.lambda_handler"
   runtime          = "python3.12"
   filename         = data.archive_file.db_lambda_zip.output_path
   source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
@@ -56,6 +56,7 @@ resource "aws_lambda_function" "db_retrieval" {
     variables = {
       DB_HOST     = "testdb.cby62qewyxsr.ap-southeast-2.rds.amazonaws.com"
       DB_PASSWORD = var.db_password
+      CERT_PATH   = "global-bundle.pem"
     }
   }
 }
@@ -92,4 +93,17 @@ resource "aws_lambda_permission" "db_api_gw_perm" {
   function_name = aws_lambda_function.db_retrieval.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.db_api.execution_arn}/*/*"
+}
+
+#
+# Outputs
+#
+output "api_base_url" {
+  description = "The base URL for the API Gateway"
+  value       = aws_apigatewayv2_api.db_api.api_endpoint
+}
+
+output "vulnerability_endpoint" {
+  description = "The specific endpoint for company vulnerabilities"
+  value       = "${aws_apigatewayv2_api.db_api.api_endpoint}/v1/companies/{company_name}/vulnerabilities"
 }
