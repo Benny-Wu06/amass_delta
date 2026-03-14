@@ -85,6 +85,14 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ${{ matrix.directory }}
+        env:
+            # This maps your GitHub Secret to the Terraform variable
+            TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+            TF_VAR_private_subnet_ids: ${{ secrets.PRIVATE_SUBNET_IDS }}
+            TF_VAR_lambda_sg_id: ${{ secrets.LAMBDA_SG_ID }}
+            # Your existing AWS secrets
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform plan -input=false
         
       - name: Terraform Apply
