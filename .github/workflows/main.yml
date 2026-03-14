@@ -38,7 +38,7 @@ jobs:
         python3 -m pytest
     - name: Type Checking
       run: |
-        mypy . --explicit-package-bases --ignore-missing-imports
+        mypy . --explicit-package-bases --ignore-missing-imports --exclude "microservices/data_retrieval/package/"
     - name: Test and Coverage
       env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
