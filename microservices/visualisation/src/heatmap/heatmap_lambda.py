@@ -20,7 +20,7 @@ def heatmap_lambda(event, context):
             "statusCode": 200,
             "body": json.dumps({
                 "company_name": name,
-                "grid": grid
+                "heatmap_grid": grid
             })
         }
     except Exception as e:
