@@ -17,7 +17,7 @@ resource "aws_iam_role" "company_summary_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
+resource "aws_iam_role_policy_attachment" "company_summary_vpc_access" {
   role       = aws_iam_role.company_summary_role
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
