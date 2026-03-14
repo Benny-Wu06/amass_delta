@@ -3,7 +3,7 @@
 #
 data "archive_file" "db_lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../microservices/data_retrieval/package" 
+  source_dir  = "${path.module}/../package" 
   output_path = "${path.module}/db_retrieval.zip"
 }
 
@@ -54,11 +54,14 @@ resource "aws_lambda_function" "db_retrieval" {
 
   environment {
     variables = {
-      DB_HOST     = "testdb.cby62qewyxsr.ap-southeast-2.rds.amazonaws.com"
-      DB_PASSWORD = var.db_password
-      CERT_PATH   = "global-bundle.pem"
+    DB_HOST     = var.db_address
+    DB_NAME     = var.db_name
+    DB_USER     = var.db_user
+    DB_PASSWORD = var.db_password
+    CERT_PATH   = "global-bundle.pem"
+        }
     }
-  }
+
 }
 
 

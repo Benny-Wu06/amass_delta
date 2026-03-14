@@ -30,8 +30,8 @@ def lambda_handler(event, context):
         conn = psycopg2.connect(
             host=DB_HOST,
             port=5432,
-            database='postgres',
-            user='postgres',
+            database=os.environ.get('DB_NAME', 'postgres'),
+            user=os.environ.get('DB_USER', 'postgres'),
             password=DB_PASSWORD,
             sslmode='require',
             connect_timeout = 5,
