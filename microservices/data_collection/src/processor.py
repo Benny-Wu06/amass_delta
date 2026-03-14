@@ -3,7 +3,7 @@ import os
 import boto3
 import psycopg2
 
-# Definijg variablies
+# Variables definitions
 
 s3 = boto3.client('s3')
 
@@ -16,7 +16,7 @@ DB_PASSWORD = 'testdiddyblud'
 BUCKET_NAME = os.environ.get('BUCKET_NAME')
 CISA_KEY    = 'cisa/data.json'
 
-# Connecting to postgres database
+# Database connection
 
 def get_db_connection():
     conn = psycopg2.connect(
@@ -30,7 +30,7 @@ def get_db_connection():
     )
     return conn
 
-# Retrieving data from s3 Bucket
+# retrieving data from s3 bucket
 
 def get_cisa_data():
     response = s3.get_object(
@@ -41,7 +41,7 @@ def get_cisa_data():
     data = json.loads(raw)
     return data['vulnerabilities']
 
-# Searching for companyid via company_name
+# searching for company id via companyname 
 
 def get_or_create_company(cur, company_name):
     cur.execute(
@@ -69,7 +69,7 @@ def get_or_create_company(cur, company_name):
     new_id = cur.fetchone()[0]
     return new_id
 
-# creating vulnerabilites in the table
+# creating new vuolnerablility
 
 def insert_vulnerability(cur, vuln, company_id):
     cvss_score = vuln.get('cvss_score')
@@ -111,7 +111,70 @@ def insert_vulnerability(cur, vuln, company_id):
         epss_percentile
     ))
 
-# lambda function
+# risk calculations 
+
+def calculate_risk(avg_cvss, avg_epss):
+    if avg_cvss is None or avg_epss is None:
+        return 0, 'UNKNOWN'
+
+    risk_index = round(
+        (float(avg_cvss) / 10) * 0.6 + float(avg_epss) * 0.4,
+        4
+    )
+
+    if risk_index >= 0.8:
+        rating = 'CRITICAL'
+    elif risk_index >= 0.6:
+        rating = 'HIGH'
+    elif risk_index >= 0.4:
+        rating = 'MEDIUM'
+    else:
+        rating = 'LOW'
+
+    return risk_index, rating
+
+# updating company stats at the end
+
+def update_all_company_stats(cur):
+    cur.execute('SELECT id FROM companies')
+    company_ids = cur.fetchall()
+
+    for (company_id,) in company_ids:
+        cur.execute('''
+            SELECT
+                COUNT(*),
+                AVG(cvss_score),
+                AVG(epss_score),
+                MIN(date_added)
+            FROM vulnerabilities
+            WHERE company_id = %s
+        ''', (company_id,))
+
+        count, avg_cvss, avg_epss, earliest_date = cur.fetchone()
+        risk_index, risk_rating = calculate_risk(avg_cvss, avg_epss)
+
+        cur.execute('''
+            UPDATE companies SET
+                num_vulnerabilities = %s,
+                avg_cvss            = %s,
+                avg_epss            = %s,
+                risk_index          = %s,
+                risk_rating         = %s,
+                earliest_vuln_date  = %s
+            WHERE id = %s
+        ''', (
+            count,
+            avg_cvss,
+            avg_epss,
+            risk_index,
+            risk_rating,
+            earliest_date,
+            company_id
+        ))
+
+    print(f"Updated stats for {len(company_ids)} companies")
+
+# lambda fucntion
 
 def lambda_handler(event, context):
     print("Starting processor...")
@@ -123,7 +186,6 @@ def lambda_handler(event, context):
     print(f"Found {len(vulnerabilities)} vulnerabilities to process")
 
     inserted = 0
-    skipped = 0
 
     try:
         for vuln in vulnerabilities:
@@ -133,11 +195,16 @@ def lambda_handler(event, context):
             inserted += 1
 
         conn.commit()
-        print(f"Done! Inserted: {inserted}, Skipped: {skipped}")
+        print(f"Inserted {inserted} vulnerabilities")
+
+        print("Updating company stats...")
+        update_all_company_stats(cur)
+        conn.commit()
+        print("Company stats updated!")
 
         return {
             'statusCode': 200,
-            'body': f"Inserted {inserted} vulnerabilities"
+            'body': f"Inserted {inserted} vulnerabilities and updated company stats"
         }
 
     except Exception as e:
