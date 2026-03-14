@@ -3,15 +3,9 @@ import seaborn as sns
 import pandas as pd
 import json
 import io
-import base64
 
-def visualise(json_data):
-    try:
-        data = json.loads(json_data)
-    except json.JSONDecodeError as e:
-        return {"statusCode": 400, "body": json.dumps({"error": str(e)})}
-
-    # Create an in-memory binary stream
+def generate_plot_bytes(data):
+    # create an in-memory binary stream
     buf = io.BytesIO()
 
     # HEATMAP
@@ -58,13 +52,5 @@ def visualise(json_data):
     plt.savefig(buf, format='png')
     plt.close()
     buf.seek(0)
-    
-    # encode to base64
-    b64_image = base64.b64encode(buf.read()).decode('utf-8')
-    
-    return {
-        "isBase64Encoded": True,
-        "statusCode": 200,
-        "headers": {"Content-Type": "image/png"},
-        "body": b64_image
-    }
+
+    return buf.read()
