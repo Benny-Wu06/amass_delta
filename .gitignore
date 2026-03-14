@@ -37,3 +37,5 @@ override.tf.json
 terraform.rc
 
 .venv
+__pycache__/
+*.pyc
