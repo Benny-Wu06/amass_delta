@@ -127,13 +127,13 @@ module "data_retrieval" {
 }
 
 module "visualisation" {
-  source             = "../microservices/visualisation/terraform"
-  subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-  db_password        = var.db_password
-  vpc_id             = aws_vpc.main.id
-  db_address         = aws_db_instance.postgres.address
-  db_name            = aws_db_instance.postgres.db_name
-  db_user            = aws_db_instance.postgres.username
+  source      = "../microservices/visualisation/terraform"
+  subnet_ids  = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  db_password = var.db_password
+  vpc_id      = aws_vpc.main.id
+  db_address  = aws_db_instance.postgres.address
+  db_name     = aws_db_instance.postgres.db_name
+  db_user     = aws_db_instance.postgres.username
 }
 
 resource "aws_vpc_endpoint" "s3" {
