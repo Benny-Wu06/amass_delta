@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from visualisation.src.cve_growth.cve_growth_processor import calculate_growth_stats
 
 def test_calculate_growth_stats():
@@ -7,8 +7,10 @@ def test_calculate_growth_stats():
         (date(2026, 3, 12), 5)
     ]
     
-    # Test with a 5-day window
-    data_points, total, peak_day = calculate_growth_stats(mock_db_query_results, 5)
+    # Force "today" to be March 13, 2026 for consistent testing
+    ref_date = datetime(2026, 3, 13)
+    
+    data_points, total, peak_day = calculate_growth_stats(mock_db_query_results, 5, reference_date=ref_date)
     
     assert total == 7
     assert peak_day == "2026-03-12"
