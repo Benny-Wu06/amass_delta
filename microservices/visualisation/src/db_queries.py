@@ -3,7 +3,7 @@ def fetch_company_name(db, company_id):
     row = db.fetchone()
     return row[0] if row else None
 
-def get_heatmap_data(db, company_id):
+def get_heatmap_data(db, company_name):
     query = """
         SELECT 
             CASE
@@ -22,8 +22,8 @@ def get_heatmap_data(db, company_id):
             END AS epss_range,
             COUNT(*) as cve_count
         FROM vulnerabilities
-        WHERE company_id = %s
+        WHERE company_name = %s
         GROUP BY cvss_range, epss_range;
     """
-    db.execute(query, (company_id,))
+    db.execute(query, (company_name,))
     return db.fetchall()
