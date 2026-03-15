@@ -25,10 +25,6 @@ def get_db_connection():
         sslrootcert=DB_SSL_ROOT_CERT
     )
 
-def fetch_company_name(db, company_id):
-    db.execute("SELECT id, company_name FROM companies WHERE company_name = %s;", (company_id,))
-    return db.fetchone()
-
 def fetch_vulnerability_data(db, company_id, days):
     query = """
         SELECT date_added, COUNT(*) as cve_count
@@ -72,8 +68,7 @@ def cve_growth_lambda(event, context):
         conn = get_db_connection()
 
         with conn.cursor() as db_cursor:
-
-            company_id = event.get('pathParameters', {}).get('company_name')
+            company_name = event.get('pathParameters', {}).get('company_name')
             days = int(event.get('queryStringParameters', {}).get('days', 30))
             
             # error check
@@ -82,26 +77,22 @@ def cve_growth_lambda(event, context):
                     "statusCode": 400,
                     "body": json.dumps({"error": f"Days has to be greater than zero"})
                 }
-
-            company_input = event.get('pathParameters', {}).get('company_name')
-            company_row = fetch_company_name(db_cursor, company_input)
             
-            if not company_row: 
+            if not company_name: 
                 return {
                     "statusCode": 404,
-                    "body": json.dumps({"error": f"Company {company_input} not found"})
+                    "body": json.dumps({"error": f"Company {company_name} not found"})
                 }
             
-            actual_id, name = company_row
-        
-            raw_vuls = fetch_vulnerability_data(db_cursor, actual_id, days)
+            # process
+            raw_vuls = fetch_vulnerability_data(db_cursor, company_name, days)
             
             data_points, total_increase, peak_day = calculate_growth_stats(raw_vuls, days)
             
             return {
                 "statusCode": 200,
                 "body": json.dumps({
-                    "company_name": name,
+                    "company_name": company_name,
                     "data_points": data_points,
                     "summary": {
                         "total_period_increase": total_increase,
