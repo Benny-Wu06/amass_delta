@@ -1,7 +1,7 @@
 import json
-from src.db import get_db_connection
-from src.db_queries import get_heatmap_data, fetch_company_name
-from src.heatmap.heatmap_processor import format_heatmap
+from microservices.visualisation.src.db import get_db_connection
+from microservices.visualisation.src.db_queries import get_heatmap_data, fetch_company_name
+from microservices.visualisation.src.heatmap.heatmap_processor import format_heatmap
 
 ################## !!! WORKING TRIAL !!! #######################
 
