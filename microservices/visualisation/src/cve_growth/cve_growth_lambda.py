@@ -25,16 +25,23 @@ def get_db_connection():
         sslrootcert=DB_SSL_ROOT_CERT
     )
 
+def fetch_company_id(db, company_name):
+    db.execute("SELECT id FROM companies WHERE company = %s;", (company_name,))
+    row = db.fetchone()
+    return row[0] if row else None
+
 def fetch_vulnerability_data(db, company_name, days):
+    company_id = fetch_company_id(db, company_name)
+
     query = """
         SELECT date_added, COUNT(*) as cve_count
         FROM vulnerabilities
-        WHERE company_name = %s
+        WHERE company_id = %s 
         AND date_added >= CURRENT_DATE - (%s || ' days')::interval
         GROUP BY date_added
         ORDER BY date_added ASC;
     """
-    db.execute(query, (company_name, days))
+    db.execute(query, (company_id, days))
     return db.fetchall()
 
 def calculate_growth_stats(vulnerability_counts, days, reference_date=None):
