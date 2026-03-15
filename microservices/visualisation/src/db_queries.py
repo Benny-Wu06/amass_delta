@@ -1,9 +1,11 @@
-def fetch_company_name(db, company_id):
-    db.execute("SELECT company_name FROM companies WHERE id = %s;", (company_id,))
+def fetch_company_id(db, company_name):
+    db.execute("SELECT id FROM companies WHERE company = %s;", (company_name,))
     row = db.fetchone()
     return row[0] if row else None
 
 def get_heatmap_data(db, company_name):
+    company_id = fetch_company_id(db, company_name)
+
     query = """
         SELECT 
             CASE
@@ -22,19 +24,22 @@ def get_heatmap_data(db, company_name):
             END AS epss_range,
             COUNT(*) as cve_count
         FROM vulnerabilities
-        WHERE company_name = %s
+        WHERE company_id = %s
         GROUP BY cvss_range, epss_range;
     """
-    db.execute(query, (company_name,))
+    db.execute(query, (company_id,))
+    return db.fetchall()
     
 def fetch_vulnerability_data(db, company_name, days):
+    company_id = fetch_company_id(db, company_name)
+
     query = """
         SELECT date_added, COUNT(*) as cve_count
         FROM vulnerabilities
-        WHERE company_name = %s 
+        WHERE company_id = %s 
         AND date_added >= CURRENT_DATE - (%s || ' days')::interval
         GROUP BY date_added
         ORDER BY date_added ASC;
     """
-    db.execute(query, (company_name, days))
+    db.execute(query, (company_id, days))
     return db.fetchall()

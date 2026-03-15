@@ -32,7 +32,7 @@ def generate_plot_bytes(data):
 
 def generate_heatmap(data):
     df_heat = pd.DataFrame(data["heatmap_grid"])
-    pivot_table = df_heat.pivot(index="epss", columns="cvss", values="count").fillna(0)
+    pivot_table = df_heat.pivot(index="epss_range", columns="cvss_range", values="count").fillna(0)
     cvss_order = ["0-2", "2-4", "4-6", "6-8", "8-10"]
     epss_order = ["0-0.2", "0.2-0.4", "0.4-0.6", "0.6-0.8", "0.8-1.0"]
     pivot_table = pivot_table.reindex(index=epss_order[::-1], columns=cvss_order).fillna(0)
