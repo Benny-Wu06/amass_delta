@@ -80,7 +80,7 @@ def heatmap_lambda(event, context):
             if not company_name: 
                 return {
                     "statusCode": 404,
-                    "headers": {"Content-Type: application/json"},
+                    "headers": {"Content-Type": "application/json"},
                     "body": json.dumps({"error": f"Company {company_name} not found"})
                 }
             
@@ -89,7 +89,7 @@ def heatmap_lambda(event, context):
             
             return {
                 "statusCode": 200,
-                "headers": {"Content-Type: application/json"},
+                "headers": {"Content-Type": "application/json"},
                 "body": json.dumps({
                     "company_name": company_name,
                     "heatmap_grid": grid
@@ -99,6 +99,7 @@ def heatmap_lambda(event, context):
         print(f"Error: {str(e)}")
         return {
             "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"error": str(e)})
         }
     
