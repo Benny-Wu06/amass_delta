@@ -1,5 +1,5 @@
 import pytest
-from visualisation.src.visualiser.visualiser import generate_plot_bytes
+from microservices.visualisation.src.visualiser.visualiser import generate_plot_bytes
 
 ######################## DELETE PNG'S AFTER MANUALLY !!! ############################
 
