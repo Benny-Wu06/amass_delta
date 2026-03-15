@@ -60,9 +60,16 @@ resource "aws_iam_role_policy" "s3_enrich_access" {
       {
         Effect = "Allow"
         Action = [
-          "s3:PutObject", "s3:GetObject", "s3:ListBucket"
+          "s3:PutObject", "s3:GetObject"
         ]
         Resource = "${var.raw_bucket_arn}/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket"
+        ]
+        Resource = ["${var.raw_bucket_arn}"]
       }
     ]
   })
