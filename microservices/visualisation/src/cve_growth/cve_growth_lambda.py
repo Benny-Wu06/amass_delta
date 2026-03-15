@@ -26,9 +26,8 @@ def get_db_connection():
     )
 
 def fetch_company_name(db, company_id):
-    db.execute("SELECT company_name FROM companies WHERE id = %s;", (company_id,))
-    row = db.fetchone()
-    return row[0] if row else None
+    db.execute("SELECT id, company_name FROM companies WHERE company_name = %s;", (company_id,))
+    return db.fetchone()
 
 def fetch_vulnerability_data(db, company_id, days):
     query = """
@@ -74,7 +73,7 @@ def cve_growth_lambda(event, context):
 
         with conn.cursor() as db_cursor:
 
-            company_id = event.get('pathParameters', {}).get('company_id')
+            company_id = event.get('pathParameters', {}).get('company_name')
             days = int(event.get('queryStringParameters', {}).get('days', 30))
             
             # error check
@@ -84,16 +83,18 @@ def cve_growth_lambda(event, context):
                     "body": json.dumps({"error": f"Days has to be greater than zero"})
                 }
 
-            # error check
-            name = fetch_company_name(db_cursor, company_id)
-            if not name: 
+            company_input = event.get('pathParameters', {}).get('company_name')
+            company_row = fetch_company_name(db_cursor, company_input)
+            
+            if not company_row: 
                 return {
                     "statusCode": 404,
-                    "body": json.dumps({"error": f"Company {company_id} not found"})
+                    "body": json.dumps({"error": f"Company {company_input} not found"})
                 }
             
-            # proceed
-            raw_vuls = fetch_vulnerability_data(db_cursor, company_id, days)
+            actual_id, name = company_row
+        
+            raw_vuls = fetch_vulnerability_data(db_cursor, actual_id, days)
             
             data_points, total_increase, peak_day = calculate_growth_stats(raw_vuls, days)
             
