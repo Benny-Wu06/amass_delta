@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from visualisation.src.cve_growth.cve_growth_processor import calculate_growth_stats
+from microservices.visualisation.src.cve_growth.cve_growth_processor import calculate_growth_stats
 
 def test_calculate_growth_stats():
     mock_db_query_results = [
