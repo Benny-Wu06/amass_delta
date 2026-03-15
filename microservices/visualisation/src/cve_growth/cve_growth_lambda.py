@@ -76,7 +76,10 @@ def cve_growth_lambda(event, context):
 
         with conn.cursor() as db_cursor:
             company_name = event.get('pathParameters', {}).get('company_name')
-            days = int(event.get('queryStringParameters', {}).get('days', 30))
+
+            # days defaults to 30 days if none given
+            query_params = event.get('queryStringParameters') or {}
+            days = int(query_params.get('days', 30))
             
             # error check
             if days <= 0:
