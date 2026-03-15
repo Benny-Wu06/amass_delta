@@ -15,14 +15,16 @@ def enrichment(event, context):
     epss = {}
     chunk = 80
     bucket_name = os.environ['BUCKET_NAME']
-    nvd_data = [    'reference/nvdcve-2.0-2026.json.gz', 
+    nvd_data = [    'reference/nvdcve-2.0-2026.json.gz',
                      'reference/nvdcve-2.0-2025.json.gz', 
                      'reference/nvdcve-2.0-2024.json.gz', 
                      'reference/nvdcve-2.0-2023.json.gz', 
                      'reference/nvdcve-2.0-2022.json.gz', 
                      'reference/nvdcve-2.0-2021.json.gz', 
                      'reference/nvdcve-2.0-2020.json.gz',
-                     'reference/nvdcve-2.0-modified.json.gz',]
+                     'reference/nvdcve-2.0-modified.json.gz',
+                     'nvdcve-2.0-recent.json.gz']
+    versions = ['cvssMetricV31', 'cvssMetricV30', 'cvssMetricV2']
 
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix="raw/")
     if 'Contents' not in response:
@@ -39,9 +41,25 @@ def enrichment(event, context):
                 for cve in cvss_data.get('vulnerabilities', []):
                     cve_id = cve['cve']['id']
                     metrics = cve['cve'].get('metrics', {})
-                    cvss_scores = metrics.get('cvssMetricV31') or metrics.get('cvssMetricV30') or metrics.get('cvssMetricV2')
-                    if cvss_scores:
-                        nvd_data_cache[cve_id] = cvss_scores[0]['cvssData']['baseScore']
+                    metric_versions = ['cvssMetricV31', 'cvssMetricV30', 'cvssMetricV2']
+                    final_score = None
+                    for version in metric_versions:
+                        scores = metrics.get(version, [])
+                        if not scores:
+                            continue
+                        nist_score = None
+                        for source in scores:
+                            if source.get('source') == 'nvd@nist.gov':
+                                nist_score = source
+                                break
+                        if nist_score:
+                            final_score = nist_score['cvssData']['baseScore']
+                            break
+                        else:
+                            final_score = scores[0]['cvssData']['baseScore']
+                            break
+                    if final_score:
+                        nvd_data_cache[cve_id] = final_score
                     else:
                         nvd_data_cache[cve_id] = "Awaiting Analysis"
         except s3.exceptions.NoSuchKey:
