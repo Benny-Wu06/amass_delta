@@ -70,6 +70,8 @@ def calculate_growth_stats(vulnerability_counts, days, reference_date=None):
 
 ############## LAMBDA FUNCTION ###############
 
+DEFAULT_DAYS = 30
+
 def cve_growth_lambda(event, context):
     try:
         conn = get_db_connection()
@@ -79,7 +81,7 @@ def cve_growth_lambda(event, context):
 
             # days defaults to 30 days if none given
             query_params = event.get('queryStringParameters') or {}
-            days = int(query_params.get('days', 30))
+            days = int(query_params.get('days', DEFAULT_DAYS))
             
             # error check
             if days <= 0:
