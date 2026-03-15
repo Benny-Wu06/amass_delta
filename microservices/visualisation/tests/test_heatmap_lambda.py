@@ -1,58 +1,39 @@
-import psycopg2
 import json
-from visualisation.db_queries import get_heatmap_data, fetch_company_name
-from visualisation.src.heatmap.heatmap_processor import format_heatmap
+from src.db import get_db_connection
+from src.db_queries import get_heatmap_data, fetch_company_name
+from src.heatmap.heatmap_processor import format_heatmap
 
-password = "testdiddyblud"
+################## !!! WORKING TRIAL !!! #######################
 
 # DB CONNECTION STARTER CODE
-conn = None
-try:
-    conn = psycopg2.connect(
-        host='testdb.cjwhnekr8yms.us-east-1.rds.amazonaws.com',
-        port=5432,
-        database='postgres',
-        user='postgres',
-        password=password,
-        sslmode='prefer',
-        connect_timeout=3,
-        sslrootcert='/certs/global-bundle.pem'
-    )
-    db_cursor = conn.cursor()
 
+def trial_db_connection_heatmap():
     try:
-        company_id = 1      # test company 1
+        conn = get_db_connection()
 
-        name = fetch_company_name(db_cursor, company_id)
-        if not name: 
-            print({
-                "statusCode": 404,
-                "body": json.dumps({"error": f"Company {company_id} not found"})
-            } )
-        
-        raw_data = get_heatmap_data(db_cursor, company_id)
-        grid = format_heatmap(raw_data)
-        
-        print({
-            "statusCode": 200,
-            "body": json.dumps({
-                "company_name": name,
-                "grid": grid
-            })
-        })
+        with conn.cursor() as db_cursor:
+            # test company 1
+            company_id = 1
+
+            name = fetch_company_name(db_cursor, company_id)
+            if not name: 
+                print({"statusCode": 404,"body": json.dumps({"error": f"Company {company_id} not found"})})
+                return
+            
+            raw_data = get_heatmap_data(db_cursor, company_id)
+            heatmap_grid = format_heatmap(raw_data)
+            
+            print({"statusCode": 200,"body": json.dumps({"company_name": name, "heatmap_grid": heatmap_grid})})
+            return
 
     except Exception as e:
         print(f"Error: {str(e)}")
-        print( {
-            "statusCode": 500,
-            "body": json.dumps({"error": str(e)})
-        })
+        print({"statusCode": 500, "body": json.dumps({"error": str(e)})})
+        return
 
-    db_cursor.close()
+    finally:
+        if conn:
+            conn.close()
 
-except Exception as e:
-    print(f"Database error: {e}")
-    raise
-finally:
-    if conn:
-       conn.close()
+if __name__ == "__main__":
+    trial_db_connection_heatmap() # works 👌
