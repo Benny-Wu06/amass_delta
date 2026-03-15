@@ -25,12 +25,7 @@ def get_db_connection():
         sslrootcert=DB_SSL_ROOT_CERT
     )
 
-def fetch_company_name(db, company_id):
-    db.execute("SELECT company_name FROM companies WHERE id = %s;", (company_id,))
-    row = db.fetchone()
-    return row[0] if row else None
-
-def get_heatmap_data(db, company_id):
+def get_heatmap_data(db, company_name):
     query = """
         SELECT 
             CASE
@@ -49,10 +44,10 @@ def get_heatmap_data(db, company_id):
             END AS epss_range,
             COUNT(*) as cve_count
         FROM vulnerabilities
-        WHERE company_id = %s
+        WHERE company_name = %s
         GROUP BY cvss_range, epss_range;
     """
-    db.execute(query, (company_id,))
+    db.execute(query, (company_name,))
     return db.fetchall()
 
 def format_heatmap(raw_data):
@@ -80,25 +75,23 @@ def heatmap_lambda(event, context):
         conn = get_db_connection()
 
         with conn.cursor() as db_cursor:
+            company_name = event.get('pathParameters', {}).get('company_name')
 
-            company_id = event.get('pathParameters', {}).get('company_id')
-
-            name = fetch_company_name(db_cursor, company_id)
-            if not name: 
+            if not company_name: 
                 return {
                     "statusCode": 404,
                     "headers": {"Content-Type: application/json"},
-                    "body": json.dumps({"error": f"Company {company_id} not found"})
+                    "body": json.dumps({"error": f"Company {company_name} not found"})
                 }
             
-            raw_data = get_heatmap_data(db_cursor, company_id)
+            raw_data = get_heatmap_data(db_cursor, company_name)
             grid = format_heatmap(raw_data)
             
             return {
                 "statusCode": 200,
                 "headers": {"Content-Type: application/json"},
                 "body": json.dumps({
-                    "company_name": name,
+                    "company_name": company_name,
                     "heatmap_grid": grid
                 })
             }
