@@ -38,7 +38,7 @@ resource "aws_apigatewayv2_integration" "visualisation_heatmap_lambda_int" {
 
 resource "aws_apigatewayv2_route" "heatmap_route" {
   api_id    = aws_apigatewayv2_api.visualisation_api.id
-  route_key = "GET /v1/heatmap/{company_id}"
+  route_key = "GET /v1/heatmap/{company_name}"
   target    = "integrations/${aws_apigatewayv2_integration.visualisation_heatmap_lambda_int.id}"
 }
 
