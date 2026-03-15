@@ -1,5 +1,4 @@
-import pytest
-from visualisation.src.heatmap.heatmap_processor import format_heatmap
+from microservices.visualisation.src.heatmap.heatmap_processor import format_heatmap
 
 def test_partial_data():
     # only two buckets have data
