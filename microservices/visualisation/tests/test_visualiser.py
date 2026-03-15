@@ -18,7 +18,7 @@ def test_visualiser_data_points_success():
             {"date": "2026-03-13", "new_cves": 1}
         ],
         "summary": {
-            "total_period_increase": 7,
+            "total_period_increase": 22,
             "peak_growth_day": "2026-03-12"
         }
     }
