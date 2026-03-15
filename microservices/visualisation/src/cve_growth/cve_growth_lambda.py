@@ -26,7 +26,7 @@ def get_db_connection():
     )
 
 def fetch_company_id(db, company_name):
-    db.execute("SELECT id FROM companies WHERE company = %s;", (company_name,))
+    db.execute("SELECT id FROM companies WHERE company_name = %s;", (company_name,))
     row = db.fetchone()
     return row[0] if row else None
 
