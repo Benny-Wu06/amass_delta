@@ -37,7 +37,6 @@ def get_company_summary(target_company):
             sslrootcert=cert_path
         )
         cur = conn.cursor()
-        
         # get aggregated company info - may need to change later to dynamically derive info
         query = '''
             SELECT 
