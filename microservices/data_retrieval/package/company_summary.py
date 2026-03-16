@@ -3,10 +3,7 @@ import boto3
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
-
-password = "testdiddyblud"
-
-conn = None
+import os
 
 # /v1/companies/{company_name}
 # get vulnerability statistics (avg cvss, epss) about a company
@@ -24,18 +21,22 @@ def lambda_handler(event, context):
 
 def get_company_summary(target_company):
     try:
+        DB_PASSWORD = os.environ.get('DB_PASSWORD')
+        DB_HOST = os.environ.get('DB_HOST')
+        cert_path = os.environ.get('CERT_PATH', 'global-bundle.pem')
+
         conn = psycopg2.connect(
-            host='testdb.cjwhnekr8yms.us-east-1.rds.amazonaws.com',
+            host=DB_HOST,
             port=5432,
-            database='postgres',
-            user='postgres',
-            password=password,
-            sslmode='prefer',
-            connect_timeout=50,
-        sslrootcert='/certs/global-bundle.pem'
+            database=os.environ.get('DB_NAME', 'postgres'),
+            user=os.environ.get('DB_USER', 'postgres'),
+            password=DB_PASSWORD,
+            sslmode='require',
+            connect_timeout = 50,
+            sslrootcert=cert_path
         )
         cur = conn.cursor()
-        
+        # get aggregated company info - may need to change later to dynamically derive info
         query = '''
             SELECT 
             c.company_name as company,
@@ -49,7 +50,8 @@ def get_company_summary(target_company):
         WHERE c.company_name = %s
         GROUP BY c.id;
         '''
-        
+
+        # build return object
         cur.execute(query, (target_company,))
         row = cur.fetchone()
         company, cve_count, avg_epss, avg_cvss, risk_index, risk_rating = row
