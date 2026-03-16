@@ -13,10 +13,7 @@ conn = None
 # /v1/companies/{company_name}/vulnerabilities
 # i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
-    conn = None
-    DB_PASSWORD = os.environ.get('DB_PASSWORD')
-    DB_HOST = os.environ.get('DB_HOST')
-    cert_path = os.environ.get('CERT_PATH', 'global-bundle.pem')
+
     path_params = event.get('pathParameters', {})
     target_company = path_params.get('company_name')
 
@@ -25,8 +22,15 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': json.dumps({"error": "Company name is required in the URL"})
         }
-    
+    return get_company_vulnerabiltiies(target_company)
+
+def get_company_vulnerabiltiies(target_company):
     try:
+        conn = None
+        DB_PASSWORD = os.environ.get('DB_PASSWORD')
+        DB_HOST = os.environ.get('DB_HOST')
+        cert_path = os.environ.get('CERT_PATH', 'global-bundle.pem')
+
         conn = psycopg2.connect(
             host=DB_HOST,
             port=5432,
