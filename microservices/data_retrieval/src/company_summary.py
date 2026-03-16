@@ -33,7 +33,7 @@ def get_company_summary(target_company):
             user=os.environ.get('DB_USER', 'postgres'),
             password=DB_PASSWORD,
             sslmode='require',
-            connect_timeout = 5,
+            connect_timeout = 50,
             sslrootcert=cert_path
         )
         cur = conn.cursor()
