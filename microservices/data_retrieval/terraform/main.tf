@@ -80,21 +80,21 @@ resource "aws_apigatewayv2_stage" "db_api_stage" {
   auto_deploy = true
 }
 
-resource "aws_apigatewayv2_integration" "db_lambda_int" {
+resource "aws_apigatewayv2_integration" "company_vulnerabilities_int" {
   api_id           = aws_apigatewayv2_api.db_api.id
   integration_type = "AWS_PROXY"
-  integration_uri  = aws_lambda_function.db_retrieval.invoke_arn
+  integration_uri  = aws_lambda_function.company_vulnerabilities.invoke_arn
 }
 
-resource "aws_apigatewayv2_route" "db_route" {
+resource "aws_apigatewayv2_route" "company_vulnerabilities_route" {
   api_id    = aws_apigatewayv2_api.db_api.id
   route_key = "GET /v1/companies/{company_name}/vulnerabilities"
-  target    = "integrations/${aws_apigatewayv2_integration.db_lambda_int.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.company_vulnerabilities_int.id}"
 }
 
-resource "aws_lambda_permission" "db_api_gw_perm" {
+resource "aws_lambda_permission" "company_vulnerabilities_perm" {
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.db_retrieval.function_name
+  function_name = aws_lambda_function.company_vulnerabilities.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.db_api.execution_arn}/*/*"
 }
