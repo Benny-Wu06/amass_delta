@@ -34,7 +34,7 @@ def lambda_handler(event, context):
             user=os.environ.get('DB_USER', 'postgres'),
             password=DB_PASSWORD,
             sslmode='require',
-            connect_timeout = 5,
+            connect_timeout = 50,
             sslrootcert=cert_path
         )
         cur = conn.cursor()
