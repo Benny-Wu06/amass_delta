@@ -3,6 +3,7 @@ import boto3
 
 password = "testdiddyblud"
 
+# pip install psycopg2-binary boto3
 # DB CONNECTION STARTER CODE
 conn = None
 try:
