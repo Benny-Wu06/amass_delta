@@ -31,7 +31,7 @@ def get_company_summary(target_company):
             user='postgres',
             password=password,
             sslmode='prefer',
-            connect_timeout=3,
+            connect_timeout=50,
         sslrootcert='/certs/global-bundle.pem'
         )
         cur = conn.cursor()
