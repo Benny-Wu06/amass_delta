@@ -11,8 +11,8 @@ data "archive_file" "db_lambda_zip" {
 #
 # IAM Role for Database Access
 #
-resource "aws_iam_role" "db_retrieval_role" {
-  name = "db_retrieval_lambda_role"
+resource "aws_iam_role" "company_vulnerabilities_role" {
+  name = "company_vulnerabilities_lambda_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -30,7 +30,7 @@ resource "aws_iam_role" "db_retrieval_role" {
 #
 
 resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
-  role       = aws_iam_role.db_retrieval_role.name
+  role       = aws_iam_role.company_vulnerabilities_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
@@ -38,9 +38,9 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
 #
 # The Lambda Function
 #
-resource "aws_lambda_function" "db_retrieval" {
-  function_name    = "db_retrieval_service"
-  role             = aws_iam_role.db_retrieval_role.arn
+resource "aws_lambda_function" "company_vulnerabilities" {
+  function_name    = "company_vulnerabilities_service"
+  role             = aws_iam_role.company_vulnerabilities_role.arn
   handler          = "company_vulnerabilities.lambda_handler"
   runtime          = "python3.12"
   filename         = data.archive_file.db_lambda_zip.output_path
