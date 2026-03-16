@@ -45,6 +45,7 @@ resource "aws_lambda_function" "db_retrieval" {
   runtime          = "python3.12"
   filename         = data.archive_file.db_lambda_zip.output_path
   source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
+  timeout          = 300
 
   # Networking: Must match your RDS VPC
   vpc_config {
