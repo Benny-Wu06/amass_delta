@@ -1,0 +1,26 @@
+services:
+  cisa-scraper:
+    build: ./data_collection
+    command: python -c "from src.cisa import cisascrapper; cisascrapper({}, None)"
+    env_file: .env
+
+  nvd-sync:
+    build: ./data_collection
+    command: python -c "from src.reference import nvdscrapper; nvdscrapper({}, None)"
+    env_file: .env
+
+  data-enricher:
+    build: ./data_collection
+    command: python -c "from src.enrich import enrichment; enrichment({}, None)"
+    env_file: .env
+
+  db-processor:
+    build: ./data_collection
+    command: python -c "from src.processor import lambda_handler; lambda_handler({}, None)"
+    env_file: .env
+  company-api:
+    build: ./data_retrieval
+    command: python src/company_summary.py
+  vulnerability-api:
+    build: ./data_retrieval
+    command: python src/vulnerability_info.py
