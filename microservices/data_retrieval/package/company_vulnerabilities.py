@@ -47,7 +47,7 @@ def get_company_vulnerabiltiies(target_company):
         query = '''
             SELECT 
                 v.cve_id, 
-                c.company_id, 
+                v.company_id, 
                 v.vulnerability_name, 
                 v.cvss_score, 
                 v.cvss_severity
