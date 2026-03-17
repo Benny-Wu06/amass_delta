@@ -50,7 +50,7 @@ def get_company_vulnerabiltiies(target_company):
                 v.company_id, 
                 v.vulnerability_name, 
                 v.cvss_score, 
-                v.cvss_severity
+                v.cvss_severity,
             FROM vulnerabilities v
             JOIN companies c ON v.company_id = c.id
             WHERE c.company_name = %s;
