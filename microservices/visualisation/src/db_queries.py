@@ -3,6 +3,7 @@ def fetch_company_id(db, company_name):
     row = db.fetchone()
     return row[0] if row else None
 
+
 def get_heatmap_data(db, company_name):
     company_id = fetch_company_id(db, company_name)
 
@@ -29,7 +30,8 @@ def get_heatmap_data(db, company_name):
     """
     db.execute(query, (company_id,))
     return db.fetchall()
-    
+
+
 def fetch_vulnerability_data(db, company_name, days):
     company_id = fetch_company_id(db, company_name)
 

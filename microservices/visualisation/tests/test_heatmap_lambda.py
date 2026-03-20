@@ -7,6 +7,7 @@ from microservices.visualisation.src.heatmap.heatmap_processor import format_hea
 
 # DB CONNECTION STARTER CODE
 
+
 def trial_db_connection_heatmap():
     try:
         conn = get_db_connection()
@@ -15,14 +16,28 @@ def trial_db_connection_heatmap():
             # test company 1
             company_name = "Microsoft"
 
-            if not company_name: 
-                print({"statusCode": 404,"body": json.dumps({"error": f"Company {company_name} not found"})})
+            if not company_name:
+                print(
+                    {
+                        "statusCode": 404,
+                        "body": json.dumps(
+                            {"error": f"Company {company_name} not found"}
+                        ),
+                    }
+                )
                 return
-            
+
             raw_data = get_heatmap_data(db_cursor, company_name)
             heatmap_grid = format_heatmap(raw_data)
-            
-            print({"statusCode": 200,"body": json.dumps({"company_name": company_name, "heatmap_grid": heatmap_grid})})
+
+            print(
+                {
+                    "statusCode": 200,
+                    "body": json.dumps(
+                        {"company_name": company_name, "heatmap_grid": heatmap_grid}
+                    ),
+                }
+            )
             return
 
     except Exception as e:
@@ -34,5 +49,6 @@ def trial_db_connection_heatmap():
         if conn:
             conn.close()
 
+
 if __name__ == "__main__":
-    trial_db_connection_heatmap() # works 👌
+    trial_db_connection_heatmap()  # works 👌
