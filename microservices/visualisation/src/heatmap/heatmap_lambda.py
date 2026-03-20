@@ -78,6 +78,7 @@ def format_heatmap(raw_data):
 ############## LAMBDA FUNCTION ###############
 
 def heatmap_lambda(event, context):
+    conn = None
     try:
         conn = get_db_connection()
 
