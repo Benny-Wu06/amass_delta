@@ -21,7 +21,6 @@ def lambda_handler(event, context):
 
 def get_company_summary(target_company):
     try:
-        conn = None
         DB_PASSWORD = os.environ.get('DB_PASSWORD')
         DB_HOST = os.environ.get('DB_HOST')
         cert_path = os.environ.get('CERT_PATH', 'global-bundle.pem')
@@ -33,11 +32,10 @@ def get_company_summary(target_company):
             user=os.environ.get('DB_USER', 'postgres'),
             password=DB_PASSWORD,
             sslmode='require',
-            connect_timeout = 5,
+            connect_timeout = 50,
             sslrootcert=cert_path
         )
         cur = conn.cursor()
-        
         # get aggregated company info - may need to change later to dynamically derive info
         query = '''
             SELECT 

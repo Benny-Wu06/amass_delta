@@ -13,9 +13,7 @@ conn = None
 # /v1/companies/{company_name}/vulnerabilities
 # i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
-    DB_PASSWORD = os.environ.get('DB_PASSWORD')
-    DB_HOST = os.environ.get('DB_HOST')
-    cert_path = os.environ.get('CERT_PATH', 'global-bundle.pem')
+
     path_params = event.get('pathParameters', {})
     target_company = path_params.get('company_name')
 
@@ -24,16 +22,23 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': json.dumps({"error": "Company name is required in the URL"})
         }
-    
+    return get_company_vulnerabiltiies(target_company)
+
+def get_company_vulnerabiltiies(target_company):
     try:
+        conn = None
+        DB_PASSWORD = os.environ.get('DB_PASSWORD')
+        DB_HOST = os.environ.get('DB_HOST')
+        cert_path = os.environ.get('CERT_PATH', 'global-bundle.pem')
+
         conn = psycopg2.connect(
             host=DB_HOST,
             port=5432,
-            database='postgres',
-            user='postgres',
+            database=os.environ.get('DB_NAME', 'postgres'),
+            user=os.environ.get('DB_USER', 'postgres'),
             password=DB_PASSWORD,
             sslmode='require',
-            connect_timeout = 5,
+            connect_timeout = 50,
             sslrootcert=cert_path
         )
         cur = conn.cursor()
@@ -42,7 +47,7 @@ def lambda_handler(event, context):
         query = '''
             SELECT 
                 v.cve_id, 
-                c.company_name, 
+                c.company_id, 
                 v.vulnerability_name, 
                 v.cvss_score, 
                 v.cvss_severity
