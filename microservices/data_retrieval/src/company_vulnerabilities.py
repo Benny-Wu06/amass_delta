@@ -2,7 +2,6 @@ import datetime
 from decimal import Decimal
 
 import psycopg2
-import boto3
 import os
 import json
 

@@ -87,7 +87,7 @@ def cve_growth_lambda(event, context):
             if days <= 0:
                 return {
                     "statusCode": 400,
-                    "body": json.dumps({"error": f"Days has to be greater than zero"})
+                    "body": json.dumps({"error": "Days has to be greater than zero"})
                 }
             
             if not company_name: 

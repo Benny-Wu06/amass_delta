@@ -2,8 +2,6 @@ import json
 import urllib.request
 import boto3
 import os
-import io
-from datetime import datetime
 import gzip
 
 s3 = boto3.client('s3')
@@ -24,7 +22,6 @@ def enrichment(event, context):
                      'reference/nvdcve-2.0-2020.json.gz',
                      'reference/nvdcve-2.0-modified.json.gz',
                      'nvdcve-2.0-recent.json.gz']
-    versions = ['cvssMetricV31', 'cvssMetricV30', 'cvssMetricV2']
 
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix="raw/")
     if 'Contents' not in response:

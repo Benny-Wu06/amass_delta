@@ -1,5 +1,4 @@
 import psycopg2
-import boto3
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
