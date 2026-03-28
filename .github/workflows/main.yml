@@ -24,6 +24,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-mock pytest-cov mypy psycopg2-binary
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Build Collection Docker Image
+      run: |
+        docker build -t amass-collection -f microservices/data_collection/Dockerfile .
+    
+    - name: Build Retrieval Docker Image
+      run: |
+        docker build -t amass-retrieval -f microservices/data_retrieval/Dockerfile .
+
+    - name: Build Visualisation Docker Image
+      run: |
+        docker build -t amass-visualisation -f microservices/visualisation/Dockerfile .
+
     - name: Lint with flake8
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -45,6 +58,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: "ap-southeast-2"
           BUCKET_NAME: "amass-cisa-bucket-01"
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: |
         python3 -m pytest --cov=. --cov-fail-under=85
 
