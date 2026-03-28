@@ -36,9 +36,6 @@ def fetch_company_id(db, company_name):
 def fetch_vulnerability_data(db, company_name, days):
     company_id = fetch_company_id(db, company_name)
 
-    if company_id is None:
-        return []
-
     query = """
         SELECT date_added, COUNT(*) as cve_count
         FROM vulnerabilities
