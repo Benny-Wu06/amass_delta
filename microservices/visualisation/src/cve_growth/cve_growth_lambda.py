@@ -36,6 +36,9 @@ def fetch_company_id(db, company_name):
 def fetch_vulnerability_data(db, company_name, days):
     company_id = fetch_company_id(db, company_name)
 
+    if company_id is None:
+        return []
+
     query = """
         SELECT date_added, COUNT(*) as cve_count
         FROM vulnerabilities
@@ -79,6 +82,7 @@ DEFAULT_DAYS = 30
 
 
 def cve_growth_lambda(event, context):
+    conn = None
     try:
         conn = get_db_connection()
 
@@ -89,17 +93,19 @@ def cve_growth_lambda(event, context):
             query_params = event.get("queryStringParameters") or {}
             days = int(query_params.get("days", DEFAULT_DAYS))
 
-            # error check
+            # error check for days
             if days <= 0:
                 return {
                     "statusCode": 400,
                     "body": json.dumps({"error": "Days has to be greater than zero"}),
                 }
-
-            if not company_name:
+            
+            # check if company exists
+            company_id = fetch_company_id(db_cursor, company_name)
+            if (company_name is None) or (company_id is None):
                 return {
                     "statusCode": 404,
-                    "body": json.dumps({"error": f"Company {company_name} not found"}),
+                    "body": json.dumps({"error": f"Company '{company_name}' not found"})
                 }
 
             # process
