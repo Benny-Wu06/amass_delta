@@ -98,6 +98,7 @@ def test_cve_growth_company_not_found(mock_get_db):
     response = cve_growth_lambda(event, None)
     assert response["statusCode"] == 404
     assert "not found" in json.loads(response["body"])["error"]
+    mock_conn.close.assert_called_once()
 
 # TEST 5: DATABASE CONNECTION ERROR
 @patch("src.cve_growth.cve_growth_lambda.get_db_connection")
