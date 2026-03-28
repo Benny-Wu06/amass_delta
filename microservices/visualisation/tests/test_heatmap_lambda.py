@@ -1,5 +1,4 @@
 import json
-import pytest
 from unittest.mock import MagicMock, patch
 from src.heatmap.heatmap_lambda import heatmap_lambda
 
