@@ -44,13 +44,25 @@ def test_correct_cve_id(mocker):
     }
     assert actual_body == expected_response_body
 
-def not_found_cve():
+def test_not_found_cve():
     incorrect_test_input = {"pathParameters": {
         "cve_id": "CVE-1998-0001"
     }}
     
     response = vuln_info(incorrect_test_input, None)
-    assert response["statusCode"]
+    assert response["statusCode"] == 404
 
-def wrong_format_cve():
-    pass
+def test_no_param_defined():
+    incorrect_test_input = {}
+    response = vuln_info(incorrect_test_input, None)
+    assert response["statusCode"] == 400
+    assert response["body"] == '{"error": "cve_id is required in the URL"}'
+
+def test_wrong_format_cve():
+    incorrect_test_input = {"pathParameters": {
+        "cve_id": "CVE-103-0001"
+    }}
+
+    response = vuln_info(incorrect_test_input, None)
+    assert response["statusCode"] == 400
+    assert response["body"] == '{"error": "Invalid CVE ID format"}'
