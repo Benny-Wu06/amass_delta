@@ -1,6 +1,12 @@
 import pytest
+import pytest_mock
 from microservices.data_retrieval.src.vulnerability_info import lambda_handler
 import json
+
+# class to expect any string instead of having to match date at runtime.
+class AnyString():
+    def __eq__(self, value):
+        return isinstance(value, str)
 
 # given a cve_id string, return json object with vulnerability info.
 def test_correct_cve_id(mocker):
@@ -20,5 +26,20 @@ def test_correct_cve_id(mocker):
     response = lambda_handler(test_input, None)
 
     assert response["statusCode"] == 200
-    body = json.loads(response["body"])
-    assert body == {'meow': 'meow'}
+    actual_body = json.loads(response["body"])
+    expected_response_body = {
+        "cve_id": "CVE-2021-22175",
+        "name": "GitLab Server-Side Request Forgery (SSRF) Vulnerability",
+        "description": "GitLab contains a server-side request forgery (SSRF) vulnerability when requests to the internal network for webhooks are enabled.",
+        "dateAdded": "2026-02-18",
+        "dueDate": "2026-03-11",
+        "cvss": 9.8,
+        "epss": 0.74079,
+        "risk_index": 0.8843,
+        "risk_rating": 'CRITICAL',
+        "time": {
+            "timestamp": AnyString(),
+            "timezone": AnyString()
+  }
+    }
+    assert actual_body == expected_response_body
