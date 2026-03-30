@@ -1,6 +1,6 @@
 import pytest
 import pytest_mock
-from microservices.data_retrieval.src.vulnerability_info import lambda_handler
+from microservices.data_retrieval.src.vulnerability_info import lambda_handler as vuln_info 
 import json
 
 # class to expect any string instead of having to match date at runtime.
@@ -23,7 +23,7 @@ def test_correct_cve_id(mocker):
         "cve_id": "CVE-2021-22175"
     }}
 
-    response = lambda_handler(test_input, None)
+    response = vuln_info(test_input, None)
 
     assert response["statusCode"] == 200
     actual_body = json.loads(response["body"])
@@ -40,6 +40,17 @@ def test_correct_cve_id(mocker):
         "time": {
             "timestamp": AnyString(),
             "timezone": AnyString()
-  }
+        }
     }
     assert actual_body == expected_response_body
+
+def not_found_cve():
+    incorrect_test_input = {"pathParameters": {
+        "cve_id": "CVE-1998-0001"
+    }}
+    
+    response = vuln_info(incorrect_test_input, None)
+    assert response["statusCode"]
+
+def wrong_format_cve():
+    pass
