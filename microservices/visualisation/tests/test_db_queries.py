@@ -3,8 +3,8 @@ import psycopg2
 import testing.postgresql
 from freezegun import freeze_time
 from datetime import datetime
-from src.cve_growth.cve_growth_lambda import fetch_vulnerability_data, fetch_company_id
-from src.heatmap.heatmap_lambda import fetch_heatmap_data
+from microservices.visualisation.src.cve_growth.cve_growth_lambda import fetch_vulnerability_data, fetch_company_id
+from microservices.visualisation.src.heatmap.heatmap_lambda import fetch_heatmap_data
 
 @pytest.fixture
 def cve_growth_db():

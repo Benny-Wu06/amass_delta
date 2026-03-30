@@ -1,6 +1,6 @@
 import json
 from unittest.mock import MagicMock, patch
-from src.heatmap.heatmap_lambda import heatmap_lambda
+from microservices.visualisation.src.heatmap.heatmap_lambda import heatmap_lambda
 
 # Helper Function: create a mock DB setup
 def setup_mock_db(mock_get_db):
@@ -11,7 +11,7 @@ def setup_mock_db(mock_get_db):
     return mock_conn, mock_cur
 
 # TEST 1: SUCCESSFUL HEATMAP GENERATION
-@patch("src.heatmap.heatmap_lambda.get_db_connection")
+@patch("microservices.visualisation.src.heatmap.heatmap_lambda.get_db_connection")
 def test_heatmap_success(mock_get_db):
     mock_conn, mock_cur = setup_mock_db(mock_get_db)
     
@@ -43,7 +43,7 @@ def test_heatmap_success(mock_get_db):
     mock_conn.close.assert_called_once()
 
 # TEST 2: COMPANY NOT FOUND (404)
-@patch("src.heatmap.heatmap_lambda.get_db_connection")
+@patch("microservices.visualisation.src.heatmap.heatmap_lambda.get_db_connection")
 def test_heatmap_company_not_found(mock_get_db):
     mock_conn, mock_cur = setup_mock_db(mock_get_db)
     
@@ -60,7 +60,7 @@ def test_heatmap_company_not_found(mock_get_db):
     mock_conn.close.assert_called_once()
 
 # TEST 3: EMPTY DATA (Success but all 0s)
-@patch("src.heatmap.heatmap_lambda.get_db_connection")
+@patch("microservices.visualisation.src.heatmap.heatmap_lambda.get_db_connection")
 def test_heatmap_empty_results(mock_get_db):
     mock_conn, mock_cur = setup_mock_db(mock_get_db)
     
@@ -78,7 +78,7 @@ def test_heatmap_empty_results(mock_get_db):
     mock_conn.close.assert_called_once()
 
 # TEST 4: DATABASE CONNECTION ERROR (500)
-@patch("src.heatmap.heatmap_lambda.get_db_connection")
+@patch("microservices.visualisation.src.heatmap.heatmap_lambda.get_db_connection")
 def test_heatmap_db_error(mock_get_db):
     mock_get_db.side_effect = Exception("Connection Timeout")
 

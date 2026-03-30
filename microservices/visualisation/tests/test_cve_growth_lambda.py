@@ -2,7 +2,7 @@ import json
 from unittest.mock import MagicMock, patch
 from datetime import datetime, date
 
-from src.cve_growth.cve_growth_lambda import cve_growth_lambda
+from microservices.visualisation.src.cve_growth.cve_growth_lambda import cve_growth_lambda
 
 # Helper Function: create a mock DB setup
 def setup_mock_db(mock_get_db):
@@ -13,7 +13,7 @@ def setup_mock_db(mock_get_db):
     return mock_conn, mock_cur
 
 # TEST 1: SUCCESSFUL RETURN
-@patch("src.cve_growth.cve_growth_lambda.get_db_connection")
+@patch("microservices.visualisation.src.cve_growth.cve_growth_lambda.get_db_connection")
 def test_cve_growth_success(mock_get_db):
     mock_conn, mock_cur = setup_mock_db(mock_get_db)
     
@@ -36,7 +36,7 @@ def test_cve_growth_success(mock_get_db):
     }
 
     # use patch to "freeze" time for consistent testing
-    with patch("src.cve_growth.cve_growth_lambda.datetime") as mock_date:
+    with patch("microservices.visualisation.src.cve_growth.cve_growth_lambda.datetime") as mock_date:
         # set "today" to March 26, 2026
         mock_date.now.return_value = datetime(2026, 3, 26)
         mock_date.strftime = datetime.strftime
@@ -52,7 +52,7 @@ def test_cve_growth_success(mock_get_db):
     mock_conn.close.assert_called_once()
 
 # TEST 2: INVALID DAYS
-@patch("src.cve_growth.cve_growth_lambda.get_db_connection")
+@patch("microservices.visualisation.src.cve_growth.cve_growth_lambda.get_db_connection")
 def test_cve_growth_invalid_days(mock_get_db):
     setup_mock_db(mock_get_db)
 
@@ -69,7 +69,7 @@ def test_cve_growth_invalid_days(mock_get_db):
     assert "Days has to be greater than zero" in body["error"]
 
 # TEST 3: MISSING COMPANY NAME
-@patch("src.cve_growth.cve_growth_lambda.get_db_connection")
+@patch("microservices.visualisation.src.cve_growth.cve_growth_lambda.get_db_connection")
 def test_cve_growth_missing_company(mock_get_db):
     setup_mock_db(mock_get_db)
 
@@ -84,7 +84,7 @@ def test_cve_growth_missing_company(mock_get_db):
     assert "not found" in json.loads(response["body"])["error"]
 
 # TEST 4: COMPANY NOT IN DB (The 404 Logic)
-@patch("src.cve_growth.cve_growth_lambda.get_db_connection")
+@patch("microservices.visualisation.src.cve_growth.cve_growth_lambda.get_db_connection")
 def test_cve_growth_company_not_found(mock_get_db):
     mock_conn, mock_cur = setup_mock_db(mock_get_db)
     # Simulate fetch_company_id returning nothing
@@ -100,7 +100,7 @@ def test_cve_growth_company_not_found(mock_get_db):
     mock_conn.close.assert_called_once()
 
 # TEST 5: DATABASE CONNECTION ERROR
-@patch("src.cve_growth.cve_growth_lambda.get_db_connection")
+@patch("microservices.visualisation.src.cve_growth.cve_growth_lambda.get_db_connection")
 def test_cve_growth_db_failure(mock_get_db):
     # simulate the DB driver throwing an exception
     mock_get_db.side_effect = Exception("Connection Timeout")
