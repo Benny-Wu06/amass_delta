@@ -20,6 +20,7 @@ def lambda_handler(event, context):
 
     min_cvss = query_params.get("min_cvss")
     min_epss = query_params.get("min_epss")
+    
     if not target_company:
         return {
             "statusCode": 400,
