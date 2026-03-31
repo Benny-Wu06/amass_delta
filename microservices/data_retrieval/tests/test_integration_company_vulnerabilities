@@ -1,0 +1,64 @@
+import json
+import os
+import psycopg2
+import testing.postgresql
+from decimal import Decimal
+from company_vulnerabilities import lambda_handler
+
+# Generate a temporary database for the duration of the test
+def test_lambda_with_temp_db():
+    with testing.postgresql.Postgresql() as postgresql:
+        # 1. Setup Environment to point to the temporary DB
+        # testing.postgresql provides the connection params automatically
+        db_params = postgresql.dsn()
+        
+        os.environ['DB_HOST'] = db_params['host']
+        os.environ['DB_PORT'] = str(db_params['port'])
+        os.environ['DB_NAME'] = db_params['database']
+        os.environ['DB_USER'] = db_params['user']
+        os.environ['DB_PASSWORD'] = '' # Temp DBs usually have no password
+        os.environ['CERT_PATH'] = ''   # Disable SSL for the temp instance
+
+        # 2. Initialize Schema
+        conn = psycopg2.connect(**db_params)
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE companies (
+                id SERIAL PRIMARY KEY,
+                company_name TEXT UNIQUE NOT NULL
+            );
+            CREATE TABLE vulnerabilities (
+                cve_id VARCHAR(20) PRIMARY KEY,
+                company_id INTEGER REFERENCES companies(id),
+                vulnerability_name TEXT,
+                cvss_score NUMERIC,
+                cvss_severity TEXT
+            );
+        """)
+        
+        # 3. Seed Data
+        cur.execute("INSERT INTO companies (company_name) VALUES ('AcmeCorp') RETURNING id;")
+        company_id = cur.fetchone()[0]
+        cur.execute("""
+            INSERT INTO vulnerabilities (cve_id, company_id, vulnerability_name, cvss_score, cvss_severity)
+            VALUES (%s, %s, %s, %s, %s)
+        """, ("CVE-2026-TEMP", company_id, "Temporary DB Vuln", 8.5, "HIGH"))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        # 4. Execute the actual Lambda Handler
+        event = {"pathParameters": {"company_name": "AcmeCorp"}}
+        response = lambda_handler(event, None)
+        
+        # 5. Assertions
+        body = json.loads(response["body"])
+        assert response["statusCode"] == 200
+        assert body[0]["cve_id"] == "CVE-2026-TEMP"
+        assert body[0]["cvss_score"] == "8.5"
+        
+        print("Integration Test on Ephemeral DB: SUCCESS")
+
+if __name__ == "__main__":
+    test_lambda_with_temp_db()
