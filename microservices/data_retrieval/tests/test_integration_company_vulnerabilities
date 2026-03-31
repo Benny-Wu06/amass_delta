@@ -59,6 +59,33 @@ def test_lambda_with_temp_db():
         assert body[0]["cvss_score"] == "8.5"
         
         print("Integration Test on Ephemeral DB: SUCCESS")
+        
+def test_missing_company_name():
+    event = {"pathParameters": {}} 
+    response = lambda_handler(event, None)
+    
+    body = json.loads(response["body"])
+    
+    assert response["statusCode"] == 400
+    assert "error" in body
+    assert body["error"] == "Company name is required in the URL"
+    print("Test Missing Company Name: SUCCESS")
 
+def test_database_connection_error():
+    os.environ['DB_HOST'] = 'localhost'
+    os.environ['DB_PORT'] = '9999' # Incorrect port
+    os.environ['DB_USER'] = 'invalid_user'
+    
+    event = {"pathParameters": {"company_name": "AcmeCorp"}}
+    
+    response = lambda_handler(event, None)
+    
+    body = json.loads(response["body"])
+    
+    assert response["statusCode"] == 500
+    assert body["error"] == "Failed to retrieve data"
+    print("Test Database Error (500): SUCCESS")
+    
 if __name__ == "__main__":
     test_lambda_with_temp_db()
+    test_missing_company_name()
