@@ -16,10 +16,13 @@ def lambda_handler(event, context):
             "statusCode": 400,
             "body": json.dumps({"error": "Company name is required in the URL"}),
         }
+        
+    target_company = str(target_company)
     return get_company_summary(target_company)
 
 
-def get_company_summary(target_company):
+def get_company_summary(target_company: str):
+    conn = None
     try:
         DB_PASSWORD = os.environ.get("DB_PASSWORD")
         DB_HOST = os.environ.get("DB_HOST")
@@ -36,13 +39,17 @@ def get_company_summary(target_company):
             sslrootcert=cert_path,
         )
         cur = conn.cursor()
+
+        # handle whitespace
+        target_company = target_company.replace("+", " ")
+
         # get aggregated company info - may need to change later to dynamically derive info
         query = """
             SELECT 
             c.company_name as company,
             COUNT(v.cve_id) as cve_count,
-            AVG(v.epss_score) as avg_epss,
             AVG(v.cvss_score) as avg_cvss,
+            AVG(v.epss_score) as avg_epss,
             c.risk_index,
             c.risk_rating
         FROM companies c
@@ -51,10 +58,26 @@ def get_company_summary(target_company):
         GROUP BY c.id;
         """
 
-        # build return object
         cur.execute(query, (target_company,))
         row = cur.fetchone()
-        company, cve_count, avg_epss, avg_cvss, risk_index, risk_rating = row
+
+        # company not found
+        if not row:
+            return {
+                "statusCode": 404,
+                "body": json.dumps({"error": "Company not found"})
+            }
+
+        # build return object
+        company, cve_count, avg_cvss, avg_epss, risk_index, risk_rating = row
+        
+        if not avg_epss:
+            avg_epss = -1
+        if not avg_cvss:
+            avg_cvss = -1
+        if not risk_index:
+            risk_index = -1
+
         avg_epss = float(avg_epss)
         avg_cvss = float(avg_cvss)
         risk_index = float(risk_index)
