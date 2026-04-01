@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "cisa_bucket" {
-  bucket = "amass-cisa-bucket-01"
+  bucket = "amass-cisa-bucket-${var.aws_suffix}"
 }
 
 resource "aws_vpc" "main" {
