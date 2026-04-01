@@ -8,6 +8,12 @@ class AnyString():
     def __eq__(self, value):
         return isinstance(value, str)
 
+DATE_ADDED = "2026-04-01"
+DUE_DATE = "2026-04-05"
+CVSS = 9
+EPSS = 0.6
+RISK_INDEX = round((float(CVSS) / 10) * 0.6 + float(EPSS) * 0.4, 4)
+
 # given a cve_id string, return json object with vulnerability info.
 def test_correct_cve_id(mocker):
     mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
@@ -66,3 +72,71 @@ def test_wrong_format_cve():
     response = vuln_info(incorrect_test_input, None)
     assert response["statusCode"] == 400
     assert response["body"] == '{"error": "Invalid CVE ID format"}'
+
+def test_missing_cvss(mocker):
+    mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
+
+    mock_cursor = mock_connect.return_value.cursor.return_value
+    mock_expected_data = ("CVE-2030-1111", "test_name", "test_description",
+                          DATE_ADDED, DUE_DATE, None, EPSS)
+   
+    mock_cursor.fetchone.return_value = mock_expected_data
+
+    test_input = {"pathParameters": {
+        "cve_id": "CVE-2030-1111"
+    }}
+
+    response = vuln_info(test_input, None)
+
+    assert response["statusCode"] == 200
+    actual_body = json.loads(response["body"])
+    expected_response_body = {
+        "cve_id": "CVE-2030-1111",
+        "name": "test_name",
+        "description": "test_description",
+        "dateAdded": DATE_ADDED,
+        "dueDate": DUE_DATE,
+        "cvss": -1,
+        "epss": EPSS,
+        "risk_index": RISK_INDEX,
+        "risk_rating": AnyString(),
+        "time": {
+            "timestamp": AnyString(),
+            "timezone": AnyString()
+        }
+    }
+    assert actual_body == expected_response_body
+
+def test_missing_epss(mocker):
+    mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
+
+    mock_cursor = mock_connect.return_value.cursor.return_value
+    mock_expected_data = ("CVE-2030-1111", "test_name", "test_description",
+                          DATE_ADDED, DUE_DATE, CVSS, None)
+   
+    mock_cursor.fetchone.return_value = mock_expected_data
+
+    test_input = {"pathParameters": {
+        "cve_id": "CVE-2030-1111"
+    }}
+
+    response = vuln_info(test_input, None)
+
+    assert response["statusCode"] == 200
+    actual_body = json.loads(response["body"])
+    expected_response_body = {
+        "cve_id": "CVE-2030-1111",
+        "name": "test_name",
+        "description": "test_description",
+        "dateAdded": DATE_ADDED,
+        "dueDate": DUE_DATE,
+        "cvss": -1,
+        "epss": EPSS,
+        "risk_index": RISK_INDEX,
+        "risk_rating": AnyString(),
+        "time": {
+            "timestamp": AnyString(),
+            "timezone": AnyString()
+        }
+    }
+    assert actual_body == expected_response_body
