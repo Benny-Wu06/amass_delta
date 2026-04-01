@@ -23,6 +23,7 @@ EPSS = 0.8
 EPSS_PERCENTILE = 0.9
 RISK_INDEX = round((float(CVSS) / 10) * 0.6 + float(EPSS) * 0.4, 4)
 RISK_RATING = "MEDIUM"
+COMPANY_NAME = "test_company_name"
 
 
 @pytest.fixture(scope="module")
@@ -60,21 +61,46 @@ def conn_db():
 @pytest.fixture(scope="function", autouse=True)
 def seed_db(conn_db):
     cur = conn_db.cursor()
+    insert_company_query = """
+        INSERT INTO companies (
+            company_name, num_vulnerabilities, avg_cvss, 
+            avg_epss, risk_index, risk_rating, earliest_vuln_date
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s);
+    """
+    cur.execute(insert_company_query, (
+        COMPANY_NAME, 1, CVSS,
+        EPSS, RISK_INDEX, RISK_RATING, DATE_ADDED
+    ))
+
+    conn_db.commit()
+    print('succesfully seeded company')
+
+    query = """
+        select id from companies c where c.company_name=%s;
+    """
+    cur.execute(query, (COMPANY_NAME,))
+    row = cur.fetchone()
+    SERIAL_COMPANY_ID = row
+    print('serial company id', SERIAL_COMPANY_ID)
 
     query = """
         insert into vulnerabilities (cve_id, company_id, vulnerability_name, description,
           date_added, due_date, cvss_score, cvss_severity, epss_score, epss_percentile)
         values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """
-    cur.execute(query, (CVE_ID, COMPANY_ID, VULN_NAME, DESC, DATE_ADDED, DUE_DATE, CVSS, CVSS_SEVERITY, EPSS, EPSS_PERCENTILE,))
+    cur.execute(query, (CVE_ID, SERIAL_COMPANY_ID, VULN_NAME, DESC, DATE_ADDED, DUE_DATE, CVSS, CVSS_SEVERITY, EPSS, EPSS_PERCENTILE,))
     conn_db.commit()
     print('added seed successfully')
 
-    yield CVE_ID
+    yield
 
     delete_query = "DELETE FROM vulnerabilities WHERE cve_id = %s;"
     cur.execute(delete_query, (CVE_ID,))
-    cur.commit()
+
+    delete_company_query = "DELETE FROM companies WHERE id = %s;"
+    cur.execute(delete_company_query, (COMPANY_ID,))
+
+    conn_db.commit()
     cur.close()
 
 # test lambda retrieving from rds
