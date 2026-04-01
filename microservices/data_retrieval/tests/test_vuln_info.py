@@ -50,13 +50,21 @@ def test_correct_cve_id(mocker):
     }
     assert actual_body == expected_response_body
 
-def test_not_found_cve():
+def test_not_found_cve(mocker):
+    mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
+
+    mock_cursor = mock_connect.return_value.cursor.return_value
+    mock_expected_data = None
+   
+    mock_cursor.fetchone.return_value = mock_expected_data
+    
     incorrect_test_input = {"pathParameters": {
         "cve_id": "CVE-1998-0001"
     }}
     
     response = vuln_info(incorrect_test_input, None)
     assert response["statusCode"] == 404
+    assert response["body"] == '{"error": "CVE not found"}'
 
 def test_no_param_defined():
     incorrect_test_input = {}
@@ -98,7 +106,7 @@ def test_missing_cvss(mocker):
         "dueDate": DUE_DATE,
         "cvss": -1,
         "epss": EPSS,
-        "risk_index": RISK_INDEX,
+        "risk_index": 0,
         "risk_rating": AnyString(),
         "time": {
             "timestamp": AnyString(),
@@ -130,9 +138,9 @@ def test_missing_epss(mocker):
         "description": "test_description",
         "dateAdded": DATE_ADDED,
         "dueDate": DUE_DATE,
-        "cvss": -1,
-        "epss": EPSS,
-        "risk_index": RISK_INDEX,
+        "cvss": CVSS,
+        "epss": -1,
+        "risk_index": 0,
         "risk_rating": AnyString(),
         "time": {
             "timestamp": AnyString(),
