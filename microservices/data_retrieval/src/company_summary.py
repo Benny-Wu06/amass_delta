@@ -20,6 +20,7 @@ def lambda_handler(event, context):
 
 
 def get_company_summary(target_company):
+    conn = None
     try:
         DB_PASSWORD = os.environ.get("DB_PASSWORD")
         DB_HOST = os.environ.get("DB_HOST")

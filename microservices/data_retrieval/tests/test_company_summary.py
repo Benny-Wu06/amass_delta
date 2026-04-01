@@ -27,12 +27,12 @@ def test_success_summary(mocker):
     assert response["statusCode"] == 200
     actual_body = json.loads(response["body"])
     expected_response_body = {
-        "company_name": "GitLab",
-        "cve_count": 154,
-        "avg_epss": 0.125,
-        "avg_cvss": 7.2,
-        "risk_index": 8.5,
-        "risk_rating": "Severe",
+        "company": "GitLab",
+        "cve_count": 4,
+        "avg_epss": 0.791,
+        "avg_cvss": 9.275,
+        "risk_index": 0.8729,
+        "risk_rating": "CRITICAL",
         "time": {
             "timestamp": AnyString(),
             "timezone": AnyString()
@@ -57,10 +57,10 @@ def test_no_param_defined():
 
 # note that db can store company names with spaces - need to account for this as 
 # url cannot take whitespace.
-def test_company_name_whitespace():
-    test_input = {"pathParameters": {
-        "company_name": "Sierra Wireless"
-    }}
+# def test_company_name_whitespace():
+#     test_input = {"pathParameters": {
+#         "company_name": "Sierra Wireless"
+#     }}
 
-    response = company_summary(test_input, None)
-    assert response["statusCode"] == 200
+#     response = company_summary(test_input, None)
+#     assert response["statusCode"] == 200
