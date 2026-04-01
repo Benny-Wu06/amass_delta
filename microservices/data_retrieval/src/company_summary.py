@@ -52,9 +52,17 @@ def get_company_summary(target_company):
         GROUP BY c.id;
         """
 
-        # build return object
         cur.execute(query, (target_company,))
         row = cur.fetchone()
+
+        # company not found
+        if not row:
+            return {
+                "statusCode": 404,
+                "body": json.dumps({"error": "Company not found"})
+            }
+
+        # build return object
         company, cve_count, avg_cvss, avg_epss, risk_index, risk_rating = row
         avg_epss = float(avg_epss)
         avg_cvss = float(avg_cvss)
@@ -89,7 +97,7 @@ def get_company_summary(target_company):
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Failed to retrieve data"}),
+            "body": json.dumps({"error": "Failed to retrieve data, company may not be found"}),
         }
     finally:
         if conn:

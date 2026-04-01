@@ -11,11 +11,9 @@ class AnyString():
 # given a company_name, return json object with summary about a company.
 def test_success_summary(mocker):
     mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
-
     mock_cursor = mock_connect.return_value.cursor.return_value
 
     mock_expected_data = ("GitLab", 4, 9.275, 0.791, 0.8729, 'CRITICAL')
-   
     mock_cursor.fetchone.return_value = mock_expected_data
 
     test_input = {"pathParameters": {
@@ -40,11 +38,17 @@ def test_success_summary(mocker):
     }
     assert actual_body == expected_response_body
 
-def test_not_found_company():
+def test_not_found_company(mocker):
     incorrect_test_input = {"pathParameters": {
         "company_name": "diddyblud_company"
     }}
     
+    mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
+    mock_cursor = mock_connect.return_value.cursor.return_value
+
+    mock_expected_data = None
+    mock_cursor.fetchone.return_value = mock_expected_data
+
     response = company_summary(incorrect_test_input, None)
     assert response["statusCode"] == 404
     assert response["body"] == '{"error": "Company not found"}'
@@ -57,10 +61,16 @@ def test_no_param_defined():
 
 # note that db can store company names with spaces - need to account for this as 
 # url cannot take whitespace.
-# def test_company_name_whitespace():
-#     test_input = {"pathParameters": {
-#         "company_name": "Sierra Wireless"
-#     }}
+def test_company_name_whitespace(mocker):
+    mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
+    mock_cursor = mock_connect.return_value.cursor.return_value
 
-#     response = company_summary(test_input, None)
-#     assert response["statusCode"] == 200
+    mock_expected_data = ("GitLab", 4, 9.275, 0.791, 0.8729, 'CRITICAL')
+    mock_cursor.fetchone.return_value = mock_expected_data
+
+    test_input = {"pathParameters": {
+        "company_name": "Sierra Wireless"
+    }}
+
+    response = company_summary(test_input, None)
+    assert response["statusCode"] == 200
