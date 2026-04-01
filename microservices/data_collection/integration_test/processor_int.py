@@ -159,6 +159,29 @@ class TestProcessorIntegration(TestCase):
         cur.close()
         conn.close()
 
+    def test_cvss_epss_scores_stored_correctly(self):
+        lambda_handler({"test": True}, None)
+
+        conn = self.get_conn()
+        cur = conn.cursor()
+
+        cur.execute(
+            "SELECT avg_cvss, avg_epss FROM companies WHERE company_name = %s",
+            ("TestCompanyA",)
+        )
+        row = cur.fetchone()
+        self.assertIsNotNone(row)
+        self.assertIsInstance(row[0], Decimal)
+        self.assertIsInstance(row[1], Decimal)
+
+        self.assertEqual(float(row[0]), 7.5)
+        self.assertEqual(float(row[1]), 0.93743)
+
+        cur.close()
+        conn.close()
+    
+    def test_avg
+
     # teardown
     def tearDown(self):
         self.s3_client.delete_object(
@@ -173,7 +196,7 @@ class TestProcessorIntegration(TestCase):
         cur.execute(
             "DELETE FROM vulnerabilities WHERE cve_id LIKE 'CVE-TEST-%'"
         )
-        
+
         cur.execute(
             "DELETE FROM companies WHERE company_name LIKE 'TestCompany%'"
         )
