@@ -10,6 +10,7 @@ import os
 def lambda_handler(event, context):
     path_params = event.get("pathParameters", {})
     target_company = path_params.get("company_name")
+    target_company = str(target_company)
 
     if not target_company:
         return {
@@ -19,7 +20,7 @@ def lambda_handler(event, context):
     return get_company_summary(target_company)
 
 
-def get_company_summary(target_company):
+def get_company_summary(target_company: str):
     conn = None
     try:
         DB_PASSWORD = os.environ.get("DB_PASSWORD")
@@ -37,6 +38,10 @@ def get_company_summary(target_company):
             sslrootcert=cert_path,
         )
         cur = conn.cursor()
+
+        # clean company_name input
+        target_company = target_company.replace("+", " ")
+
         # get aggregated company info - may need to change later to dynamically derive info
         query = """
             SELECT 
