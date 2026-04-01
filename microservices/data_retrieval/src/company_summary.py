@@ -10,13 +10,14 @@ import os
 def lambda_handler(event, context):
     path_params = event.get("pathParameters", {})
     target_company = path_params.get("company_name")
-    target_company = str(target_company)
 
     if not target_company:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": "Company name is required in the URL"}),
         }
+        
+    target_company = str(target_company)
     return get_company_summary(target_company)
 
 
@@ -69,6 +70,14 @@ def get_company_summary(target_company: str):
 
         # build return object
         company, cve_count, avg_cvss, avg_epss, risk_index, risk_rating = row
+        
+        if not avg_epss:
+            avg_epss = -1
+        if not avg_cvss:
+            avg_cvss = -1
+        if not risk_index:
+            risk_index = -1
+
         avg_epss = float(avg_epss)
         avg_cvss = float(avg_cvss)
         risk_index = float(risk_index)
@@ -102,7 +111,7 @@ def get_company_summary(target_company: str):
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Failed to retrieve data, company may not be found"}),
+            "body": json.dumps({"error": "Failed to retrieve data"}),
         }
     finally:
         if conn:

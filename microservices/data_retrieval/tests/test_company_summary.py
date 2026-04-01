@@ -56,8 +56,8 @@ def test_not_found_company(mocker):
 def test_no_param_defined():
     incorrect_test_input = {}
     response = company_summary(incorrect_test_input, None)
-    assert response["statusCode"] == 400
     assert response["body"] == '{"error": "Company name is required in the URL"}'
+    assert response["statusCode"] == 400
 
 # note that db can store company names with spaces - need to account for this as 
 # url cannot take whitespace.
@@ -67,7 +67,49 @@ def test_company_name_whitespace(mocker):
     mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
     mock_cursor = mock_connect.return_value.cursor.return_value
 
-    mock_expected_data = ("GitLab", 4, 9.275, 0.791, 0.8729, 'CRITICAL')
+    mock_expected_data = ("Sierra Wireless", 1, None, 0.791, 0.8729, 'CRITICAL')
+    mock_cursor.fetchone.return_value = mock_expected_data
+
+    test_input = {"pathParameters": {
+        "company_name": "Sierra Wireless"
+    }}
+
+    response = company_summary(test_input, None)
+    assert response["statusCode"] == 200
+
+def test_missing_cvss(mocker):
+    mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
+    mock_cursor = mock_connect.return_value.cursor.return_value
+
+    mock_expected_data = ("testcompany", 1, None, 0.791, 0.8729, 'CRITICAL')
+    mock_cursor.fetchone.return_value = mock_expected_data
+
+    test_input = {"pathParameters": {
+        "company_name": "Sierra Wireless"
+    }}
+
+    response = company_summary(test_input, None)
+    assert response["statusCode"] == 200
+
+def test_missing_epss(mocker):
+    mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
+    mock_cursor = mock_connect.return_value.cursor.return_value
+
+    mock_expected_data = ("testcompany", 1, 9, None, 0.8729, 'CRITICAL')
+    mock_cursor.fetchone.return_value = mock_expected_data
+
+    test_input = {"pathParameters": {
+        "company_name": "Sierra Wireless"
+    }}
+
+    response = company_summary(test_input, None)
+    assert response["statusCode"] == 200
+
+def test_missing_risk_index(mocker):
+    mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
+    mock_cursor = mock_connect.return_value.cursor.return_value
+
+    mock_expected_data = ("testcompany", 1, 9, 0.9, None, 'CRITICAL')
     mock_cursor.fetchone.return_value = mock_expected_data
 
     test_input = {"pathParameters": {
