@@ -180,7 +180,23 @@ class TestProcessorIntegration(TestCase):
         cur.close()
         conn.close()
     
-    def test_avg
+    def test_duplicate_handling(self):
+        lambda_handler({"test": True}, None)
+        lambda_handler({"test": True}, None)
+
+        conn = self.get_conn()
+        cur = conn.cursor
+
+        cur.execute(
+            "SELECT COUNT(*) FROM vulnerabilities WHERE cve_id = %s",
+            ("CVE-TEST-00001",)
+        )
+        row = cur.fetchone()
+        self.assertIsNotNone(row)
+        self.assertEqual(row[0], 1)
+
+        cur.close()
+        conn.close()
 
     # teardown
     def tearDown(self):
