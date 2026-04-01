@@ -41,8 +41,8 @@ def get_company_summary(target_company):
             SELECT 
             c.company_name as company,
             COUNT(v.cve_id) as cve_count,
-            AVG(v.epss_score) as avg_epss,
             AVG(v.cvss_score) as avg_cvss,
+            AVG(v.epss_score) as avg_epss,
             c.risk_index,
             c.risk_rating
         FROM companies c
@@ -54,7 +54,7 @@ def get_company_summary(target_company):
         # build return object
         cur.execute(query, (target_company,))
         row = cur.fetchone()
-        company, cve_count, avg_epss, avg_cvss, risk_index, risk_rating = row
+        company, cve_count, avg_cvss, avg_epss, risk_index, risk_rating = row
         avg_epss = float(avg_epss)
         avg_cvss = float(avg_cvss)
         risk_index = float(risk_index)
