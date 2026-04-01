@@ -39,7 +39,7 @@ def get_company_summary(target_company: str):
         )
         cur = conn.cursor()
 
-        # clean company_name input
+        # handle whitespace
         target_company = target_company.replace("+", " ")
 
         # get aggregated company info - may need to change later to dynamically derive info

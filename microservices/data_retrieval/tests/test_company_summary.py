@@ -61,6 +61,8 @@ def test_no_param_defined():
 
 # note that db can store company names with spaces - need to account for this as 
 # url cannot take whitespace.
+
+# TODO: write integration test since this can only really be tested there
 def test_company_name_whitespace(mocker):
     mock_connect = mocker.patch('src.vulnerability_info.psycopg2.connect')
     mock_cursor = mock_connect.return_value.cursor.return_value
