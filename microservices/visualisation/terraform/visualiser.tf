@@ -23,13 +23,13 @@ resource "aws_lambda_function" "visualiser_lambda" {
 }
 
 resource "aws_apigatewayv2_integration" "visualiser_int" {
-  api_id           = aws_apigatewayv2_api.visualisation_api.id
+  api_id           = var.api_id
   integration_type = "AWS_PROXY"
   integration_uri  = aws_lambda_function.visualiser_lambda.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "visualiser_route" {
-  api_id    = aws_apigatewayv2_api.visualisation_api.id
+  api_id    = var.api_id
   route_key = "POST /v1/visualise" 
   target    = "integrations/${aws_apigatewayv2_integration.visualiser_int.id}"
 }
@@ -38,5 +38,5 @@ resource "aws_lambda_permission" "visualiser_api_gw_perm" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.visualiser_lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.visualisation_api.execution_arn}/*/*"
+  source_arn    = "${var.api_execution_arn}/*/*"
 }

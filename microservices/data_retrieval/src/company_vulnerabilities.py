@@ -5,8 +5,6 @@ import psycopg2
 import os
 import json
 
-password = "testdiddyblud"
-
 conn = None
 
 
@@ -14,18 +12,47 @@ conn = None
 # i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
 
-    path_params = event.get("pathParameters", {})
+    path_params = event.get("pathParameters") or {}
+    query_params = event.get("queryStringParameters") or {}
     target_company = path_params.get("company_name")
+
+    min_cvss = query_params.get("min_cvss")
+    min_epss = query_params.get("min_epss")
+    validated_cvss = None
+    validated_epss = None
 
     if not target_company:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": "Company name is required in the URL"}),
         }
-    return get_company_vulnerabiltiies(target_company)
+    
+    # Validate Min_cvss and Min_epss
+    if min_cvss is not None:
+        try:
+            val = float(min_cvss)
+            if 0 <= val <= 10:
+                validated_cvss = val
+            else:
+                return {"statusCode": 400, "body": json.dumps({"error": "min_cvss must be 0-10"})}
+        except ValueError:
+            return {"statusCode": 400, "body": json.dumps({"error": "min_cvss must be 0-10"})}
 
 
-def get_company_vulnerabiltiies(target_company):
+    if min_epss is not None:
+        try:
+            val = float(min_epss)
+            if 0 <= val <= 1:
+                validated_epss = val
+            else:
+                return {"statusCode": 400, "body": json.dumps({"error": "min_epss must be 0-1"})}
+        except ValueError:
+            return {"statusCode": 400, "body": json.dumps({"error": "min_epss must be 0-1"})}
+
+    return get_company_vulnerabiltiies(target_company, validated_cvss, validated_epss)
+
+
+def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
     try:
         conn = None
         DB_PASSWORD = os.environ.get("DB_PASSWORD")
@@ -44,20 +71,32 @@ def get_company_vulnerabiltiies(target_company):
         )
         cur = conn.cursor()
 
-        # Retrieval Query
+        # Retrieval base Query 
         query = """
             SELECT 
                 v.cve_id, 
                 c.company_id, 
                 v.vulnerability_name, 
                 v.cvss_score, 
-                v.cvss_severity
+                v.cvss_severity,
+                v.epss_score
             FROM vulnerabilities v
             JOIN companies c ON v.company_id = c.id
-            WHERE c.company_name = %s;
+            WHERE c.company_name = %s
         """
+        params = [target_company]
 
-        cur.execute(query, (target_company,))
+        if min_cvss is not None:
+            query += " AND v.cvss_score >= %s"
+            params.append(min_cvss)
+        
+        if min_epss is not None:
+            query += " AND v.epss_score >= %s"
+            params.append(min_epss)
+        
+        query += ";"
+
+        cur.execute(query, tuple(params))
 
         # transform result into list of dictionaries
         columns = [desc[0] for desc in cur.description]
