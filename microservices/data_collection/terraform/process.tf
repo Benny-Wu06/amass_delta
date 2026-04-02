@@ -78,6 +78,16 @@ resource "aws_iam_role_policy" "processor_policy" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "processor_basic_execution" {
+  role       = aws_iam_role.processor_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "processor_insights" {
+  role       = aws_iam_role.processor_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+}
+
 output "lambda_sg_id" {
   value = aws_security_group.lambda_processor_sg.id
 }
