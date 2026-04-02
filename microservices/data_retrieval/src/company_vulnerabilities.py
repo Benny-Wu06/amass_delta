@@ -5,8 +5,6 @@ import psycopg2
 import os
 import json
 
-password = "testdiddyblud"
-
 conn = None
 
 
@@ -97,7 +95,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             params.append(min_epss)
         
         query += ";"
-        
+
         cur.execute(query, tuple(params))
 
         # transform result into list of dictionaries
