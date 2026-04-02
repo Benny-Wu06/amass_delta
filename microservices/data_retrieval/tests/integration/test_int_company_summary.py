@@ -231,7 +231,8 @@ def test_company_not_found(lambda_client):
 
 COMPANY_SUMMARY_URL = BASE_URL + "/v1/companies"
 
-# E2E TESTS
+# E2E TESTS,
+# test flow between api, which calls lambda, then retrieves rds, and back.
 def test_endpoint_success():
     response = requests.get(f"{COMPANY_SUMMARY_URL}/{COMPANY_NAME}", timeout=30)
     expected_response_body = {
