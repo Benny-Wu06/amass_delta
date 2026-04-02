@@ -223,12 +223,11 @@ def test_null_cvss_epss(lambda_client):
     assert body["risk_index"] == 0
     assert body["risk_rating"] == "UNKNOWN"
 
-RETIREVAL_URL = BASE_URL + "/v1/vulnerabilities"
+RETRIEVAL_URL = BASE_URL + "/v1/vulnerabilities"
 
 # e2e? tests - calling api
 def test_endpoint_success():
-    print('\nurl', BASE_URL)
-    response = requests.get(f"{RETIREVAL_URL}/{CVE_ID}", timeout=30)
+    response = requests.get(f"{RETRIEVAL_URL}/{CVE_ID}", timeout=30)
     expected_response_body = {
         "cve_id": CVE_ID,
         "name": VULN_NAME,
@@ -244,6 +243,17 @@ def test_endpoint_success():
             "timezone": AnyString()
         }
     }
-    
-    assert response["statusCode"] == 200
+    assert response.status_code == 200
     assert response.json() == expected_response_body
+
+def test_endpoint_no_cve_found():
+    response = requests.get(f"{RETRIEVAL_URL}/CVE-1230-0123", timeout=30)
+
+    assert response.status_code == 404
+    assert response.json() == {"error": "CVE not found"}
+
+def test_endpoint_wrong_cve_format():
+    response = requests.get(f"{RETRIEVAL_URL}/CVE-", timeout=30)
+
+    assert response.status_code == 400
+    assert response.json() == {"error": "Invalid CVE ID format"}
