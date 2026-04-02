@@ -15,7 +15,10 @@ def lambda_handler(event, context):
     path_params = event.get("pathParameters") or {}
     query_params = event.get("queryStringParameters") or {}
     target_company = path_params.get("company_name")
-
+    # handle whitespace
+    target_company = target_company.replace("+", " ")
+    target_company = target_company.replace("%20", " ")
+    
     min_cvss = query_params.get("min_cvss")
     min_epss = query_params.get("min_epss")
     validated_cvss = None
