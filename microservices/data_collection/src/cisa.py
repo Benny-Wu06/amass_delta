@@ -28,7 +28,7 @@ def cisascrapper(event, context):
             Bucket=bucket_name, Key=file_name, Body=data, ContentType="application/json"
         )
 
-        logger.info("CISA KEV saved to s3://%s/%s", bucket_name, file_name)
+        logger.info("Success CISA KEV saved to s3://%s/%s", bucket_name, file_name)
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},

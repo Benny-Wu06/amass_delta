@@ -99,7 +99,7 @@ def enrichment(event, context):
         Body=json.dumps(data, indent=4),
         ContentType="application/json",
     )
-    logger.info("Enrichment complete, %d CVEs written to %s", len(cve_list), dest_key)
+    logger.info("Success Enrichment complete, %d CVEs written to %s", len(cve_list), dest_key)
     return {
         "statusCode": 200,
         "body": json.dumps(f"Successfully enriched and saved to {dest_key}"),

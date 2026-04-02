@@ -255,7 +255,7 @@ def lambda_handler(event, context):
         logger.info("Updating company stats")
         update_all_company_stats(cur)
         conn.commit()
-        logger.info("Company stats updated")
+        logger.info("Success Company stats updated")
 
         return {
             "statusCode": 200,

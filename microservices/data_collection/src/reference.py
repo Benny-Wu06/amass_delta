@@ -42,10 +42,10 @@ def nvdscrapper(event, context):
                     ContentType="application/x-gzip",
                 )
             files_synced.append(file_name)
-            logger.info("Synced %s", file_name)
+            logger.info("Success Synced %s", file_name)
 
         except Exception as e:
-            logger.error("Failed to sync %s: %s", file, str(e))
+            logger.error("Error Fail to sync %s: %s", file, str(e))
             return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
 
     logger.info("NVD reference sync complete, %d files synced", len(files_synced))

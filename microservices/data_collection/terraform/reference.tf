@@ -43,7 +43,7 @@ resource "aws_apigatewayv2_integration" "reference_integration" {
 
 resource "aws_apigatewayv2_route" "reference_route" {
   api_id    = var.api_id
-  route_key = "GET v1/reference"
+  route_key = "GET /v1/reference"
   target    = "integrations/${aws_apigatewayv2_integration.reference_integration.id}"
 }
 
