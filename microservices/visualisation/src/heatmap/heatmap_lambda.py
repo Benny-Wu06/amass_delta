@@ -98,6 +98,7 @@ def heatmap_lambda(event, context):
             if (company_name is None) or (company_id is None):
                 return {
                     "statusCode": 404,
+                    "headers": {"Content-Type": "application/json"},
                     "body": json.dumps({"error": f"Company '{company_name}' not found"})
                 }
 

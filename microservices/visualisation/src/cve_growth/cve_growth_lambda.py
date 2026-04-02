@@ -94,6 +94,7 @@ def cve_growth_lambda(event, context):
             if days <= 0:
                 return {
                     "statusCode": 400,
+                    "headers": {"Content-Type": "application/json"},
                     "body": json.dumps({"error": "Days has to be greater than zero"}),
                 }
             
@@ -102,6 +103,7 @@ def cve_growth_lambda(event, context):
             if (company_name is None) or (company_id is None):
                 return {
                     "statusCode": 404,
+                    "headers": {"Content-Type": "application/json"},
                     "body": json.dumps({"error": f"Company '{company_name}' not found"})
                 }
 
@@ -114,6 +116,7 @@ def cve_growth_lambda(event, context):
 
             return {
                 "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
                 "body": json.dumps(
                     {
                         "company_name": company_name,
