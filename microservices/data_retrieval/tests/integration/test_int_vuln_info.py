@@ -4,6 +4,9 @@ import pytest
 import datetime 
 import boto3
 import psycopg2
+import requests
+
+RETREIVAL_API_LINK = "https://5j1yyqhms4.execute-api.ap-southeast-2.amazonaws.com/"
 
 class AnyString():
     def __eq__(self, value):
@@ -126,97 +129,102 @@ def seed_db(conn_db):
 
     cur.close()
 
-# test lambda retrieving from rds
-def test_vuln_retrieval_success(lambda_client):
-    event = {
-        "pathParameters": {
-            "cve_id": CVE_ID
+class TestVulnInfoIntegration:
+
+    # test lambda retrieving from rds
+    def test_vuln_retrieval_success(lambda_client):
+        event = {
+            "pathParameters": {
+                "cve_id": CVE_ID
+            }
         }
-    }
-    
-    response = lambda_client.invoke(
-        FunctionName='vuln_info_lambda',
-        InvocationType="RequestResponse",
-        Payload=json.dumps(event)
-    )
-    
-    response = json.loads(response["Payload"].read().decode("utf-8"))
-    print('\nresponse is ', response)
-    body = json.loads(response["body"])
-    expected_response_body = {
-        "cve_id": CVE_ID,
-        "name": VULN_NAME,
-        "description": DESC,
-        "dateAdded": str(DATE_ADDED),
-        "dueDate": str(DUE_DATE),
-        "cvss": CVSS,
-        "epss": EPSS,
-        "risk_index": RISK_INDEX,
-        "risk_rating": RISK_RATING,
-        "time": {
-            "timestamp": AnyString(),
-            "timezone": AnyString()
+        
+        response = lambda_client.invoke(
+            FunctionName='vuln_info_lambda',
+            InvocationType="RequestResponse",
+            Payload=json.dumps(event)
+        )
+        
+        response = json.loads(response["Payload"].read().decode("utf-8"))
+        print('\nresponse is ', response)
+        body = json.loads(response["body"])
+        expected_response_body = {
+            "cve_id": CVE_ID,
+            "name": VULN_NAME,
+            "description": DESC,
+            "dateAdded": str(DATE_ADDED),
+            "dueDate": str(DUE_DATE),
+            "cvss": CVSS,
+            "epss": EPSS,
+            "risk_index": RISK_INDEX,
+            "risk_rating": RISK_RATING,
+            "time": {
+                "timestamp": AnyString(),
+                "timezone": AnyString()
+            }
         }
-    }
-    
-    assert response["statusCode"] == 200
-    assert body == expected_response_body
+        
+        assert response["statusCode"] == 200
+        assert body == expected_response_body
 
-def test_cve_not_found(lambda_client):
-    cve_not_found = "CVE-0000-12930"
-    event = {
-        "pathParameters": {
-            "cve_id": cve_not_found
+    def test_cve_not_found(lambda_client):
+        cve_not_found = "CVE-0000-12930"
+        event = {
+            "pathParameters": {
+                "cve_id": cve_not_found
+            }
         }
-    }
 
-    response = lambda_client.invoke(
-        FunctionName='vuln_info_lambda',
-        InvocationType="RequestResponse",
-        Payload=json.dumps(event)
-    )
-    
-    response = json.loads(response["Payload"].read().decode("utf-8"))
-    body = json.loads(response["body"])
-    
-    assert response["statusCode"] == 404
-    assert body == {"error": "CVE not found"}
+        response = lambda_client.invoke(
+            FunctionName='vuln_info_lambda',
+            InvocationType="RequestResponse",
+            Payload=json.dumps(event)
+        )
+        
+        response = json.loads(response["Payload"].read().decode("utf-8"))
+        body = json.loads(response["body"])
+        
+        assert response["statusCode"] == 404
+        assert body == {"error": "CVE not found"}
 
-# # TODO
-def test_no_param_defined(lambda_client):
+    def test_no_param_defined(lambda_client):
 
-    response = lambda_client.invoke(
-        FunctionName='vuln_info_lambda',
-        InvocationType="RequestResponse",
-        Payload=json.dumps({})
-    )
-    
-    response = json.loads(response["Payload"].read().decode("utf-8"))
-    body = json.loads(response["body"])
-    
-    assert response["statusCode"] == 400
-    assert body == {"error": "cve_id is required in the URL"}
+        response = lambda_client.invoke(
+            FunctionName='vuln_info_lambda',
+            InvocationType="RequestResponse",
+            Payload=json.dumps({})
+        )
+        
+        response = json.loads(response["Payload"].read().decode("utf-8"))
+        body = json.loads(response["body"])
+        
+        assert response["statusCode"] == 400
+        assert body == {"error": "cve_id is required in the URL"}
 
-def test_null_cvss_epss(lambda_client):
-    event = {
-        "pathParameters": {
-            "cve_id": NULL_CVE_ID
+    def test_null_cvss_epss(lambda_client):
+        event = {
+            "pathParameters": {
+                "cve_id": NULL_CVE_ID
+            }
         }
-    }
-    
-    response = lambda_client.invoke(
-        FunctionName=LAMBDA_FUNCTION_NAME,
-        InvocationType="RequestResponse",
-        Payload=json.dumps(event)
-    )
-    
-    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
-    body = json.loads(response_payload["body"])
-    
-    assert response_payload["statusCode"] == 200
-    
-    # check that null cvss and epss are handled correctly
-    assert body["cvss"] == -1.0
-    assert body["epss"] == -1.0
-    assert body["risk_index"] == 0
-    assert body["risk_rating"] == "UNKNOWN"
+        
+        response = lambda_client.invoke(
+            FunctionName=LAMBDA_FUNCTION_NAME,
+            InvocationType="RequestResponse",
+            Payload=json.dumps(event)
+        )
+        
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        body = json.loads(response_payload["body"])
+        
+        assert response_payload["statusCode"] == 200
+        
+        # check that null cvss and epss are handled correctly
+        assert body["cvss"] == -1.0
+        assert body["epss"] == -1.0
+        assert body["risk_index"] == 0
+        assert body["risk_rating"] == "UNKNOWN"
+
+# e2e? tests - calling api
+def TestVulnInfoE2E:
+    def test_endpoint():
