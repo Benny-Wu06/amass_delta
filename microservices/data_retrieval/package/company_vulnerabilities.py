@@ -20,13 +20,38 @@ def lambda_handler(event, context):
 
     min_cvss = query_params.get("min_cvss")
     min_epss = query_params.get("min_epss")
-    
+    validated_cvss = None
+    validated_epss = None
+
     if not target_company:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": "Company name is required in the URL"}),
         }
-    return get_company_vulnerabiltiies(target_company, min_cvss, min_epss)
+    
+    # Validate Min_cvss and Min_epss
+    if min_cvss is not None:
+        try:
+            val = float(min_cvss)
+            if 0 <= val <= 10:
+                validated_cvss = val
+            else:
+                return {"statusCode": 400, "body": json.dumps({"error": "min_cvss must be 0-10"})}
+        except ValueError:
+            return {"statusCode": 400, "body": json.dumps({"error": "min_cvss must be 0-10"})}
+
+
+    if min_epss is not None:
+        try:
+            val = float(min_epss)
+            if 0 <= val <= 1:
+                validated_epss = val
+            else:
+                return {"statusCode": 400, "body": json.dumps({"error": "min_epss must be 0-1"})}
+        except ValueError:
+            return {"statusCode": 400, "body": json.dumps({"error": "min_epss must be 0-1"})}
+
+    return get_company_vulnerabiltiies(target_company, validated_cvss, validated_epss)
 
 
 def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
@@ -62,35 +87,13 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         """
         params = [target_company]
 
-        # Validate CVSS if it exists
         if min_cvss is not None:
-            try:
-                val = float(min_cvss)
-                if 0 <= val <= 10:
-                    query += " AND v.cvss_score >= %s"
-                    params.append(val)
-                else:
-                    raise ValueError
-            except ValueError:
-                return {
-                    "statusCode": 400, 
-                    "body": json.dumps({"error": "min_cvss must be a number between 0 and 10"})
-                }
-
-        # Validate EPSS if it exists
+            query += " AND v.cvss_score >= %s"
+            params.append(min_cvss)
+        
         if min_epss is not None:
-            try:
-                val = float(min_epss)
-                if 0 <= val <= 1:
-                    query += " AND v.epss_score >= %s"
-                    params.append(val)
-                else:
-                    raise ValueError
-            except ValueError:
-                return {
-                    "statusCode": 400,
-                    "body": json.dumps({"error": "min_epss must be a number between 0 and 1"})
-                }
+            query += " AND v.epss_score >= %s"
+            params.append(min_epss)
         
         cur.execute(query, tuple(params))
 
