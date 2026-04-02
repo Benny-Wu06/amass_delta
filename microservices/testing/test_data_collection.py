@@ -183,3 +183,54 @@ class TestReferenceIntegration:
     def test_post_to_reference_route_returns_404(self):
         response = requests.post(f"{URL}/v1/reference", timeout=30, json={"files": ["nvdcve-2.0-modified.json.gz"]})
         assert response.status_code == 404
+
+class TestEnrichmentComponent:
+
+    @pytest.fixture(autouse=True)
+    def clearns3bucket(self):
+        pass
+
+    @pytest.fixture(scope="class", autouse=True)
+    def setup_s3_data(self):
+        bucket.objects.all().delete()
+        invoke_lambda("cisa_scraper")
+        invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
+
+    def test_enrichment_returns_200(self):
+        result = invoke_lambda("enrichment")
+        assert result["function_error"] is None
+        assert result["statusCode"] == 200
+
+    def test_enrichment_response_body_success(self):
+        result = invoke_lambda("enrichment")
+        body = json.loads(result["body"])
+        assert "Successfully enriched" in body
+
+    def test_enrichment_creates_enriched_file_in_s3(self):
+        invoke_lambda("enrichment")
+        s3_response = s3_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix="enriched/")
+        keys = [obj["Key"] for obj in s3_response.get("Contents", [])]
+        assert "enriched/enriched.json" in keys
+
+    def test_enrichment_output_has_cvss_and_epss_scores(self):
+        invoke_lambda("enrichment")
+        s3_obj = s3_client.get_object(Bucket=BUCKET_NAME, Key="enriched/enriched.json")
+        content = json.loads(s3_obj["Body"].read().decode("utf-8"))
+        assert "vulnerabilities" in content
+        vuln = content["vulnerabilities"][0]
+        assert "cvss_score" in vuln
+        assert "epss_score" in vuln
+
+    def test_enrichment_succeeds_without_reference_data(self):
+        bucket.objects.all().delete()
+        invoke_lambda("cisa_scraper")
+        result = invoke_lambda("enrichment")
+        assert result["function_error"] is None
+        assert result["statusCode"] == 200
+
+    def test_enrichment_returns_400_when_no_raw_data(self):
+        bucket.objects.all().delete()
+        result = invoke_lambda("enrichment")
+        assert result["function_error"] is None
+        assert result["statusCode"] == 400  
+
