@@ -92,12 +92,13 @@ def seed_whitespace_company(conn_db):
     ))
 
     conn_db.commit()
-
+    print('seeded whitespace company successfully')
     yield
     
-    delete_company_query = "DELETE FROM companies WHERE id = %s;"
+    delete_company_query = "DELETE FROM companies WHERE company_name = %s;"
     cur.execute(delete_company_query, (WHITESPACE_NAME,))
     conn_db.commit()
+    print('deleted whitespace company successfully')
 
 
 # seed db, this sets up and tears down the vulnerability for every test
@@ -167,8 +168,8 @@ def seed_db(conn_db):
     delete_query = "DELETE FROM vulnerabilities WHERE cve_id = %s;"
     cur.execute(delete_query, (NULL_CVE_ID,))
 
-    delete_company_query = "DELETE FROM companies WHERE id = %s;"
-    cur.execute(delete_company_query, (COMPANY_ID,))
+    delete_company_query = "DELETE FROM companies WHERE company_name = %s;"
+    cur.execute(delete_company_query, (COMPANY_NAME,))
 
     conn_db.commit()
     print('teardown successful')
@@ -246,5 +247,38 @@ def test_endpoint_success():
         }
     }
     
+    assert response.status_code == 200
+    assert response.json() == expected_response_body
+
+def test_endpoint_company_not_found():
+    FAKE_COMPANY = 'diddylbud company holee'
+    response = requests.get(f"{COMPANY_SUMMARY_URL}/{FAKE_COMPANY}", timeout=30)
+    
+    assert response.status_code == 404
+    assert response.json() == {"error": "Company not found"}
+
+def test_endpoint_whitespace_company(seed_whitespace_company):
+    response = requests.get(f"{COMPANY_SUMMARY_URL}/{WHITESPACE_NAME}", timeout=30)
+
+    # requests library resolves whitespace to "%20" so this should still work
+    expected_response_body = {
+        "company": WHITESPACE_NAME,
+        "cve_count": 0,
+        "avg_epss": 0,
+        "avg_cvss": 0,
+        "risk_index": 0,
+        "risk_rating": "UNKNOWN",
+        "time": {
+            "timestamp": AnyString(),
+            "timezone": AnyString()
+        }
+    }
+    
+    assert response.status_code == 200
+    assert response.json() == expected_response_body
+
+    # simulate a url w/ "+"
+    response = requests.get(f"{COMPANY_SUMMARY_URL}/whitespace+company+name", timeout=30)
+
     assert response.status_code == 200
     assert response.json() == expected_response_body
