@@ -19,6 +19,14 @@ variable "db_user" {
 }
 
 variable "db_password" {
-  type        = string
-  sensitive   = true
+  type      = string
+  sensitive = true
+}
+
+variable "api_id" {
+  type = string
+}
+
+variable "api_execution_arn" {
+  type = string
 }
