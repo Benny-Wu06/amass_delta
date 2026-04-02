@@ -105,4 +105,5 @@ def test_enrichment_no_raw_files():
     )
 
     result = enrichment({}, None)
-    assert result is None
+    assert result["statusCode"] == 400
+    assert "No raw files found in S3" in result["body"]
