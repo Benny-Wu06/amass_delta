@@ -62,14 +62,36 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         """
         params = [target_company]
 
+        # Validate CVSS if it exists
         if min_cvss is not None:
-            query+= " AND v.cvss_score >= %s"
-            params.append(min_cvss)
-        
-        if min_epss is not None:
-            query+= " AND v.epss_score >= %s"
-            params.append(min_epss)
+            try:
+                val = float(min_cvss)
+                if 0 <= val <= 10:
+                    query += " AND v.cvss_score >= %s"
+                    params.append(val)
+                else:
+                    raise ValueError
+            except ValueError:
+                return {
+                    "statusCode": 400, 
+                    "body": json.dumps({"error": "min_cvss must be a number between 0 and 10"})
+                }
 
+        # Validate EPSS if it exists
+        if min_epss is not None:
+            try:
+                val = float(min_epss)
+                if 0 <= val <= 1:
+                    query += " AND v.epss_score >= %s"
+                    params.append(val)
+                else:
+                    raise ValueError
+            except ValueError:
+                return {
+                    "statusCode": 400,
+                    "body": json.dumps({"error": "min_epss must be a number between 0 and 1"})
+                }
+        
         cur.execute(query, tuple(params))
 
         # transform result into list of dictionaries
