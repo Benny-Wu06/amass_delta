@@ -20,6 +20,7 @@ def lambda_handler(event, context):
 
     min_cvss = query_params.get("min_cvss")
     min_epss = query_params.get("min_epss")
+    
     if not target_company:
         return {
             "statusCode": 400,
@@ -62,14 +63,14 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         params = [target_company]
 
         if min_cvss is not None:
-            query+= "AND v.cvss_score >= %s"
+            query+= " AND v.cvss_score >= %s"
             params.append(min_cvss)
         
         if min_epss is not None:
-            query+= "AND v.epss_score >= %s"
+            query+= " AND v.epss_score >= %s"
             params.append(min_epss)
 
-        cur.execute(query, tuple(params))
+        cur.execute(query, tuple(target_company,))
 
         # transform result into list of dictionaries
         columns = [desc[0] for desc in cur.description]
