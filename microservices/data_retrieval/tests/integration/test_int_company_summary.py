@@ -43,6 +43,7 @@ AVG_EPSS = 0.6
 AVG_RISK_INDEX=0.472
 AVG_RISK_RATING = "MEDIUM"
 
+WHITESPACE_NAME = "whitespace company name"
 
 
 
@@ -76,6 +77,28 @@ def conn_db():
     yield conn
     conn.close()
             
+@pytest.fixture(scope="function")
+def seed_whitespace_company(conn_db):
+    cur = conn_db.cursor()
+    query = """
+            INSERT INTO companies (
+            company_name, num_vulnerabilities, avg_cvss, 
+            avg_epss, risk_index, risk_rating, earliest_vuln_date
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s);
+    """
+    cur.execute(query, (
+        WHITESPACE_NAME, 0, 0,
+        0, 0, "UNKNOWN", None
+    ))
+
+    conn_db.commit()
+
+    yield
+    
+    delete_company_query = "DELETE FROM companies WHERE id = %s;"
+    cur.execute(delete_company_query, (WHITESPACE_NAME,))
+    conn_db.commit()
+
 
 # seed db, this sets up and tears down the vulnerability for every test
 @pytest.fixture(scope="function", autouse=True)
@@ -205,4 +228,23 @@ def test_company_not_found(lambda_client):
     assert response["statusCode"] == 404
     assert body == {"error": "Company not found"}
 
+COMPANY_SUMMARY_URL = BASE_URL + "/v1/companies"
+
 # E2E TESTS
+def test_endpoint_success():
+    response = requests.get(f"{COMPANY_SUMMARY_URL}/{COMPANY_NAME}", timeout=30)
+    expected_response_body = {
+        "company": COMPANY_NAME,
+        "cve_count": 3,
+        "avg_epss": AVG_EPSS,
+        "avg_cvss": AVG_CVSS,
+        "risk_index": AVG_RISK_INDEX,
+        "risk_rating": AVG_RISK_RATING,
+        "time": {
+            "timestamp": AnyString(),
+            "timezone": AnyString()
+        }
+    }
+    
+    assert response.status_code == 200
+    assert response.json() == expected_response_body
