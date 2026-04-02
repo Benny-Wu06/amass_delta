@@ -265,3 +265,36 @@ class TestEnrichmentIntegration:
     def test_get_to_enrichment_returns_404(self):
         response = requests.get(f"{URL}/enrichment", timeout=30)
         assert response.status_code == 404
+
+class TestProcessorComponent:
+
+    @pytest.fixture(autouse=True)
+    def clearns3bucket(self):
+        pass
+
+    @pytest.fixture(scope="class", autouse=True)
+    def setup_full_pipeline(self):
+        bucket.objects.all().delete()
+        invoke_lambda("cisa_scraper")
+        invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
+        invoke_lambda("enrichment")
+
+    def test_processor_returns_200(self):
+        result = invoke_lambda("amass-rds-processor")
+        assert result["function_error"] is None
+        assert result["statusCode"] == 200
+
+    def test_processor_response_body_contains_inserted(self):
+        result = invoke_lambda("amass-rds-processor")
+        assert "Inserted" in result["body"]
+        assert "vulnerabilities" in result["body"]
+
+    def test_processor_inserts_nonzero_vulnerabilities(self):
+        result = invoke_lambda("amass-rds-processor")
+        count = int(result["body"].split("Inserted ")[1].split(" vulnerabilities")[0])
+        assert count > 0
+
+    def test_processor_fails_without_enriched_data(self):
+        bucket.objects.all().delete()
+        result = invoke_lambda("amass-rds-processor")
+        assert result["function_error"] is not None
