@@ -32,6 +32,16 @@ resource "aws_iam_role_policy" "s3_access" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "cisa_basic_execution" {
+  role       = aws_iam_role.cisa_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "cisa_insights" {
+  role       = aws_iam_role.cisa_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+}
+
 resource "aws_iam_role" "enrich_role" {
   name = "enrich_role"
 
@@ -73,4 +83,14 @@ resource "aws_iam_role_policy" "s3_enrich_access" {
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "enrich_basic_execution" {
+  role       = aws_iam_role.enrich_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "enrich_insights" {
+  role       = aws_iam_role.enrich_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
 }
