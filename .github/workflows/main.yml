@@ -33,7 +33,7 @@ jobs:
         mypy . --explicit-package-bases --ignore-missing-imports --exclude "microservices/data_retrieval/package/"
     - name: Test and Coverage
       run: |
-        python3 -m pytest --cov=. --cov-fail-under=85
+        python3 -m pytest --cov=. --cov-fail-under=85 --ignore=microservices/testing
 
   terraform-build-check:
     name: Terraform Build Check
@@ -153,7 +153,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Run Integration Tests
         run: |
-          python3 -m pytest tests/integration --html=report.html --self-contained-html
+          python3 -m pytest microservices/testing --html=report.html --self-contained-html
       - name: Upload Test Report
         uses: actions/upload-artifact@v4
         if: always()
