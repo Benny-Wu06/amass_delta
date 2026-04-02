@@ -14,7 +14,7 @@ conn = None
 # i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
 
-    path_params = event.get("pathParameters", {})
+    path_params = event.get("pathParameters") or {}
     query_params = event.get("queryStringParameters") or {}
     target_company = path_params.get("company_name")
 
@@ -70,7 +70,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             query+= " AND v.epss_score >= %s"
             params.append(min_epss)
 
-        cur.execute(query, tuple(target_company,))
+        cur.execute(query, tuple(params))
 
         # transform result into list of dictionaries
         columns = [desc[0] for desc in cur.description]

@@ -70,7 +70,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             query+= " AND v.epss_score >= %s"
             params.append(min_epss)
 
-        cur.execute(query, tuple(target_company,))
+        cur.execute(query, tuple(params))
 
         # transform result into list of dictionaries
         columns = [desc[0] for desc in cur.description]
