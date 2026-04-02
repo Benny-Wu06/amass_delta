@@ -30,18 +30,19 @@ COMPANY_NAME = "test_company_name"
 
 NULL_CVE_ID = "CVE-1111-0000"
 
-# CVE_ID = "CVE-2026-99999"
-# COMPANY_ID = 9999
-# VULN_NAME = "test vulnerability"
-# DESC = "test description"
-# DATE_ADDED = datetime.datetime.strptime("2026-04-01", "%Y-%m-%d").date()
-# DUE_DATE = datetime.datetime.strptime("2026-04-05", "%Y-%m-%d").date()
-# CVSS = 9
-# CVSS_SEVERITY = "TEST_SEVERITY"
-# EPSS = 0.8
-# EPSS_PERCENTILE = 0.9
-# RISK_INDEX = round((float(CVSS) / 10) * 0.6 + float(EPSS) * 0.4, 4)
-# RISK_RATING = "CRITICAL"
+CVE_ID_1 = "CVE-2027-9998"
+VULN_NAME_1 = "test vulnerability 1"
+DESC_1 = "test description 1"
+CVSS_1 = 5.2
+EPSS_1 = 0.4
+RISK_INDEX_1 = round((float(CVSS_1) / 10) * 0.6 + float(EPSS_1) * 0.4, 4)
+RISK_RATING_1 = "MEDIUM"
+
+AVG_CVSS = 7.1
+AVG_EPSS = 0.6
+AVG_RISK_INDEX=0.472
+AVG_RISK_RATING = "MEDIUM"
+
 
 
 
@@ -89,8 +90,8 @@ def seed_db(conn_db):
         ) VALUES (%s, %s, %s, %s, %s, %s, %s);
     """
     cur.execute(insert_company_query, (
-        COMPANY_NAME, 1, CVSS,
-        EPSS, RISK_INDEX, RISK_RATING, DATE_ADDED
+        COMPANY_NAME, 3, AVG_CVSS,
+        AVG_EPSS, AVG_RISK_INDEX, AVG_RISK_RATING, DATE_ADDED
     ))
 
     conn_db.commit()
@@ -105,15 +106,20 @@ def seed_db(conn_db):
     SERIAL_COMPANY_ID = row
     print('serial company id', SERIAL_COMPANY_ID)
 
-    # seed vulnerability
+    # seed 2 vulnerabilities
     query = """
         insert into vulnerabilities (cve_id, company_id, vulnerability_name, description,
           date_added, due_date, cvss_score, cvss_severity, epss_score, epss_percentile)
         values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """
     cur.execute(query, (CVE_ID, SERIAL_COMPANY_ID, VULN_NAME, DESC, DATE_ADDED, DUE_DATE, CVSS, CVSS_SEVERITY, EPSS, EPSS_PERCENTILE,))
-    conn_db.commit()
-    print('added seed successfully')
+    
+    query = """
+        insert into vulnerabilities (cve_id, company_id, vulnerability_name, description,
+          date_added, due_date, cvss_score, cvss_severity, epss_score, epss_percentile)
+        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+    """
+    cur.execute(query, (CVE_ID_1, SERIAL_COMPANY_ID, VULN_NAME_1, DESC_1, DATE_ADDED, DUE_DATE, CVSS_1, CVSS_SEVERITY, EPSS_1, EPSS_PERCENTILE,))
 
     # vuln with missing cvss/epss info
     query = """
@@ -124,12 +130,16 @@ def seed_db(conn_db):
     cur.execute(query, (
         NULL_CVE_ID, SERIAL_COMPANY_ID, "test_ null vuln", DESC, DATE_ADDED, DUE_DATE
     ))
+    print('added seed successfully')
     conn_db.commit()
 
     yield
 
     delete_query = "DELETE FROM vulnerabilities WHERE cve_id = %s;"
     cur.execute(delete_query, (CVE_ID,))
+
+    delete_query = "DELETE FROM vulnerabilities WHERE cve_id = %s;"
+    cur.execute(delete_query, (CVE_ID_1,))
 
     delete_query = "DELETE FROM vulnerabilities WHERE cve_id = %s;"
     cur.execute(delete_query, (NULL_CVE_ID,))
