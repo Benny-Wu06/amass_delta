@@ -1,7 +1,7 @@
 import pytest
 import requests
 
-BASE_URL = "https://030sai2223.execute-api.ap-southeast-2.amazonaws.com"
+BASE_URL = "https://blj7h0zmba.execute-api.ap-southeast-2.amazonaws.com"
 
 # MOCK INPUT (Retrieved from other routes by the user)
 GROWTH_INPUT = {
@@ -92,4 +92,4 @@ def test_visualiser_get_method_not_allowed():
     response = requests.get(url, timeout=10)
     
     # should be an error
-    assert response.status_code in [400, 403, 404, 405]
+    assert response.status_code == 404

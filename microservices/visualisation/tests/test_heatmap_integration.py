@@ -3,7 +3,7 @@ import pytest
 import requests
 import psycopg2
 
-BASE_URL = "https://030sai2223.execute-api.ap-southeast-2.amazonaws.com"
+BASE_URL = "https://blj7h0zmba.execute-api.ap-southeast-2.amazonaws.com"
 
 # SEED DATA
 COMPANY_NAME_1 = "TestCorp1"
@@ -81,9 +81,30 @@ def test_get_heatmap_returns_200():
     # verify structure
     body = response.json()
     assert body["company_name"] == COMPANY_NAME_1
-    assert "data_points" in body
-    assert "summary" in body
-    assert isinstance(body["data_points"], list)
+    heatmap_grid = body["heatmap_grid"]
+    assert isinstance(heatmap_grid, list)
+
+    # check contents
+    assert len(heatmap_grid) == 25
+
+    # verify specific high-risk bucket (CVSS 8-10, EPSS 0.8-1.0), matches CVE-2026-005 (9.9, 0.88)
+    critical_cell = next(item for item in heatmap_grid 
+                         if item["cvss_range"] == "8-10" and item["epss_range"] == "0.8-1.0")
+    assert critical_cell["cve_count"] == 1
+
+    # verify a mid-range bucket (CVSS 2-4, EPSS 0.8-1.0), matches CVE-2026-004 (3.3, 0.88)
+    mid_low_cell = next(item for item in heatmap_grid 
+                        if item["cvss_range"] == "2-4" and item["epss_range"] == "0.8-1.0")
+    assert mid_low_cell["cve_count"] == 1
+
+    # verify an empty bucket, vo vulnerabilities in TestCorp1 fall into 0-2 CVSS
+    empty_cell = next(item for item in heatmap_grid 
+                      if item["cvss_range"] == "0-2")
+    assert empty_cell["cve_count"] == 0
+
+    total_cves_in_grid = sum(item["cve_count"] for item in heatmap_grid)
+    assert total_cves_in_grid == 6
+
 
 def test_get_heatmap_invalid_company_404():
     url = f"{BASE_URL}/v1/heatmap/UnknownCorp"
@@ -97,4 +118,4 @@ def test_post_to_heatmap_route_returns_error():
     # attempting a POST instead of a GET
     response = requests.post(url, timeout=10)
     
-    assert response.status_code in [400, 403, 404, 405]
+    assert response.status_code == 404

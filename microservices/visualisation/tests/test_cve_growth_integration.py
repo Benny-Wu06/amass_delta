@@ -3,7 +3,7 @@ import pytest
 import requests
 import psycopg2
 
-BASE_URL = "https://030sai2223.execute-api.ap-southeast-2.amazonaws.com"
+BASE_URL = "https://blj7h0zmba.execute-api.ap-southeast-2.amazonaws.com"
 
 # SEED DATA
 COMPANY_NAME_1 = "TestCorp1"
@@ -98,4 +98,4 @@ def test_post_to_growth_route_returns_error():
     response = requests.post(url, timeout=10)
     
     # API Gateway usually returns 403 or 405 if the method isn't configured
-    assert response.status_code in [403, 405]
+    assert response.status_code == 404
