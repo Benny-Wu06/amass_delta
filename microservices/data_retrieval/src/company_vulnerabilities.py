@@ -81,9 +81,10 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
                 v.vulnerability_name, 
                 v.cvss_score, 
                 v.cvss_severity
+                v.epss_score
             FROM vulnerabilities v
             JOIN companies c ON v.company_id = c.id
-            WHERE c.company_name = %s;
+            WHERE c.company_name = %s
         """
         params = [target_company]
 
@@ -94,6 +95,8 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         if min_epss is not None:
             query += " AND v.epss_score >= %s"
             params.append(min_epss)
+        
+        query += ";"
         
         cur.execute(query, tuple(params))
 
