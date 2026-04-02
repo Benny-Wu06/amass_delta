@@ -63,11 +63,11 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         params = [target_company]
 
         if min_cvss is not None:
-            query+= "AND v.cvss_score >= %s"
+            query+= " AND v.cvss_score >= %s"
             params.append(min_cvss)
         
         if min_epss is not None:
-            query+= "AND v.epss_score >= %s"
+            query+= " AND v.epss_score >= %s"
             params.append(min_epss)
 
         cur.execute(query, tuple(target_company,))
