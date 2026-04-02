@@ -22,19 +22,6 @@ resource "aws_lambda_function" "enrichment" {
   }
 }
 
-resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = var.raw_bucket_id
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.enrichment.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "raw/"
-    filter_suffix       = ".json"
-  }
-
-  depends_on = [aws_lambda_permission.allow_s3_enricher]
-}
-
 resource "aws_apigatewayv2_integration" "enrichment_integration" {
   api_id           = var.api_id
   integration_type = "AWS_PROXY"
