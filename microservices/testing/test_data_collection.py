@@ -8,7 +8,7 @@ import gzip
 import io
 
 AWS_REGION = "ap-southeast-2"
-URL = "https://3y9896hlw6.execute-api.ap-southeast-2.amazonaws.com"
+URL = "https://7mz3fi8zw1.execute-api.ap-southeast-2.amazonaws.com/"
 BUCKET_NAME = "amass-cisa-bucket-staging"
 
 lambda_client = boto3.client(
@@ -29,6 +29,8 @@ def invoke_lambda(function_name, payload=None):
     )
     function_error = response.get("FunctionError")
     parsed = json.loads(response["Payload"].read())
+    if parsed is None:
+        return {"statusCode": None, "body": None, "raw": None, "function_error": function_error}
     return {
         "statusCode": parsed.get("statusCode"),
         "body": parsed.get("body"),
@@ -89,7 +91,7 @@ class TestCisaIntegration:
         assert "application/json" in response.headers.get("Content-Type", "")
 
     def test_get_scrape_response_body_is_valid_json(self):
-        response = requests.get(f"{URL}/scrape", timeout=60)
+        response = requests.get(f"{URL}/v1/scrape", timeout=60)
         body = response.json()
         assert isinstance(body, dict)
 
@@ -121,26 +123,28 @@ class TestNvdScrapperComponent:
         body = json.loads(result["body"])
         assert body["status"] == "success"
     
-    def test_cisa_scraper_response_includes_file_path(self):
+    def test_nvd_scrapper_response_includes_file_path(self):
         result = invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
         body = json.loads(result["body"])
         assert "file" in body
-        assert body["file"].startswith("reference/")
-        assert "nvdcve-2.0" in body["file"]
+        assert isinstance(body["file"], list)
+        file_key = body["file"][0]
+        assert file_key.startswith("reference/")
+        assert "nvdcve-2.0" in file_key
 
-    def test_cisa_scraper_file_actually_lands_in_s3(self):
+    def test_nvd_scrapper_file_actually_lands_in_s3(self):
         result = invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
         body = json.loads(result["body"])
-        file_key = body["file"]
+        file_key = body["file"][0]
 
         s3_response = s3_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix="reference/")
         keys = [obj["Key"] for obj in s3_response.get("Contents", [])]
         assert file_key in keys
 
-    def test_cisa_scraper_uploaded_file_is_valid_json(self):
+    def test_nvd_scrapper_uploaded_file_is_valid_json(self):
         result = invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
         body = json.loads(result["body"])
-        file_key = body["file"]
+        file_key = body["file"][0]
 
         s3_obj = s3_client.get_object(Bucket=BUCKET_NAME, Key=file_key)
         gz_bytes = s3_obj["Body"].read()
@@ -149,3 +153,33 @@ class TestNvdScrapperComponent:
         assert "vulnerabilities" in content
         assert isinstance(content["vulnerabilities"], list)
         assert len(content["vulnerabilities"]) > 0
+
+class TestReferenceIntegration:
+
+    def test_get_reference_returns_200(self):
+        response = requests.get(f"{URL}/v1/reference", timeout=60, json={"files": ["nvdcve-2.0-modified.json.gz"]})
+        assert response.status_code == 200
+
+    def test_get_reference_returns_json_content_type(self):
+        response = requests.get(f"{URL}/v1/reference", timeout=60, json={"files": ["nvdcve-2.0-modified.json.gz"]})
+        assert "application/json" in response.headers.get("Content-Type", "")
+
+    def test_get_reference_response_body_is_valid_json(self):
+        response = requests.get(f"{URL}/v1/reference", timeout=60, json={"files": ["nvdcve-2.0-modified.json.gz"]})
+        body = response.json()
+        assert isinstance(body, dict)
+
+    def test_get_reference_response_has_all_expected_fields(self):
+        response = requests.get(f"{URL}/v1/reference", timeout=60, json={"files": ["nvdcve-2.0-modified.json.gz"]})
+        body = response.json()
+        assert "status" in body
+        assert "file" in body
+
+    def test_get_reference_status_field_is_success(self):
+        response = requests.get(f"{URL}/v1/reference", timeout=60, json={"files": ["nvdcve-2.0-modified.json.gz"]})
+        body = response.json()
+        assert body["status"] == "success"
+
+    def test_post_to_reference_route_returns_404(self):
+        response = requests.post(f"{URL}/v1/reference", timeout=30, json={"files": ["nvdcve-2.0-modified.json.gz"]})
+        assert response.status_code == 404

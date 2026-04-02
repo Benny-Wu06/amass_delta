@@ -20,7 +20,11 @@ def nvdscrapper(event, context):
         "nvdcve-2.0-2020.json.gz",
     ]
 
-    files_to_sync = event.get("files", default_files)
+    body = event.get("body", {})
+    if isinstance(body, str):
+        body = json.loads(body)
+
+    files_to_sync = body.get("files") or event.get("files") or default_files
     files_synced = []
 
     for file in files_to_sync:
