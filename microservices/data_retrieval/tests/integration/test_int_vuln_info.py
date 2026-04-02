@@ -145,33 +145,37 @@ def test_vuln_retrieval_success(lambda_client):
     assert response["statusCode"] == 200
     assert body == expected_response_body
 
-# def test_cve_not_found(lambda_client):
-#     cve_not_found = "CVE-0000-12930"
-#     event = {
-#         "pathParameters": {
-#             "cve_id": cve_not_found
-#         }
-#     }
+def test_cve_not_found(lambda_client):
+    cve_not_found = "CVE-0000-12930"
+    event = {
+        "pathParameters": {
+            "cve_id": cve_not_found
+        }
+    }
+
+    response = lambda_client.invoke(
+        FunctionName='vuln_info_lambda',
+        InvocationType="RequestResponse",
+        Payload=json.dumps(event)
+    )
     
-#     response = lambda_client.invoke(
-#         FunctionName='vuln_info_lambda',
-#         InvocationType="RequestResponse",
-#         Payload=json.dumps(event)
-#     )
+    response = json.loads(response["Payload"].read().decode("utf-8"))
+    body = json.loads(response["body"])
     
-#     response = json.loads(response["Payload"].read().decode("utf-8"))
-#     assert response["status"] == 404
-#     body = json.loads(response["body"])
-#     print('HELLO', body)
+    assert response["statusCode"] == 404
+    assert body == {"error": "CVE not found"}
 
 # # TODO
-# def test_no_param_defined(lambda_client):
-#     pass
+def test_no_param_defined(lambda_client):
 
-# # TODO? mayybe dont need to test these if this is done in unit tests
-# def test_missing_cvss(lambda_client):
-#     pass
-
-# def test_missing_epss(lambda_client):
-#     pass
-
+    response = lambda_client.invoke(
+        FunctionName='vuln_info_lambda',
+        InvocationType="RequestResponse",
+        Payload=json.dumps({})
+    )
+    
+    response = json.loads(response["Payload"].read().decode("utf-8"))
+    body = json.loads(response["body"])
+    
+    assert response["statusCode"] == 400
+    assert body == {"error": "cve_id is required in the URL"}
