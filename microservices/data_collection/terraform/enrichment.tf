@@ -13,6 +13,7 @@ resource "aws_lambda_function" "enrichment" {
   memory_size      = 3000
   filename         = data.archive_file.enrichment_zip.output_path
   source_code_hash = data.archive_file.enrichment_zip.output_base64sha256
+  layers           = ["arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21"]
 
   environment {
     variables = {
