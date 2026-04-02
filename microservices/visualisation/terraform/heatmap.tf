@@ -31,13 +31,13 @@ resource "aws_lambda_function" "heatmap_lambda" {
 }
 
 resource "aws_apigatewayv2_integration" "visualisation_heatmap_lambda_int" {
-  api_id           = aws_apigatewayv2_api.visualisation_api.id
+  api_id           = var.api_id
   integration_type = "AWS_PROXY"
   integration_uri  = aws_lambda_function.heatmap_lambda.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "heatmap_route" {
-  api_id    = aws_apigatewayv2_api.visualisation_api.id
+  api_id    = var.api_id
   route_key = "GET /v1/heatmap/{company_name}"
   target    = "integrations/${aws_apigatewayv2_integration.visualisation_heatmap_lambda_int.id}"
 }
@@ -46,5 +46,5 @@ resource "aws_lambda_permission" "visualisation_heatmap_api_gw_perm" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.heatmap_lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.visualisation_api.execution_arn}/*/*"
+  source_arn    = "${var.api_execution_arn}/*/*"
 }
