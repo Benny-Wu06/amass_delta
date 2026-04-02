@@ -110,7 +110,7 @@ def get_company_summary(target_company: str):
             "headers": {"Content-Type": "application/json"},
             "body": result,
         }
-    except Exception as e:
+    except Exception:
         logger.error("Error: Company not found for ID: %s", target_company)
         return {
             "statusCode": 500,
