@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "cisa_bucket" {
-  bucket = "amass-cisa-bucket-01"
+  bucket = "amass-cisa-bucket-${var.aws_suffix}"
 }
 
 resource "aws_vpc" "main" {
@@ -162,4 +162,8 @@ resource "aws_vpc_endpoint" "s3" {
   service_name      = "com.amazonaws.ap-southeast-2.s3"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_vpc.main.main_route_table_id]
+}
+
+terraform {
+  backend "s3" {}
 }
