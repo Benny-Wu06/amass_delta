@@ -1,5 +1,4 @@
 import json
-import base64
 import pytest
 import boto3
 from botocore.config import Config
@@ -27,6 +26,18 @@ def invoke_visualiser(payload):
     return parsed
 
 # MOCK INPUT (Retrieved from other routes by the user)
+GROWTH_INPUT = {
+    "company_name": "TestCorp1",
+    "data_points": [
+        {"date": "2026-03-26", "new_cves": 0},
+        {"date": "2026-03-27", "new_cves": 2},
+        {"date": "2026-03-28", "new_cves": 0},
+        {"date": "2026-03-29", "new_cves": 4},
+        {"date": "2026-03-30", "new_cves": 1}
+    ],
+    "summary": {"total_period_increase": 4, "peak_growth_day": "2026-03-29"}
+}
+
 HEATMAP_INPUT = {
     "company_name": "TestCorp1",
     "heatmap_grid": [
@@ -65,18 +76,6 @@ HEATMAP_INPUT = {
         {"cvss_range": "8-10", "epss_range": "0.6-0.8", "cve_count": 0},
         {"cvss_range": "8-10", "epss_range": "0.8-1.0", "cve_count": 1}
     ]
-}
-
-GROWTH_INPUT = {
-    "company_name": "TestCorp1",
-    "data_points": [
-        {"date": "2026-03-26", "new_cves": 0},
-        {"date": "2026-03-27", "new_cves": 2},
-        {"date": "2026-03-28", "new_cves": 0},
-        {"date": "2026-03-29", "new_cves": 4},
-        {"date": "2026-03-30", "new_cves": 1}
-    ],
-    "summary": {"total_period_increase": 4, "peak_growth_day": "2026-03-29"}
 }
 
 # TESTS
