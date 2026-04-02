@@ -34,7 +34,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 
 resource "aws_apigatewayv2_route" "scrape_route" {
   api_id    = var.api_id
-  route_key = "GET /scrape"
+  route_key = "GET v1/scrape"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
