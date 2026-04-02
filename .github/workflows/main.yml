@@ -32,6 +32,13 @@ jobs:
       run: |
         mypy . --explicit-package-bases --ignore-missing-imports --exclude "microservices/data_retrieval/package/"
     - name: Test and Coverage
+      env:
+        AWS_ACCESS_KEY_ID: testing
+        AWS_SECRET_ACCESS_KEY: testing
+        AWS_SECURITY_TOKEN: testing
+        AWS_SESSION_TOKEN: testing
+        AWS_DEFAULT_REGION: ap-southeast-2
+        BUCKET_NAME: test-bucket
       run: |
         python3 -m pytest --cov=. --cov-fail-under=85 --ignore=microservices/testing
 
