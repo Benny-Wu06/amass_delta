@@ -129,6 +129,7 @@ def seed_db(conn_db):
 
     cur.close()
 
+# INTEGRATION TESTS
 # test lambda retrieving from rds
 def test_vuln_retrieval_success(lambda_client):
     event = {
@@ -138,7 +139,7 @@ def test_vuln_retrieval_success(lambda_client):
     }
     
     response = lambda_client.invoke(
-        FunctionName='vuln_info_lambda',
+        FunctionName=LAMBDA_FUNCTION_NAME,
         InvocationType="RequestResponse",
         Payload=json.dumps(event)
     )
@@ -174,7 +175,7 @@ def test_cve_not_found(lambda_client):
     }
 
     response = lambda_client.invoke(
-        FunctionName='vuln_info_lambda',
+        FunctionName=LAMBDA_FUNCTION_NAME,
         InvocationType="RequestResponse",
         Payload=json.dumps(event)
     )
@@ -188,7 +189,7 @@ def test_cve_not_found(lambda_client):
 def test_no_param_defined(lambda_client):
 
     response = lambda_client.invoke(
-        FunctionName='vuln_info_lambda',
+        FunctionName=LAMBDA_FUNCTION_NAME,
         InvocationType="RequestResponse",
         Payload=json.dumps({})
     )
