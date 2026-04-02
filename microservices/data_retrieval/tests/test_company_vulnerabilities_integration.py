@@ -27,8 +27,9 @@ class TestVulnerabilityRetrievalComponent:
             InvocationType="RequestResponse",
             Payload=json.dumps(payload),
         )
-        parsed = json.loads(result["Payload"].read())
         
+        parsed = json.loads(result["Payload"].read())
+        print(f"DEBUG RESPONSE: {parsed}") # Add this!
         assert parsed["statusCode"] == 200
         body = json.loads(parsed["body"])
         assert isinstance(body, list)

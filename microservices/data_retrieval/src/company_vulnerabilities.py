@@ -120,7 +120,10 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Failed to retrieve data"}),
+            "body": json.dumps({
+                "error": "Failed to retrieve data",
+                "details": str(e) 
+            }),
         }
     finally:
         if conn:

@@ -29,7 +29,7 @@ def test_get_vulnerabilities_success(mock_connect):
     
     mock_connect.return_value = mock_conn
     mock_conn.cursor.return_value = mock_cur
-
+    
     event = {"pathParameters": {"company_name": "Google"}}
     response = lambda_handler(event, None)
 
