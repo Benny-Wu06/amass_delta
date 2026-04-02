@@ -282,3 +282,9 @@ def test_endpoint_whitespace_company(seed_whitespace_company):
 
     assert response.status_code == 200
     assert response.json() == expected_response_body
+
+def test_endpoint_no_param():
+    response = requests.get(f"{COMPANY_SUMMARY_URL}/", timeout=30)
+
+    assert response.status_code == 400
+    assert response.json() == {"error": "Company name is required in the URL"}
