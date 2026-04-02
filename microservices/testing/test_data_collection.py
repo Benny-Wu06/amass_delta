@@ -234,3 +234,34 @@ class TestEnrichmentComponent:
         assert result["function_error"] is None
         assert result["statusCode"] == 400  
 
+class TestEnrichmentIntegration:
+
+    @pytest.fixture(autouse=True)
+    def clearns3bucket(self):
+        pass
+
+    @pytest.fixture(scope="class", autouse=True)
+    def setup_s3_data(self):
+        bucket.objects.all().delete()
+        invoke_lambda("cisa_scraper")
+        invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
+
+    def test_post_enrichment_returns_200(self):
+        response = requests.post(f"{URL}/enrichment", timeout=120)
+        assert response.status_code == 200
+
+    def test_post_enrichment_response_body_is_valid(self):
+        response = requests.post(f"{URL}/enrichment", timeout=120)
+        body = response.json()
+        assert isinstance(body, str)
+        assert "Successfully enriched" in body
+
+    def test_post_enrichment_creates_enriched_file_in_s3(self):
+        requests.post(f"{URL}/enrichment", timeout=120)
+        s3_response = s3_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix="enriched/")
+        keys = [obj["Key"] for obj in s3_response.get("Contents", [])]
+        assert "enriched/enriched.json" in keys
+
+    def test_get_to_enrichment_returns_404(self):
+        response = requests.get(f"{URL}/enrichment", timeout=30)
+        assert response.status_code == 404
