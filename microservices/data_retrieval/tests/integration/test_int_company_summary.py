@@ -13,7 +13,7 @@ class AnyString():
         return isinstance(value, str)
 
 # init seed vars
-LAMBDA_FUNCTION_NAME = "vuln_info_lambda"
+LAMBDA_FUNCTION_NAME = "company_summary_lambda"
 CVE_ID = "CVE-2026-99999"
 COMPANY_ID = 9999
 VULN_NAME = "test vulnerability"
@@ -153,5 +153,56 @@ def seed_db(conn_db):
     cur.close()
 
 # INTEGRATION TESTS
+def test_company_summary_success(lambda_client):
+    event = {
+        "pathParameters": {
+            "company_name": COMPANY_NAME
+        }
+    }
+    
+    response = lambda_client.invoke(
+        FunctionName=LAMBDA_FUNCTION_NAME,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(event)
+    )
+    
+    response = json.loads(response["Payload"].read().decode("utf-8"))
+    print('\nresponse is ', response)
+    body = json.loads(response["body"])
+    expected_response_body = {
+        "company": COMPANY_NAME,
+        "cve_count": 3,
+        "avg_epss": AVG_EPSS,
+        "avg_cvss": AVG_CVSS,
+        "risk_index": AVG_RISK_INDEX,
+        "risk_rating": AVG_RISK_RATING,
+        "time": {
+            "timestamp": AnyString(),
+            "timezone": AnyString()
+        }
+    }
+    
+    assert response["statusCode"] == 200
+    assert body == expected_response_body
+
+def test_company_not_found(lambda_client):
+    company_not_found = "diddybludcompany"
+    event = {
+        "pathParameters": {
+            "company_name": company_not_found
+        }
+    }
+
+    response = lambda_client.invoke(
+        FunctionName=LAMBDA_FUNCTION_NAME,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(event)
+    )
+    
+    response = json.loads(response["Payload"].read().decode("utf-8"))
+    body = json.loads(response["body"])
+    
+    assert response["statusCode"] == 404
+    assert body == {"error": "Company not found"}
 
 # E2E TESTS
