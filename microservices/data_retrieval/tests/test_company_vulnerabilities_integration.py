@@ -6,7 +6,7 @@ from botocore.config import Config
 from decimal import Decimal
 
 AWS_REGION = "ap-southeast-2"
-URL = "https://3y9896hlw6.execute-api.ap-southeast-2.amazonaws.com"
+URL = "https://5j1yyqhms4.execute-api.ap-southeast-2.amazonaws.com/"
 FUNCTION_NAME = "company_vulnerabilities_service"
 
 lambda_client = boto3.client(
@@ -29,7 +29,7 @@ class TestVulnerabilityRetrievalComponent:
         )
         
         parsed = json.loads(result["Payload"].read())
-        print(f"DEBUG RESPONSE: {parsed}") # Add this!
+        print(f"DEBUG RESPONSE: {parsed}") 
         assert parsed["statusCode"] == 200
         body = json.loads(parsed["body"])
         assert isinstance(body, list)

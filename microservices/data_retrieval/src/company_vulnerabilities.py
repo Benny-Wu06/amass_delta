@@ -77,10 +77,15 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         query = """
             SELECT 
                 v.cve_id, 
-                c.company_id, 
-                v.vulnerability_name, 
-                v.cvss_score, 
-                v.cvss_severity
+                c.id, 
+                v.vulnerability_name,
+                v.description,
+                v.date_added,
+                v.due_date,
+                v.cvss_score,
+                v.epss_score, 
+                c.risk_index,
+                c.risk_rating
             FROM vulnerabilities v
             JOIN companies c ON v.company_id = c.id
             WHERE c.company_name = %s;
