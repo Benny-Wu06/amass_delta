@@ -67,27 +67,16 @@ resource "aws_lambda_function" "company_vulnerabilities" {
 
 
 #
-#  API Gateway (HTTP API)
+#  API Gateway Integration
 #
-resource "aws_apigatewayv2_api" "db_api" {
-  name          = "db-retrieval-api"
-  protocol_type = "HTTP"
-}
-
-resource "aws_apigatewayv2_stage" "db_api_stage" {
-  api_id      = aws_apigatewayv2_api.db_api.id
-  name        = "$default"
-  auto_deploy = true
-}
-
 resource "aws_apigatewayv2_integration" "company_vulnerabilities_int" {
-  api_id           = aws_apigatewayv2_api.db_api.id
+  api_id           = var.api_id
   integration_type = "AWS_PROXY"
   integration_uri  = aws_lambda_function.company_vulnerabilities.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "company_vulnerabilities_route" {
-  api_id    = aws_apigatewayv2_api.db_api.id
+  api_id    = var.api_id
   route_key = "GET /v1/companies/{company_name}/vulnerabilities"
   target    = "integrations/${aws_apigatewayv2_integration.company_vulnerabilities_int.id}"
 }
@@ -96,18 +85,6 @@ resource "aws_lambda_permission" "company_vulnerabilities_perm" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.company_vulnerabilities.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.db_api.execution_arn}/*/*"
+  source_arn    = "${var.api_execution_arn}/*/*"
 }
 
-#
-# Outputs
-#
-output "api_base_url" {
-  description = "The base URL for the API Gateway"
-  value       = aws_apigatewayv2_api.db_api.api_endpoint
-}
-
-output "vulnerability_endpoint" {
-  description = "The specific endpoint for company vulnerabilities"
-  value       = "${aws_apigatewayv2_api.db_api.api_endpoint}/v1/companies/{company_name}/vulnerabilities"
-}

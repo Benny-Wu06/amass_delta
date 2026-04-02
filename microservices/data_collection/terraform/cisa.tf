@@ -27,14 +27,14 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  api_id           = aws_apigatewayv2_api.lambda_api.id
+  api_id           = var.api_id
   integration_type = "AWS_PROXY"
   integration_uri  = aws_lambda_function.cisa_scraper.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "scrape_route" {
-  api_id    = aws_apigatewayv2_api.lambda_api.id
-  route_key = "GET /scrape"
+  api_id    = var.api_id
+  route_key = "GET v1/scrape"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
@@ -42,6 +42,6 @@ resource "aws_lambda_permission" "api_gw" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.cisa_scraper.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.lambda_api.execution_arn}/*/*"
+  source_arn    = "${var.api_execution_arn}/*/*"
 }
 

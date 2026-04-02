@@ -101,17 +101,34 @@ output "db_endpoint" {
   value = aws_db_instance.postgres.endpoint
 }
 
+resource "aws_apigatewayv2_api" "unified_api" {
+  name          = "amass-unified-api"
+  protocol_type = "HTTP"
+}
+
+resource "aws_apigatewayv2_stage" "unified_stage" {
+  api_id      = aws_apigatewayv2_api.unified_api.id
+  name        = "$default"
+  auto_deploy = true
+}
+
+output "api_url" {
+  value = aws_apigatewayv2_api.unified_api.api_endpoint
+}
+
 module "data_collection" {
-  source         = "../microservices/data_collection/terraform"
-  vpc_id         = aws_vpc.main.id
-  raw_bucket_arn = aws_s3_bucket.cisa_bucket.arn
-  raw_bucket_id  = aws_s3_bucket.cisa_bucket.id
-  db_name        = aws_db_instance.postgres.db_name
-  db_address     = aws_db_instance.postgres.address
-  db_user        = aws_db_instance.postgres.username
-  db_password    = var.db_password
-  bucket_id      = aws_s3_bucket.cisa_bucket.id
-  subnet_ids     = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  source            = "../microservices/data_collection/terraform"
+  vpc_id            = aws_vpc.main.id
+  raw_bucket_arn    = aws_s3_bucket.cisa_bucket.arn
+  raw_bucket_id     = aws_s3_bucket.cisa_bucket.id
+  db_name           = aws_db_instance.postgres.db_name
+  db_address        = aws_db_instance.postgres.address
+  db_user           = aws_db_instance.postgres.username
+  db_password       = var.db_password
+  bucket_id         = aws_s3_bucket.cisa_bucket.id
+  subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  api_id            = aws_apigatewayv2_api.unified_api.id
+  api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
 }
 
 module "data_retrieval" {
@@ -124,16 +141,20 @@ module "data_retrieval" {
   db_name            = aws_db_instance.postgres.db_name
   db_user            = aws_db_instance.postgres.username
   bucket_id          = aws_s3_bucket.cisa_bucket.id
+  api_id             = aws_apigatewayv2_api.unified_api.id
+  api_execution_arn  = aws_apigatewayv2_api.unified_api.execution_arn
 }
 
 module "visualisation" {
-  source      = "../microservices/visualisation/terraform"
-  subnet_ids  = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-  db_password = var.db_password
-  vpc_id      = aws_vpc.main.id
-  db_address  = aws_db_instance.postgres.address
-  db_name     = aws_db_instance.postgres.db_name
-  db_user     = aws_db_instance.postgres.username
+  source            = "../microservices/visualisation/terraform"
+  subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  db_password       = var.db_password
+  vpc_id            = aws_vpc.main.id
+  db_address        = aws_db_instance.postgres.address
+  db_name           = aws_db_instance.postgres.db_name
+  db_user           = aws_db_instance.postgres.username
+  api_id            = aws_apigatewayv2_api.unified_api.id
+  api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
 }
 
 resource "aws_vpc_endpoint" "s3" {

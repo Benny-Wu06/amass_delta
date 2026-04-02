@@ -35,14 +35,14 @@ resource "aws_lambda_permission" "allow_cloudwatch_reference" {
 }
 
 resource "aws_apigatewayv2_integration" "reference_integration" {
-  api_id           = aws_apigatewayv2_api.lambda_api.id
+  api_id           = var.api_id
   integration_type = "AWS_PROXY"
   integration_uri  = aws_lambda_function.reference_scraper.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "reference_route" {
-  api_id    = aws_apigatewayv2_api.lambda_api.id
-  route_key = "GET /reference"
+  api_id    = var.api_id
+  route_key = "GET v1/reference"
   target    = "integrations/${aws_apigatewayv2_integration.reference_integration.id}"
 }
 
@@ -50,5 +50,5 @@ resource "aws_lambda_permission" "reference_api_gw" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.reference_scraper.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.lambda_api.execution_arn}/*/*"
+  source_arn    = "${var.api_execution_arn}/*/*"
 }
