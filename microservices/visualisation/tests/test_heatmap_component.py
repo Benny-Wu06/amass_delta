@@ -102,26 +102,26 @@ def test_lambda_success():
 
     body = result["body"]
     assert body["company_name"] == COMPANY_NAME_1
-    grid = body["heatmap_grid"]
+    heatmap_grid = body["heatmap_grid"]
 
-    assert len(grid) == 25
+    assert len(heatmap_grid) == 25
 
     # verify specific high-risk bucket (CVSS 8-10, EPSS 0.8-1.0), matches CVE-2026-005 (9.9, 0.88)
-    critical_cell = next(item for item in grid 
+    critical_cell = next(item for item in heatmap_grid 
                          if item["cvss_range"] == "8-10" and item["epss_range"] == "0.8-1.0")
     assert critical_cell["cve_count"] == 1
 
     # verify a mid-range bucket (CVSS 2-4, EPSS 0.8-1.0), matches CVE-2026-004 (3.3, 0.88)
-    mid_low_cell = next(item for item in grid 
+    mid_low_cell = next(item for item in heatmap_grid 
                         if item["cvss_range"] == "2-4" and item["epss_range"] == "0.8-1.0")
     assert mid_low_cell["cve_count"] == 1
 
     # verify an empty bucket, vo vulnerabilities in TestCorp1 fall into 0-2 CVSS
-    empty_cell = next(item for item in grid 
+    empty_cell = next(item for item in heatmap_grid 
                       if item["cvss_range"] == "0-2")
     assert empty_cell["cve_count"] == 0
 
-    total_cves_in_grid = sum(item["cve_count"] for item in grid)
+    total_cves_in_grid = sum(item["cve_count"] for item in heatmap_grid)
     assert total_cves_in_grid == 6
 
 def test_lambda_unknown_company():
