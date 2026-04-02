@@ -23,7 +23,7 @@ def test_reference_uploads_to_s3(aws_credentials):
         Bucket="test-bucket",
         CreateBucketConfiguration={"LocationConstraint": "ap-southeast-2"},
     )
-    result = nvdscrapper({}, None)
+    result = nvdscrapper({"files": ["nvdcve-2.0-modified.json.gz"]}, None)
 
     assert result["statusCode"] == 200
     body = json.loads(result["body"])

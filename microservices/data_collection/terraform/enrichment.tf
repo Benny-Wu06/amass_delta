@@ -35,13 +35,13 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 }
 
 resource "aws_apigatewayv2_integration" "enrichment_integration" {
-  api_id           = aws_apigatewayv2_api.lambda_api.id
+  api_id           = var.api_id
   integration_type = "AWS_PROXY"
   integration_uri  = aws_lambda_function.enrichment.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "enrichment_route" {
-  api_id    = aws_apigatewayv2_api.lambda_api.id
+  api_id    = var.api_id
   route_key = "POST /enrichment"
   target    = "integrations/${aws_apigatewayv2_integration.enrichment_integration.id}"
 }
@@ -50,7 +50,7 @@ resource "aws_lambda_permission" "enrichment_api_gw" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.enrichment.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.lambda_api.execution_arn}/*/*"
+  source_arn    = "${var.api_execution_arn}/*/*"
 }
 
 resource "aws_lambda_permission" "allow_s3_enricher" {
