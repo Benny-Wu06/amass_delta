@@ -25,6 +25,9 @@ RISK_INDEX = round((float(CVSS) / 10) * 0.6 + float(EPSS) * 0.4, 4)
 RISK_RATING = "CRITICAL"
 COMPANY_NAME = "test_company_name"
 
+NULL_CVE_ID = "CVE-1111-0000"
+
+
 
 @pytest.fixture(scope="module")
 def lambda_client():
@@ -96,10 +99,24 @@ def seed_db(conn_db):
     conn_db.commit()
     print('added seed successfully')
 
+    # vuln with missing cvss/epss info
+    query = """
+        INSERT INTO vulnerabilities (cve_id, company_id, vulnerability_name, description,
+          date_added, due_date, cvss_score, cvss_severity, epss_score, epss_percentile)
+        VALUES (%s, %s, %s, %s, %s, %s, NULL, NULL, NULL, NULL);
+    """
+    cur.execute(query, (
+        NULL_CVE_ID, SERIAL_COMPANY_ID, "test_ null vuln", DESC, DATE_ADDED, DUE_DATE
+    ))
+    conn_db.commit()
+
     yield
 
     delete_query = "DELETE FROM vulnerabilities WHERE cve_id = %s;"
     cur.execute(delete_query, (CVE_ID,))
+
+    delete_query = "DELETE FROM vulnerabilities WHERE cve_id = %s;"
+    cur.execute(delete_query, (NULL_CVE_ID,))
 
     delete_company_query = "DELETE FROM companies WHERE id = %s;"
     cur.execute(delete_company_query, (COMPANY_ID,))
@@ -179,3 +196,27 @@ def test_no_param_defined(lambda_client):
     
     assert response["statusCode"] == 400
     assert body == {"error": "cve_id is required in the URL"}
+
+def test_null_cvss_epss(lambda_client):
+    event = {
+        "pathParameters": {
+            "cve_id": NULL_CVE_ID
+        }
+    }
+    
+    response = lambda_client.invoke(
+        FunctionName=LAMBDA_FUNCTION_NAME,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(event)
+    )
+    
+    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+    body = json.loads(response_payload["body"])
+    
+    assert response_payload["statusCode"] == 200
+    
+    # check that null cvss and epss are handled correctly
+    assert body["cvss"] == -1.0
+    assert body["epss"] == -1.0
+    assert body["risk_index"] == 0
+    assert body["risk_rating"] == "UNKNOWN"
