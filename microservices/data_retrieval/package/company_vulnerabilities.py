@@ -14,7 +14,7 @@ conn = None
 # i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
 
-    path_params = event.get("pathParameters", {})
+    path_params = event.get("pathParameters") or {}
     query_params = event.get("queryStringParameters") or {}
     target_company = path_params.get("company_name")
 
