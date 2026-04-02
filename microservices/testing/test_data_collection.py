@@ -4,6 +4,8 @@ import boto3
 import pytest
 import requests
 from botocore.config import Config
+import gzip
+import io
 
 AWS_REGION = "ap-southeast-2"
 URL = "https://3y9896hlw6.execute-api.ap-southeast-2.amazonaws.com"
@@ -44,7 +46,39 @@ class TestCisaComponent:
         result = invoke_lambda("cisa_scraper")
         assert result["function_error"] is None
         assert result["statusCode"] == 200
+    
+    def test_cisa_response_body_success(self):
+        result = invoke_lambda("cisa_scraper")
+        body = json.loads(result["body"])
+        assert body["status"] == "success"
+    
+    def test_cisa_scraper_response_includes_file_path(self):
+        result = invoke_lambda("cisa_scraper")
+        body = json.loads(result["body"])
+        assert "file" in body
+        assert body["file"].startswith("raw/")
+        assert "cisa_kev" in body["file"]
 
+    def test_cisa_scraper_file_actually_lands_in_s3(self):
+        result = invoke_lambda("cisa_scraper")
+        body = json.loads(result["body"])
+        file_key = body["file"]
+
+        s3_response = s3_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix="raw/")
+        keys = [obj["Key"] for obj in s3_response.get("Contents", [])]
+        assert file_key in keys
+
+    def test_cisa_scraper_uploaded_file_is_valid_json(self):
+        result = invoke_lambda("cisa_scraper")
+        body = json.loads(result["body"])
+        file_key = body["file"]
+
+        s3_obj = s3_client.get_object(Bucket=BUCKET_NAME, Key=file_key)
+        content = json.loads(s3_obj["Body"].read().decode("utf-8"))
+
+        assert "vulnerabilities" in content
+        assert isinstance(content["vulnerabilities"], list)
+        assert len(content["vulnerabilities"]) > 0
 
 class TestCisaIntegration:
 
@@ -52,6 +86,30 @@ class TestCisaIntegration:
         response = requests.get(f"{URL}/scrape", timeout=60)
         assert response.status_code == 200
 
+    def test_get_scrape_returns_json_content_type(self):
+        response = requests.get(f"{URL}/scrape", timeout=60)
+        assert "application/json" in response.headers.get("Content-Type", "")
+
+    def test_get_scrape_response_body_is_valid_json(self):
+        response = requests.get(f"{URL}/scrape", timeout=60)
+        body = response.json()
+        assert isinstance(body, dict)
+
+    def test_get_scrape_response_has_all_expected_fields(self):
+        response = requests.get(f"{URL}/scrape", timeout=60)
+        body = response.json()
+        assert "status" in body
+        assert "file" in body
+        assert "timestamp" in body
+
+    def test_get_scrape_status_field_is_success(self):
+        response = requests.get(f"{URL}/scrape", timeout=60)
+        body = response.json()
+        assert body["status"] == "success"
+
+    def test_post_to_scrape_route_returns_404(self):
+        response = requests.post(f"{URL}/scrape", timeout=30)
+        assert response.status_code == 404
 
 class TestNvdScrapperComponent:
 
@@ -59,3 +117,41 @@ class TestNvdScrapperComponent:
         result = invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
         assert result["function_error"] is None
         assert result["statusCode"] == 200
+    
+    def test_cisa_response_body_success(self):
+        result = invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
+        body = json.loads(result["body"])
+        assert body["status"] == "success"
+    
+    # def test_cisa_scraper_response_includes_file_path(self):
+    #     result = invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
+    #     body = json.loads(result["body"])
+    #     assert "file" in body
+    #     assert body["file"].startswith("reference/")
+    #     assert "nvdcve-2.0" in body["file"]
+
+    # def test_cisa_scraper_file_actually_lands_in_s3(self):
+    #     result = invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
+    #     body = json.loads(result["body"])
+    #     file_key = body["file"]
+
+    #     s3_response = s3_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix="raw/")
+    #     keys = [obj["Key"] for obj in s3_response.get("Contents", [])]
+    #     assert file_key in keys
+
+    # def test_cisa_scraper_uploaded_file_is_valid_json(self):
+    #     result = invoke_lambda("nvd_scrapper", payload={"files": ["nvdcve-2.0-modified.json.gz"]})
+    #     body = json.loads(result["body"])
+    #     file_key = body["file"]
+
+    #     s3_obj = s3_client.get_object(Bucket=BUCKET_NAME, Key=file_key)
+    #     content = json.loads(s3_obj["Body"].read().decode("utf-8"))
+
+    #     assert "vulnerabilities" in content
+    #     assert isinstance(content["vulnerabilities"], list)
+    #     assert len(content["vulnerabilities"]) > 0
+
+
+
+
+    
