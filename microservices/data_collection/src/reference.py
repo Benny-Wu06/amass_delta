@@ -9,7 +9,7 @@ s3 = boto3.client("s3")
 def nvdscrapper(event, context):
     base_url = "https://nvd.nist.gov/feeds/json/cve/2.0/"
     bucket_name = os.environ["BUCKET_NAME"]
-    files_to_sync = [
+    default_files  = [
         "nvdcve-2.0-modified.json.gz",
         "nvdcve-2.0-2026.json.gz",
         "nvdcve-2.0-2025.json.gz",
@@ -20,6 +20,7 @@ def nvdscrapper(event, context):
         "nvdcve-2.0-2020.json.gz",
     ]
 
+    files_to_sync = event.get("files", default_files)
     files_synced = []
 
     for file in files_to_sync:

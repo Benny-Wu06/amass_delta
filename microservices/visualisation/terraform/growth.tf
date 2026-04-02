@@ -82,25 +82,14 @@ resource "aws_lambda_function" "visualisation_lambda" {
   }
 }
 
-resource "aws_apigatewayv2_api" "visualisation_api" {
-  name          = "cve-growth-visualisation-api"
-  protocol_type = "HTTP"
-}
-
-resource "aws_apigatewayv2_stage" "visualisation_api_stage" {
-  api_id      = aws_apigatewayv2_api.visualisation_api.id
-  name        = "$default"
-  auto_deploy = true
-}
-
 resource "aws_apigatewayv2_integration" "visualisation_lambda_int" {
-  api_id           = aws_apigatewayv2_api.visualisation_api.id
+  api_id           = var.api_id
   integration_type = "AWS_PROXY"
   integration_uri  = aws_lambda_function.visualisation_lambda.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "visualisation_route" {
-  api_id    = aws_apigatewayv2_api.visualisation_api.id
+  api_id    = var.api_id
   route_key = "GET /v1/growth/{company_name}"
   target    = "integrations/${aws_apigatewayv2_integration.visualisation_lambda_int.id}"
 }
@@ -109,5 +98,5 @@ resource "aws_lambda_permission" "visualisation_api_gw_perm" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.visualisation_lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.visualisation_api.execution_arn}/*/*"
+  source_arn    = "${var.api_execution_arn}/*/*"
 }

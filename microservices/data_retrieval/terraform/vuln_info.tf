@@ -46,14 +46,14 @@ resource "aws_lambda_function" "vuln_info" {
 
 # integrate lambda to api gateway
 resource "aws_apigatewayv2_integration" "vuln_info_db_integration" {
-  api_id             = aws_apigatewayv2_api.db_api.id 
+  api_id             = var.api_id 
   integration_type   = "AWS_PROXY"
   integration_uri    = aws_lambda_function.vuln_info.invoke_arn
   integration_method = "POST" 
 }
 
 resource "aws_apigatewayv2_route" "vuln_info_route" {
-  api_id    = aws_apigatewayv2_api.db_api.id
+  api_id    = var.api_id
   route_key = "GET /v1/vulnerabilities/{cve_id}"
   target    = "integrations/${aws_apigatewayv2_integration.vuln_info_db_integration.id}"
 }
@@ -65,10 +65,6 @@ resource "aws_lambda_permission" "apigw_vuln_info_lambda_invoke" {
   principal     = "apigateway.amazonaws.com"
 
   # uses the execution arn of the API defined in main.tf
-  source_arn = "${aws_apigatewayv2_api.db_api.execution_arn}/*/*" 
+  source_arn = "${var.api_execution_arn}/*/*" 
 }
 
-output "vuln_info_endpoint" {
-  description = "The specific endpoint for getting information about a specific vulnerability"
-  value       = "${aws_apigatewayv2_api.db_api.api_endpoint}/v1/vulnerabilities/{cve_id}"
-}

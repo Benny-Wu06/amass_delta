@@ -5,8 +5,6 @@ import psycopg2
 import os
 import json
 
-password = "testdiddyblud"
-
 conn = None
 
 
@@ -88,7 +86,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
                 c.risk_rating
             FROM vulnerabilities v
             JOIN companies c ON v.company_id = c.id
-            WHERE c.company_name = %s;
+            WHERE c.company_name = %s
         """
         params = [target_company]
 
@@ -100,6 +98,8 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             query += " AND v.epss_score >= %s"
             params.append(min_epss)
         
+        query += ";"
+
         cur.execute(query, tuple(params))
 
         # transform result into list of dictionaries
@@ -114,11 +114,19 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             results.append(row_dict)
 
         cur.close()
-
+        response_data = {
+            "company": target_company,
+            "cve_count": len(results),
+            "vulnerabilities": results,
+            "time": {
+                "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+                "timezone": "UTC"
+            }
+        }
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(results),
+            "body": json.dumps(response_data),
         }
     except Exception as e:
         print(f"Database error: {e}")
