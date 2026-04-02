@@ -1,8 +1,12 @@
+import logging
 import psycopg2
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import os
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 # /v1/companies/{company_name}
@@ -107,7 +111,7 @@ def get_company_summary(target_company: str):
             "body": result,
         }
     except Exception as e:
-        print(f"Database error: {e}")
+        logger.error("Database error in company_summary: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
