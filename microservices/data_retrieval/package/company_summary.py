@@ -42,6 +42,7 @@ def get_company_summary(target_company: str):
 
         # handle whitespace
         target_company = target_company.replace("+", " ")
+        target_company = target_company.replace("%20", " ")
 
         # get aggregated company info - may need to change later to dynamically derive info
         query = """
@@ -72,11 +73,11 @@ def get_company_summary(target_company: str):
         company, cve_count, avg_cvss, avg_epss, risk_index, risk_rating = row
         
         if not avg_epss:
-            avg_epss = -1
+            avg_epss = 0
         if not avg_cvss:
-            avg_cvss = -1
+            avg_cvss = 0
         if not risk_index:
-            risk_index = -1
+            risk_index = 0
 
         avg_epss = float(avg_epss)
         avg_cvss = float(avg_cvss)
