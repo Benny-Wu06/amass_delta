@@ -22,7 +22,7 @@ CVSS_SEVERITY = "TEST_SEVERITY"
 EPSS = 0.8
 EPSS_PERCENTILE = 0.9
 RISK_INDEX = round((float(CVSS) / 10) * 0.6 + float(EPSS) * 0.4, 4)
-RISK_RATING = "MEDIUM"
+RISK_RATING = "CRITICAL"
 COMPANY_NAME = "test_company_name"
 
 
@@ -124,23 +124,54 @@ def test_vuln_retrieval_success(lambda_client):
     )
     
     response = json.loads(response["Payload"].read().decode("utf-8"))
+    print('\nresponse is ', response)
     body = json.loads(response["body"])
-    print('HELLO', body)
+    expected_response_body = {
+        "cve_id": CVE_ID,
+        "name": VULN_NAME,
+        "description": DESC,
+        "dateAdded": str(DATE_ADDED),
+        "dueDate": str(DUE_DATE),
+        "cvss": CVSS,
+        "epss": EPSS,
+        "risk_index": RISK_INDEX,
+        "risk_rating": RISK_RATING,
+        "time": {
+            "timestamp": AnyString(),
+            "timezone": AnyString()
+        }
+    }
     
-    # assert json body is correct
+    assert response["statusCode"] == 200
+    assert body == expected_response_body
 
-# TODO 
-def test_cve_not_found(lambda_client):
-    pass
+# def test_cve_not_found(lambda_client):
+#     cve_not_found = "CVE-0000-12930"
+#     event = {
+#         "pathParameters": {
+#             "cve_id": cve_not_found
+#         }
+#     }
+    
+#     response = lambda_client.invoke(
+#         FunctionName='vuln_info_lambda',
+#         InvocationType="RequestResponse",
+#         Payload=json.dumps(event)
+#     )
+    
+#     response = json.loads(response["Payload"].read().decode("utf-8"))
+#     assert response["status"] == 404
+#     body = json.loads(response["body"])
+#     print('HELLO', body)
 
-# TODO
-def test_no_param_defined(lambda_client):
-    pass
+# # TODO
+# def test_no_param_defined(lambda_client):
+#     pass
 
-# TODO? mayybe dont need to test these if this is done in unit tests
-def test_missing_cvss(lambda_client):
-    pass
+# # TODO? mayybe dont need to test these if this is done in unit tests
+# def test_missing_cvss(lambda_client):
+#     pass
 
-def test_missing_epss(lambda_client):
-    pass
+# def test_missing_epss(lambda_client):
+#     pass
 
