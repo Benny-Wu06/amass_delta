@@ -129,6 +129,6 @@ def test_only_one_filter_applied(mock_connect):
     sql_query = mock_cur.execute.call_args[0][0]
     
     assert "cvss_score >=" in sql_query
-    assert "epss_score" not in sql_query 
+    assert "AND v.epss_score" not in sql_query 
     assert response["statusCode"] == 200
     assert "CVE-2026-8888" in response["body"]
