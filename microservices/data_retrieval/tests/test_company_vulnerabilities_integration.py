@@ -2,6 +2,7 @@ import json
 import pytest
 import requests
 import boto3
+from botocore.config import Config
 from decimal import Decimal
 
 AWS_REGION = "ap-southeast-2"
