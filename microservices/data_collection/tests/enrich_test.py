@@ -38,7 +38,7 @@ def test_enrichment_success(mock_urlopen):
             "requiredAction": "Apply mitigations per vendor instructions, follow applicable BOD 22-01 guidance for cloud services, or discontinue use of the product if mitigations are unavailable.",
             "dueDate": "2026-03-27",
             "knownRansomwareCampaignUse": "Unknown",
-            "notes": "https:\/\/chromereleases.googleblog.com\/2026\/03\/stable-channel-update-for-desktop_12.html ; https:\/\/nvd.nist.gov\/vuln\/detail\/CVE-2026-3910",
+            "notes": r"https:\/\/chromereleases.googleblog.com\/2026\/03\/stable-channel-update-for-desktop_12.html ; https:\/\/nvd.nist.gov\/vuln\/detail\/CVE-2026-3910",
             "cwes": [
                 "CWE-119"
             ]

@@ -7,36 +7,52 @@ from unittest.mock import MagicMock, patch
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 from company_vulnerabilities import lambda_handler
 
-# --- CONSTANTS ---
-EXPECTED_COLUMNS = ["cve_id", "company_id", "vulnerability_name", "cvss_score", "cvss_severity"]
+# CONSTANTS 
+EXPECTED_COLUMNS = [
+    "cve_id", "company_id", "vulnerability_name", "description", 
+    "date_added", "due_date", "cvss_score", "epss_score", 
+    "risk_index", "risk_rating"
+]
 
-# --- HELPERS ---
+# HELPER
 def create_mock_cursor(rows, columns):
     mock_cur = MagicMock()
     mock_cur.description = [(col,) for col in columns]
     mock_cur.fetchall.return_value = rows
     return mock_cur
 
-# --- TEST CASES ---
+# TEST CASES
 
 @patch("psycopg2.connect")
 def test_get_vulnerabilities_success(mock_connect):
     ## CASE 1: Success - Basic retrieval for a company ##
     mock_conn = MagicMock()
-    mock_row = [("CVE-2026-1111", 1, "SQLi", Decimal("9.8"), "CRITICAL")]
+    mock_row = [("CVE-2026-1111", 1, "SQLi", "Description", "2026-01-01", "2026-02-01", 9.8, 0.5, 85.0, "CRITICAL")]
     mock_cur = create_mock_cursor(mock_row, EXPECTED_COLUMNS)
     
     mock_connect.return_value = mock_conn
     mock_conn.cursor.return_value = mock_cur
-
+    
     event = {"pathParameters": {"company_name": "Google"}}
     response = lambda_handler(event, None)
 
     assert response["statusCode"] == 200
     body = json.loads(response["body"])
-    assert len(body) == 1
-    assert body[0]["cve_id"] == "CVE-2026-1111"
-    assert body[0]["cvss_score"] == "9.8"
+
+    # Verify structure
+    assert body["company"] == "Google"
+    assert body["cve_count"] == 1
+    assert "timestamp" in body["time"]
+    assert body["time"]["timezone"] == "UTC"
+
+    #  Verify Vulnerability Content 
+    assert isinstance(body["vulnerabilities"], list)
+    assert len(body["vulnerabilities"]) == 1
+    
+    vuln = body["vulnerabilities"][0]
+    assert vuln["cve_id"] == "CVE-2026-1111"
+    assert vuln["cvss"] == 9.8
+    assert vuln["risk_rating"] == "CRITICAL"
 
 def test_missing_company_name():
     ## CASE 2: Error - No company name in URL ##
@@ -81,13 +97,13 @@ def test_database_connection_error(mock_connect):
     response = lambda_handler(event, None)
 
     assert response["statusCode"] == 500
-    assert "Failed to retrieve data" in response["body"]
+    assert "Internal Server Error" in response["body"]
 
 @patch("psycopg2.connect")
 def test_filter_logic_applied(mock_connect):
     ## CASE 6: Logic - Verify both filters are added to query ##
     mock_conn = MagicMock()
-    mock_row = [("CVE-2026-9999", 2, "Data breach", Decimal("7.5"), "HIGH")]
+    mock_row = [("CVE-2026-9999", 2, "Data breach", "Desc", "2026-01-01", "2026-02-01", 7.5, 0.1, 70.0, "HIGH")]
     mock_cur = create_mock_cursor(mock_row, EXPECTED_COLUMNS) 
     
     mock_connect.return_value = mock_conn
@@ -106,14 +122,18 @@ def test_filter_logic_applied(mock_connect):
     assert "AND v.epss_score >=" in sql_query
     assert response["statusCode"] == 200
     
+    # Verify body 
     body = json.loads(response["body"])
-    assert body[0]["vulnerability_name"] == "Data breach"
+    assert body["company"] == "Google"
+    assert body["cve_count"] == 1
+    assert body["vulnerabilities"][0]["name"] == "Data breach"
+    assert "time" in body
 
 @patch("psycopg2.connect")
 def test_only_one_filter_applied(mock_connect):
     ## CASE 7: Logic - Verify 1 filter is used to query ##
     mock_conn = MagicMock()
-    mock_row = [("CVE-2026-8888", 3, "Auth Bypass", Decimal("5.0"), "MEDIUM")]
+    mock_row = [("CVE-2026-8888", 3, "Auth Bypass", "Desc", "2026-01-01", "2026-02-01", 5.0, 0.05, 40.0, "MEDIUM")]
     mock_cur = create_mock_cursor(mock_row, EXPECTED_COLUMNS)
     
     mock_connect.return_value = mock_conn
@@ -130,4 +150,10 @@ def test_only_one_filter_applied(mock_connect):
     assert "cvss_score >=" in sql_query
     assert "AND v.epss_score" not in sql_query 
     assert response["statusCode"] == 200
-    assert "CVE-2026-8888" in response["body"]
+
+    # Verify body
+    body = json.loads(response["body"])
+    assert body["cve_count"] == 1
+    # Specific check for the ID inside the list
+    assert body["vulnerabilities"][0]["cve_id"] == "CVE-2026-8888"
+    assert body["company"] == "Google"
