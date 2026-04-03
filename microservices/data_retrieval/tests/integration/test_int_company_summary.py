@@ -5,7 +5,8 @@ import datetime
 import boto3
 import psycopg2
 import requests
-from vars import BASE_URL
+
+BASE_URL = "https://7mz3fi8zw1.execute-api.ap-southeast-2.amazonaws.com/"
 
 class AnyString():
     def __eq__(self, value):
