@@ -2,6 +2,7 @@ import json
 import pytest
 import requests
 import boto3
+import psycopg2
 from botocore.config import Config
 from decimal import Decimal
 
