@@ -137,10 +137,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             results.append(vuln_item)
 
         cur.close()
-<<<<<<< HEAD
         logger.info("Success retrieved vulnerabilities for company: %s with filters min_cvss: %s, min_epss: %s", target_company, min_cvss, min_epss)
-=======
->>>>>>> 4b9fe96fcc82ed3d224a1890341774ea2889252a
         response_data = {
             "company": target_company,
             "cve_count": len(results),
