@@ -62,7 +62,9 @@ def conn_db():
     cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
     print('\nDB_PASSWORD', DB_PASSWORD)
 
+    print('\n#######################')
     print('\ndb_host', DB_HOST)
+    print('\n#######################')
     conn = psycopg2.connect(
             host=DB_HOST,
             port=5432,
