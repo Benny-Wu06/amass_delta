@@ -13,25 +13,13 @@ resource "aws_lambda_function" "enrichment" {
   memory_size      = 3000
   filename         = data.archive_file.enrichment_zip.output_path
   source_code_hash = data.archive_file.enrichment_zip.output_base64sha256
+  layers           = ["arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21"]
 
   environment {
     variables = {
       BUCKET_NAME = var.raw_bucket_id
     }
   }
-}
-
-resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = var.raw_bucket_id
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.enrichment.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "raw/"
-    filter_suffix       = ".json"
-  }
-
-  depends_on = [aws_lambda_permission.allow_s3_enricher]
 }
 
 resource "aws_apigatewayv2_integration" "enrichment_integration" {

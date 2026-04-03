@@ -1,8 +1,12 @@
+import logging
 import psycopg2
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import os
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 # /v1/companies/{company_name}
@@ -100,14 +104,14 @@ def get_company_summary(target_company: str):
             }
         )
         cur.close()
-
+        logger.info("Success retrieved summary for company: %s", target_company)
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},
             "body": result,
         }
-    except Exception as e:
-        print(f"Database error: {e}")
+    except Exception:
+        logger.error("Error: Company not found for ID: %s", target_company)
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},

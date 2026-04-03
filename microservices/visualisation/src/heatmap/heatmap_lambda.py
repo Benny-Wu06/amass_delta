@@ -1,7 +1,11 @@
 import json
 import psycopg2
 import os
+import logging
 
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 # --- DB CONFIGURATION CONSTANTS ---
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = 5432
@@ -94,6 +98,7 @@ def heatmap_lambda(event, context):
             company_name = event.get("pathParameters", {}).get("company_name")
 
             if not company_name:
+                logger.error("Error Company name is required in the URL")
                 return {
                     "statusCode": 404,
                     "headers": {"Content-Type": "application/json"},
@@ -103,6 +108,7 @@ def heatmap_lambda(event, context):
             raw_data = get_heatmap_data(db_cursor, company_name)
             grid = format_heatmap(raw_data)
 
+            logger.info(f"Success retrieved heatmap data for company: {company_name}")
             return {
                 "statusCode": 200,
                 "headers": {"Content-Type": "application/json"},
@@ -111,7 +117,7 @@ def heatmap_lambda(event, context):
                 ),
             }
     except Exception as e:
-        print(f"Error: {str(e)}")
+        logger.error(f"Error: {str(e)}")
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},

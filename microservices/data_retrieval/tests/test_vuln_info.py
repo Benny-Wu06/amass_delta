@@ -1,5 +1,3 @@
-import pytest
-import pytest_mock
 from microservices.data_retrieval.src.vulnerability_info import lambda_handler as vuln_info 
 import json
 

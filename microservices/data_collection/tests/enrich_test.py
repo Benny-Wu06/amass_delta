@@ -5,7 +5,6 @@ import os
 import pytest
 import boto3
 from moto import mock_aws
-import urllib.request
 from unittest.mock import patch, MagicMock
 from microservices.data_collection.src.enrich import enrichment
 
@@ -105,4 +104,5 @@ def test_enrichment_no_raw_files():
     )
 
     result = enrichment({}, None)
-    assert result is None
+    assert result["statusCode"] == 400
+    assert "No raw files found in S3" in result["body"]

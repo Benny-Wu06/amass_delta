@@ -1,8 +1,12 @@
+import logging
 import psycopg2
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import os
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 # /v1/companies/{company_name}
@@ -60,9 +64,9 @@ def get_company_summary(target_company: str):
 
         cur.execute(query, (target_company,))
         row = cur.fetchone()
-
         # company not found
         if not row:
+            logger.error("Error Company not found: %s", target_company)
             return {
                 "statusCode": 404,
                 "body": json.dumps({"error": "Company not found"})
@@ -101,13 +105,14 @@ def get_company_summary(target_company: str):
         )
         cur.close()
 
+        logger.info("Success retrieved summary for company: %s", target_company)
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},
             "body": result,
         }
     except Exception as e:
-        print(f"Database error: {e}")
+        logger.error("Error Database error in company_summary: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
