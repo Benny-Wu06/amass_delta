@@ -6,8 +6,6 @@ import boto3
 import psycopg2
 import requests
 
-BASE_URL = "https://5j1yyqhms4.execute-api.ap-southeast-2.amazonaws.com/"
-
 class AnyString():
     def __eq__(self, value):
         return isinstance(value, str)
