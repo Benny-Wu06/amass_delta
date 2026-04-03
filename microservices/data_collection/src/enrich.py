@@ -28,7 +28,7 @@ def enrichment(event, context):
 
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix="raw/")
     if "Contents" not in response:
-        return None
+        return {"statusCode": 400, "body": json.dumps({"error": "No raw files found in S3"})}
     all_files = sorted(
         response["Contents"], key=lambda x: x["LastModified"], reverse=True
     )
