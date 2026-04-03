@@ -102,7 +102,7 @@ def test_missing_cvss(mocker):
         "description": "test_description",
         "dateAdded": DATE_ADDED,
         "dueDate": DUE_DATE,
-        "cvss": -1,
+        "cvss": 0,
         "epss": EPSS,
         "risk_index": 0,
         "risk_rating": AnyString(),
@@ -137,7 +137,7 @@ def test_missing_epss(mocker):
         "dateAdded": DATE_ADDED,
         "dueDate": DUE_DATE,
         "cvss": CVSS,
-        "epss": -1,
+        "epss": 0,
         "risk_index": 0,
         "risk_rating": AnyString(),
         "time": {
