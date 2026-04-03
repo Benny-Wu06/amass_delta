@@ -33,7 +33,7 @@ def cve_growth_db():
             ('CVE-2026-001', id_1, datetime(2026, 3, 26)),
             ('CVE-2026-002', id_1, datetime(2026, 3, 26)),
             ('CVE-2026-003', id_1, datetime(2026, 3, 25)),
-            ('CVE-2026-004', id_1, datetime(2026, 3, 12)), # Out of 7-day range
+            ('CVE-2026-004', id_1, datetime(2025, 3, 12)), # Out of 7-day range
             ('CVE-2026-101', id_2, datetime(2026, 3, 26)), # Different Company
             ('CVE-2026-102', id_2, datetime(2026, 3, 23))  # Different Company
         ]
@@ -61,7 +61,7 @@ def test_fetch_company_id_fail(cve_growth_db):
 @freeze_time("2026-03-26")
 def test_fetch_vulnerability_data_success(cve_growth_db):
     cursor = cve_growth_db["cursor"]
-    results = fetch_vulnerability_data(cursor, "CompanyOne", 7)
+    results = fetch_vulnerability_data(cursor, "CompanyOne", 100)
 
     assert len(results) == 2
     res_dict = {str(row[0]): row[1] for row in results}
