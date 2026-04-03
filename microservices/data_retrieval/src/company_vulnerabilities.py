@@ -164,7 +164,6 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         import traceback
         error_details = traceback.format_exc()
         print(f"Full Error: {error_details}")
-        logger.error("Database error in company_vulnerabilities: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {

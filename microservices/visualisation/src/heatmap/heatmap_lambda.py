@@ -37,7 +37,7 @@ def fetch_company_id(db, company_name):
     return row[0] if row else None
 
 
-def get_heatmap_data(db, company_name):
+def fetch_heatmap_data(db, company_name):
     company_id = fetch_company_id(db, company_name)
 
     query = """
@@ -97,15 +97,17 @@ def heatmap_lambda(event, context):
         with conn.cursor() as db_cursor:
             company_name = event.get("pathParameters", {}).get("company_name")
 
-            if not company_name:
+            # check if company exists
+            company_id = fetch_company_id(db_cursor, company_name)
+            if (company_name is None) or (company_id is None):
                 logger.error("Error Company name is required in the URL")
                 return {
                     "statusCode": 404,
                     "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"error": f"Company {company_name} not found"}),
+                    "body": json.dumps({"error": f"Company '{company_name}' not found"})
                 }
 
-            raw_data = get_heatmap_data(db_cursor, company_name)
+            raw_data = fetch_heatmap_data(db_cursor, company_name)
             grid = format_heatmap(raw_data)
 
             logger.info(f"Success retrieved heatmap data for company: {company_name}")
