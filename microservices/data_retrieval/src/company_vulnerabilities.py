@@ -12,13 +12,14 @@ conn = None
 # i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
 
-    path_params = event.get("pathParameters") or {}
-    query_params = event.get("queryStringParameters") or {}
-    target_company = path_params.get("company_name")
-    # handle whitespace
-    target_company = target_company.replace("+", " ")
-    target_company = target_company.replace("%20", " ")
+    path_params = event.get("pathParameters")
+    if path_params is None: path_params = {}
     
+    query_params = event.get("queryStringParameters")
+    if query_params is None: query_params = {}
+    target_company = path_params.get("company_name")
+    
+
     min_cvss = query_params.get("min_cvss")
     min_epss = query_params.get("min_epss")
     validated_cvss = None
@@ -27,9 +28,13 @@ def lambda_handler(event, context):
     if not target_company:
         return {
             "statusCode": 400,
-            "body": json.dumps({"error": "Company name is required in the URL"}),
+            "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
+            "body": json.dumps({"error": "Company name is required in the URL", "received_params": path_params}),
         }
     
+    # handle whitespace
+    target_company = target_company.replace("+", " ").replace("%20", " ")
+
     # Validate Min_cvss and Min_epss
     if min_cvss is not None:
         try:
@@ -56,8 +61,8 @@ def lambda_handler(event, context):
 
 
 def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
+    conn = None
     try:
-        conn = None
         DB_PASSWORD = os.environ.get("DB_PASSWORD")
         DB_HOST = os.environ.get("DB_HOST")
         cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
@@ -111,8 +116,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         for row in cur.fetchall():
             row_dict = dict(zip(columns, row))
             for key, value in row_dict.items():
-                # Check if the value is a Decimal or a Date
-                if isinstance(value, (Decimal, datetime.date)):
+                if isinstance(value, (Decimal, datetime.date, datetime.datetime)):
                     row_dict[key] = str(value)
             results.append(row_dict)
 
@@ -128,17 +132,25 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         }
         return {
             "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
+            "headers": {"Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+            },
             "body": json.dumps(response_data),
         }
     except Exception as e:
-        print(f"Database error: {e}")
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Full Error: {error_details}")
         return {
             "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*" 
+            },
             "body": json.dumps({
                 "error": "Failed to retrieve data",
-                "details": str(e) 
+                "details": str(e),
+                "trace": error_details 
             }),
         }
     finally:

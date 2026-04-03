@@ -6,7 +6,7 @@ from botocore.config import Config
 from decimal import Decimal
 
 AWS_REGION = "ap-southeast-2"
-URL = "https://5j1yyqhms4.execute-api.ap-southeast-2.amazonaws.com/"
+URL = "https://7mz3fi8zw1.execute-api.ap-southeast-2.amazonaws.com/"
 FUNCTION_NAME = "company_vulnerabilities_service"
 
 lambda_client = boto3.client(
@@ -29,10 +29,12 @@ class TestVulnerabilityRetrievalComponent:
         )
         
         parsed = json.loads(result["Payload"].read())
-        print(f"DEBUG RESPONSE: {parsed}") 
         assert parsed["statusCode"] == 200
         body = json.loads(parsed["body"])
-        assert isinstance(body, list)
+        assert isinstance(body, dict)
+        assert body["company"] == "Google"
+        assert isinstance(body["vulnerabilities"], list)
+        assert len(body["vulnerabilities"]) > 0
 
     def test_retrieval_by_company_200_1_filter(self):
         payload = {
@@ -48,7 +50,10 @@ class TestVulnerabilityRetrievalComponent:
         
         assert parsed["statusCode"] == 200
         body = json.loads(parsed["body"])
-        assert isinstance(body, list)
+        assert isinstance(body, dict)
+        assert body["company"] == "Google"
+        assert isinstance(body["vulnerabilities"], list)
+        assert len(body["vulnerabilities"]) > 0
 
     def test_retrieval_by_company_200_2_filters(self):
         payload = {
@@ -64,7 +69,10 @@ class TestVulnerabilityRetrievalComponent:
         
         assert parsed["statusCode"] == 200
         body = json.loads(parsed["body"])
-        assert isinstance(body, list)
+        assert isinstance(body, dict)
+        assert body["company"] == "Google"
+        assert isinstance(body["vulnerabilities"], list)
+        assert len(body["vulnerabilities"]) > 0
 
     def test_invalid_cvss_returns_400(self):
         payload = {
@@ -99,12 +107,12 @@ class TestVulnerabilityRetrievalIntegration:
         # Testing the actual public endpoint
         endpoint = f"{URL}/v1/companies/Google/vulnerabilities"
         response = requests.get(endpoint, params={"min_cvss": "5.0"}, timeout=30)
-        
         assert response.status_code == 200
         assert "application/json" in response.headers.get("Content-Type", "")
         
         data = response.json()
-        assert isinstance(data, list)
+        assert isinstance(data, dict)
+        assert "vulnerabilities" in data
         
     def test_404_on_missing_route(self):
         # Testing a route that shouldn't exist
