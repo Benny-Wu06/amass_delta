@@ -51,7 +51,10 @@ resource "aws_lambda_function" "company_vulnerabilities" {
   filename         = data.archive_file.db_lambda_zip.output_path
   source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
   timeout = 300
-  layers  = ["arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21"]
+  layers  = [
+    "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1",
+    ]
 
   # Networking: Must match your RDS VPC
   vpc_config {
