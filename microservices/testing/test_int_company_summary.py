@@ -70,7 +70,6 @@ def conn_db():
             connect_timeout=5,
             sslrootcert=cert_path,
     )
-    print('\nconnection succesful')
     yield conn
     conn.close()
             
@@ -89,13 +88,11 @@ def seed_whitespace_company(conn_db):
     ))
 
     conn_db.commit()
-    print('seeded whitespace company successfully')
     yield
     
     delete_company_query = "DELETE FROM companies WHERE company_name = %s;"
     cur.execute(delete_company_query, (WHITESPACE_NAME,))
     conn_db.commit()
-    print('deleted whitespace company successfully')
 
 
 # seed db, this sets up and tears down the vulnerability for every test

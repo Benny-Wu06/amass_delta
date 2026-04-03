@@ -45,7 +45,6 @@ def conn_db():
     DB_HOST = os.environ.get("STAGING_DB_HOST")
     cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
     print('\nDB_PASSWORD', DB_PASSWORD)
-
     print('\ndb_host', DB_HOST)
     conn = psycopg2.connect(
             host=DB_HOST,
