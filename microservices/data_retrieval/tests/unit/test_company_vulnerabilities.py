@@ -29,15 +29,27 @@ def test_get_vulnerabilities_success(mock_connect):
     
     mock_connect.return_value = mock_conn
     mock_conn.cursor.return_value = mock_cur
-
+    
     event = {"pathParameters": {"company_name": "Google"}}
     response = lambda_handler(event, None)
 
     assert response["statusCode"] == 200
     body = json.loads(response["body"])
-    assert len(body) == 1
-    assert body[0]["cve_id"] == "CVE-2026-1111"
-    assert body[0]["cvss_score"] == "9.8"
+
+    # Verify structure
+    assert body["company"] == "Google"
+    assert body["cve_count"] == 1
+    assert "timestamp" in body["time"]
+    assert body["time"]["timezone"] == "UTC"
+
+    #  Verify Vulnerability Content 
+    assert isinstance(body["vulnerabilities"], list)
+    assert len(body["vulnerabilities"]) == 1
+    
+    vuln = body["vulnerabilities"][0]
+    assert vuln["cve_id"] == "CVE-2026-1111"
+    assert vuln["cvss_score"] == "9.8"
+    assert vuln["cvss_severity"] == "CRITICAL"
 
 def test_missing_company_name():
     ## CASE 2: Error - No company name in URL ##
@@ -107,8 +119,12 @@ def test_filter_logic_applied(mock_connect):
     assert "AND v.epss_score >=" in sql_query
     assert response["statusCode"] == 200
     
+    # Verify body 
     body = json.loads(response["body"])
-    assert body[0]["vulnerability_name"] == "Data breach"
+    assert body["company"] == "Google"
+    assert body["cve_count"] == 1
+    assert body["vulnerabilities"][0]["vulnerability_name"] == "Data breach"
+    assert "time" in body
 
 @patch("psycopg2.connect")
 def test_only_one_filter_applied(mock_connect):
@@ -131,4 +147,10 @@ def test_only_one_filter_applied(mock_connect):
     assert "cvss_score >=" in sql_query
     assert "AND v.epss_score" not in sql_query 
     assert response["statusCode"] == 200
-    assert "CVE-2026-8888" in response["body"]
+
+    # Verify body
+    body = json.loads(response["body"])
+    assert body["cve_count"] == 1
+    # Specific check for the ID inside the list
+    assert body["vulnerabilities"][0]["cve_id"] == "CVE-2026-8888"
+    assert body["company"] == "Google"
