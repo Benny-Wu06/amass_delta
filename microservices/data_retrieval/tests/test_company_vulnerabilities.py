@@ -108,7 +108,7 @@ def test_filter_logic_applied(mock_connect):
     assert response["statusCode"] == 200
     
     body = json.loads(response["body"])
-    ssert body["vulnerabilities"][0]["vulnerability_name"] == "Data breach"
+    assert body["vulnerabilities"][0]["vulnerability_name"] == "Data breach"
 
 @patch("psycopg2.connect")
 def test_only_one_filter_applied(mock_connect):
