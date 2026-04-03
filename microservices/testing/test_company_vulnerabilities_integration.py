@@ -104,7 +104,6 @@ class TestVulnerabilityRetrievalIntegration:
     ## Tests the End-to-End flow via API Gateway ## 
 
     def test_get_request_success(self):
-        # Testing the actual public endpoint
         endpoint = f"{URL}/v1/companies/Google/vulnerabilities"
         response = requests.get(endpoint, params={"min_cvss": "5.0"}, timeout=30)
         assert response.status_code == 200
@@ -113,6 +112,27 @@ class TestVulnerabilityRetrievalIntegration:
         data = response.json()
         assert isinstance(data, dict)
         assert "vulnerabilities" in data
+
+    def test_get_request_success_no_filter(self):
+        endpoint = f"{URL}/v1/companies/Google/vulnerabilities"
+        response = requests.get(endpoint, timeout=30)
+        assert response.status_code == 200
+        assert "application/json" in response.headers.get("Content-Type", "")
+        
+        data = response.json()
+        assert isinstance(data, dict)
+        assert "vulnerabilities" in data
+
+    def test_get_request_success_2_filters(self):
+        endpoint = f"{URL}/v1/companies/Google/vulnerabilities"
+        response = requests.get(endpoint, params={"min_cvss": "5.0", "min_epss": "0.5"}, timeout=30)
+        assert response.status_code == 200
+        assert "application/json" in response.headers.get("Content-Type", "")
+        
+        data = response.json()
+        assert isinstance(data, dict)
+        assert "vulnerabilities" in data
+
         
     def test_404_on_missing_route(self):
         # Testing a route that shouldn't exist
