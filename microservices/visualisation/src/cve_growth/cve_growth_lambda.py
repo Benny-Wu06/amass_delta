@@ -83,6 +83,7 @@ DEFAULT_DAYS = 30
 
 
 def cve_growth_lambda(event, context):
+    conn = None
     try:
         conn = get_db_connection()
 
@@ -93,19 +94,23 @@ def cve_growth_lambda(event, context):
             query_params = event.get("queryStringParameters") or {}
             days = int(query_params.get("days", DEFAULT_DAYS))
 
-            # error check
+            # error check for days
             if days <= 0:
                 logger.error("Error Days has to be greater than zero")
                 return {
                     "statusCode": 400,
+                    "headers": {"Content-Type": "application/json"},
                     "body": json.dumps({"error": "Days has to be greater than zero"}),
                 }
-
-            if not company_name:
+            
+            # check if company exists
+            company_id = fetch_company_id(db_cursor, company_name)
+            if (company_name is None) or (company_id is None):
                 logger.error("Error Company name is required in the URL")
                 return {
                     "statusCode": 404,
-                    "body": json.dumps({"error": f"Company {company_name} not found"}),
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"error": f"Company '{company_name}' not found"})
                 }
 
             # process
@@ -118,6 +123,7 @@ def cve_growth_lambda(event, context):
             logger.info(f"Success retrieved CVE growth data for company: {company_name} over the past {days}")
             return {
                 "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
                 "body": json.dumps(
                     {
                         "company_name": company_name,
