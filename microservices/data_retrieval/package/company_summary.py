@@ -46,6 +46,7 @@ def get_company_summary(target_company: str):
 
         # handle whitespace
         target_company = target_company.replace("+", " ")
+        target_company = target_company.replace("%20", " ")
 
         # get aggregated company info - may need to change later to dynamically derive info
         query = """
@@ -64,9 +65,9 @@ def get_company_summary(target_company: str):
 
         cur.execute(query, (target_company,))
         row = cur.fetchone()
+
         # company not found
         if not row:
-            logger.error("Error Company not found: %s", target_company)
             return {
                 "statusCode": 404,
                 "body": json.dumps({"error": "Company not found"})
@@ -76,11 +77,11 @@ def get_company_summary(target_company: str):
         company, cve_count, avg_cvss, avg_epss, risk_index, risk_rating = row
         
         if not avg_epss:
-            avg_epss = -1
+            avg_epss = 0
         if not avg_cvss:
-            avg_cvss = -1
+            avg_cvss = 0
         if not risk_index:
-            risk_index = -1
+            risk_index = 0
 
         avg_epss = float(avg_epss)
         avg_cvss = float(avg_cvss)
@@ -104,15 +105,14 @@ def get_company_summary(target_company: str):
             }
         )
         cur.close()
-
         logger.info("Success retrieved summary for company: %s", target_company)
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},
             "body": result,
         }
-    except Exception as e:
-        logger.error("Error Database error in company_summary: %s", str(e))
+    except Exception:
+        logger.error("Error: Company not found for ID: %s", target_company)
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
