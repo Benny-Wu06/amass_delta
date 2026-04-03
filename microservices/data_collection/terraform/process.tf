@@ -12,7 +12,10 @@ resource "aws_lambda_function" "data_processor" {
   timeout          = 300
   filename         = data.archive_file.processor_zip.output_path
   source_code_hash = data.archive_file.processor_zip.output_base64sha256
-  layers = ["arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1"]
+  layers = [
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1",
+    "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
+  ]
 
   vpc_config {
     subnet_ids         = var.subnet_ids
@@ -78,6 +81,16 @@ resource "aws_iam_role_policy" "processor_policy" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "processor_basic_execution" {
+  role       = aws_iam_role.processor_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "processor_insights" {
+  role       = aws_iam_role.processor_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+}
+
 output "lambda_sg_id" {
   value = aws_security_group.lambda_processor_sg.id
 }
@@ -88,17 +101,4 @@ resource "aws_lambda_permission" "allow_s3_processor" {
   function_name = aws_lambda_function.data_processor.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = var.raw_bucket_arn
-}
-
-resource "aws_s3_bucket_notification" "processor_notification" {
-  bucket = var.raw_bucket_id
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.data_processor.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "enriched/"
-    filter_suffix       = ".json"
-  }
-
-  depends_on = [aws_lambda_permission.allow_s3_processor]
 }

@@ -34,6 +34,11 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
+resource "aws_iam_role_policy_attachment" "company_vulnerabilities_insights" {
+  role       = aws_iam_role.company_vulnerabilities_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+}
+
 
 #
 # The Lambda Function
@@ -45,7 +50,8 @@ resource "aws_lambda_function" "company_vulnerabilities" {
   runtime          = "python3.12"
   filename         = data.archive_file.db_lambda_zip.output_path
   source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
-  timeout          = 300
+  timeout = 300
+  layers  = ["arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21"]
 
   # Networking: Must match your RDS VPC
   vpc_config {
