@@ -58,7 +58,7 @@ def lambda_client():
 def conn_db():
     conn = None
     DB_PASSWORD = os.environ.get("DB_PASSWORD")
-    DB_HOST = os.environ.get("DB_HOST")
+    DB_HOST = os.environ.get("DIDDYBLUD_HOST")
     cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
     print('\nDB_PASSWORD', DB_PASSWORD)
 
