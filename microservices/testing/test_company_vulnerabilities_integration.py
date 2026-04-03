@@ -15,6 +15,7 @@ lambda_client = boto3.client(
     config=Config(read_timeout=30, connect_timeout=10),
 )
 
+
 class TestVulnerabilityRetrievalComponent:
     ##  Tests the Lambda directly via Boto3 (Bypasses API Gateway) ## 
     
@@ -101,27 +102,63 @@ class TestVulnerabilityRetrievalComponent:
         assert "min_epss must be 0-1" in parsed["body"]
 
 class TestVulnerabilityRetrievalIntegration:
-    ## Tests the End-to-End flow via API Gateway ## 
-
-    def test_get_request_success(self):
-        endpoint = f"{URL}/v1/companies/Google/vulnerabilities"
-        response = requests.get(endpoint, params={"min_cvss": "5.0"}, timeout=30)
-        assert response.status_code == 200
-        assert "application/json" in response.headers.get("Content-Type", "")
+    def _assert_full_schema(self, vuln):
+        ## Helper to validate the complete schema and types for a single vulnerability ##
+        expected_keys = [
+            "cve_id", "name", "description", "dateAdded", 
+            "dueDate", "cvss", "epss", "risk_index", 
+            "risk_rating", "time"
+        ]
+        # Key Existence Check
+        for key in expected_keys:
+            assert key in vuln, f"Contract Failure: Missing key '{key}'"
         
-        data = response.json()
-        assert isinstance(data, dict)
-        assert "vulnerabilities" in data
+        # Strict Type Validation
+        assert isinstance(vuln["cve_id"], str)
+        assert isinstance(vuln["name"], str)
+        assert isinstance(vuln["cvss"], (int, float))
+        assert isinstance(vuln["epss"], (int, float))
+        assert isinstance(vuln["risk_index"], (int, float))
+        assert isinstance(vuln["risk_rating"], str)
+        
+        # Nested Object Validation
+        assert "timestamp" in vuln["time"]
+        assert vuln["time"]["timezone"] == "UTC"
 
+    ## Tests the End-to-End flow via API Gateway ## 
     def test_get_request_success_no_filter(self):
         endpoint = f"{URL}/v1/companies/Google/vulnerabilities"
         response = requests.get(endpoint, timeout=30)
         assert response.status_code == 200
-        assert "application/json" in response.headers.get("Content-Type", "")
+
+        data = response.json()
+
+        # verify structure
+        assert data["company"] == "Google"
+        assert isinstance(data["cve_count"], int)
+        assert "timezone" in data["time"]
+
+        # Full Schema & Type Validation 
+        if data["cve_count"] > 0:
+            for vuln in data["vulnerabilities"]:
+                self._assert_full_schema(vuln)
+
+    def test_get_request_success_1_filter(self):
+        endpoint = f"{URL}/v1/companies/Google/vulnerabilities"
+        response = requests.get(endpoint, params={"min_cvss": "5.0"}, timeout=30)
+        assert response.status_code == 200
         
         data = response.json()
-        assert isinstance(data, dict)
-        assert "vulnerabilities" in data
+
+        assert data["cve_count"] == len(data["vulnerabilities"])
+
+        if data["cve_count"] > 0:
+            for vuln in data["vulnerabilities"]:
+                
+                assert float(vuln["cvss"]) >= 5.0
+                # Full Schema Check
+                self._assert_full_schema(vuln)
+    
 
     def test_get_request_success_2_filters(self):
         endpoint = f"{URL}/v1/companies/Google/vulnerabilities"
@@ -130,9 +167,14 @@ class TestVulnerabilityRetrievalIntegration:
         assert "application/json" in response.headers.get("Content-Type", "")
         
         data = response.json()
-        assert isinstance(data, dict)
-        assert "vulnerabilities" in data
-
+        
+        if data["cve_count"] > 0:
+            for vuln in data["vulnerabilities"]:
+                
+                assert float(vuln["cvss"]) >= 7.0
+                assert float(vuln["epss"]) >= 0.1
+                # Full Schema Check
+                self._assert_full_schema(vuln)
         
     def test_404_on_missing_route(self):
         # Testing a route that shouldn't exist

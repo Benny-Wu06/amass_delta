@@ -114,11 +114,23 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         columns = [desc[0] for desc in cur.description]
         results = []
         for row in cur.fetchall():
-            row_dict = dict(zip(columns, row))
-            for key, value in row_dict.items():
-                if isinstance(value, (Decimal, datetime.date, datetime.datetime)):
-                    row_dict[key] = str(value)
-            results.append(row_dict)
+            now_aware = datetime.datetime.now(datetime.timezone.utc)
+            vuln_item = {
+                "cve_id": row[0],
+                "name": row[2],
+                "description": row[3],
+                "dateAdded": str(row[4]) if row[4] else None,
+                "dueDate": str(row[5]) if row[5] else None,
+                "cvss": float(row[6]) if row[6] is not None else 0.0,
+                "epss": float(row[7]) if row[7] is not None else 0.0,
+                "risk_index": float(row[8]) if row[8] is not None else 0.0,
+                "risk_rating": row[9],
+                "time": {
+                    "timestamp": now_aware.isoformat().replace("+00:00", "Z"),
+                    "timezone": str(now_aware.tzinfo) 
+                }
+            }
+            results.append(vuln_item)
 
         cur.close()
         response_data = {
