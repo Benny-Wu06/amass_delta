@@ -120,8 +120,8 @@ def seed_db(conn_db):
     delete_query = "DELETE FROM vulnerabilities WHERE cve_id = %s;"
     cur.execute(delete_query, (NULL_CVE_ID,))
 
-    delete_company_query = "DELETE FROM companies WHERE id = %s;"
-    cur.execute(delete_company_query, (COMPANY_ID,))
+    delete_company_query = "DELETE FROM companies WHERE company_name = %s;"
+    cur.execute(delete_company_query, (COMPANY_NAME,))
 
     conn_db.commit()
     print('teardown successful')
