@@ -35,8 +35,8 @@ def test_get_vulnerabilities_success(mock_connect):
 
     assert response["statusCode"] == 200
     body = json.loads(response["body"])
-    assert len(body) == 1
-    assert body[0]["cve_id"] == "CVE-2026-1111"
+    assert len(body["vulnerabilities"]) == 1 
+    assert body["vulnerabilities"][0]["cve_id"] == "CVE-2026-1111"
     assert body[0]["cvss_score"] == "9.8"
 
 def test_missing_company_name():
@@ -108,7 +108,7 @@ def test_filter_logic_applied(mock_connect):
     assert response["statusCode"] == 200
     
     body = json.loads(response["body"])
-    assert body[0]["vulnerability_name"] == "Data breach"
+    ssert body["vulnerabilities"][0]["vulnerability_name"] == "Data breach"
 
 @patch("psycopg2.connect")
 def test_only_one_filter_applied(mock_connect):

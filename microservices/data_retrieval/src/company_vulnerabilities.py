@@ -126,7 +126,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             "cve_count": len(results),
             "vulnerabilities": results,
             "time": {
-                "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+                "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
                 "timezone": "UTC"
             }
         }
