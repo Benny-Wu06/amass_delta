@@ -25,14 +25,23 @@ VULNS_2 = [
 # FIXTRURES
 @pytest.fixture(scope="module")
 def conn_db():
+    conn = None
+    DB_PASSWORD = os.environ.get("STAGING_DB_PASSWORD")
+    DB_HOST = os.environ.get("STAGING_DB_HOST")
+    cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
+    print('\nDB_PASSWORD', DB_PASSWORD)
+    print('\ndb_host', DB_HOST)
     conn = psycopg2.connect(
-        host=os.environ.get("DB_HOST"),
-        password=os.environ.get("DB_PASSWORD"),
-        database=os.environ.get("DB_NAME", "postgres"),
-        user=os.environ.get("DB_USER", "postgres"),
-        sslmode="prefer",
-        sslrootcert=os.environ.get("CERT_PATH", "global-bundle.pem")
+            host=DB_HOST,
+            port=5432,
+            database=os.environ.get("DB_NAME", "postgres"),
+            user=os.environ.get("DB_USER", "postgres"),
+            password=DB_PASSWORD,
+            sslmode="prefer",
+            connect_timeout=5,
+            sslrootcert=cert_path,
     )
+    print('\nconnection succesful')
     yield conn
     conn.close()
 
