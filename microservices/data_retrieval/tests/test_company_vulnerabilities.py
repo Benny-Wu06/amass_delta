@@ -37,7 +37,7 @@ def test_get_vulnerabilities_success(mock_connect):
     body = json.loads(response["body"])
     assert len(body["vulnerabilities"]) == 1 
     assert body["vulnerabilities"][0]["cve_id"] == "CVE-2026-1111"
-    assert body[0]["cvss_score"] == "9.8"
+    assert body["vulnerabilities"][0]["cvss_score"] == "9.8"
 
 def test_missing_company_name():
     ## CASE 2: Error - No company name in URL ##
