@@ -2,6 +2,8 @@ import json
 import psycopg2
 import os
 from datetime import datetime, timedelta
+import logging
+
 
 # --- DB CONFIGURATION CONSTANTS ---
 DB_HOST = os.environ.get("DB_HOST")
@@ -13,6 +15,8 @@ DB_SSL_MODE = "prefer"
 DB_SSL_ROOT_CERT = "/certs/global-bundle.pem"
 DB_TIMEOUT = 3
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def get_db_connection():
     return psycopg2.connect(
@@ -92,6 +96,7 @@ def cve_growth_lambda(event, context):
 
             # error check for days
             if days <= 0:
+                logger.error("Error Days has to be greater than zero")
                 return {
                     "statusCode": 400,
                     "headers": {"Content-Type": "application/json"},
@@ -101,6 +106,7 @@ def cve_growth_lambda(event, context):
             # check if company exists
             company_id = fetch_company_id(db_cursor, company_name)
             if (company_name is None) or (company_id is None):
+                logger.error("Error Company name is required in the URL")
                 return {
                     "statusCode": 404,
                     "headers": {"Content-Type": "application/json"},
@@ -114,6 +120,7 @@ def cve_growth_lambda(event, context):
                 raw_vuls, days
             )
 
+            logger.info(f"Success retrieved CVE growth data for company: {company_name} over the past {days}")
             return {
                 "statusCode": 200,
                 "headers": {"Content-Type": "application/json"},
@@ -129,7 +136,7 @@ def cve_growth_lambda(event, context):
                 ),
             }
     except Exception as e:
-        print(f"Error: {str(e)}")
+        logger.error(f"Error: {str(e)}")
         return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
     finally:
         if conn:

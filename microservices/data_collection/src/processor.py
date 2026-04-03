@@ -1,7 +1,11 @@
 import json
+import logging
 import os
 import boto3
 import psycopg2
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # Variables definitions
 
@@ -218,14 +222,14 @@ def update_all_company_stats(cur):
             ),
         )
 
-    print(f"Updated stats for {len(company_ids)} companies")
+    logger.info("Updated stats for %d companies", len(company_ids))
 
 
 # lambda fucntion
 
 
 def lambda_handler(event, context):
-    print("Starting processor...")
+    logger.info("Starting processor")
 
     conn = get_db_connection()
     cur = conn.cursor()
@@ -234,7 +238,7 @@ def lambda_handler(event, context):
     conn.commit()
 
     vulnerabilities = get_cisa_data()
-    print(f"Found {len(vulnerabilities)} vulnerabilities to process")
+    logger.info("Found %d vulnerabilities to process", len(vulnerabilities))
 
     inserted = 0
 
@@ -246,12 +250,12 @@ def lambda_handler(event, context):
             inserted += 1
 
         conn.commit()
-        print(f"Inserted {inserted} vulnerabilities")
+        logger.info("Inserted %d vulnerabilities", inserted)
 
-        print("Updating company stats...")
+        logger.info("Updating company stats")
         update_all_company_stats(cur)
         conn.commit()
-        print("Company stats updated!")
+        logger.info("Success Company stats updated")
 
         return {
             "statusCode": 200,
@@ -260,7 +264,7 @@ def lambda_handler(event, context):
 
     except Exception as e:
         conn.rollback()
-        print(f"Error: {e}")
+        logger.error("Processor failed: %s", str(e))
         raise
 
     finally:

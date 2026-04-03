@@ -1,5 +1,3 @@
-import pytest
-import pytest_mock
 from microservices.data_retrieval.src.company_summary import lambda_handler as company_summary 
 import json
 
