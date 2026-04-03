@@ -5,6 +5,7 @@ pytest-cov==4.1.0
 moto[s3,lambda]==5.0.1
 flake8==7.0.0
 boto3-stubs[s3]
+types-requests==2.31.0.20240125
 mypy==1.8.0
 botocore==1.42.64
 jmespath==1.1.0
