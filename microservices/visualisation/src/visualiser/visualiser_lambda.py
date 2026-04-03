@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import io
+import logging
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 # Custom styling
 sns.set_theme(style="darkgrid")
 plt.rcParams.update(
@@ -106,6 +109,7 @@ def visualiser_lambda(event, context):
 
         b64_image = base64.b64encode(binary_data).decode("utf-8")
 
+        logger.info(f"Success generated visualisation for company: {data.get('company_name', 'Company')}")
         return {
             "isBase64Encoded": True,
             "statusCode": 200,
@@ -114,6 +118,7 @@ def visualiser_lambda(event, context):
         }
 
     except ValueError as e:
+        logger.error(f"Error: {str(e)}")
         return {
             "statusCode": 400,
             "headers": {"Content-Type": "application/json"},
@@ -121,6 +126,7 @@ def visualiser_lambda(event, context):
         }
 
     except Exception as e:
+        logger.error(f"Error: {str(e)}")
         return {
             "statusCode": 400,
             "headers": {"Content-Type": "application/json"},

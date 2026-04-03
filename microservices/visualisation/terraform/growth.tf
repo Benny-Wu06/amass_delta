@@ -52,6 +52,11 @@ resource "aws_iam_role_policy_attachment" "vpc_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
+resource "aws_iam_role_policy_attachment" "visualisation_insights" {
+  role       = aws_iam_role.visualisation_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+}
+
 output "lambda_sg_id" {
   value = aws_security_group.visualisation_sg.id
 }
@@ -63,7 +68,10 @@ resource "aws_lambda_function" "visualisation_lambda" {
   handler       = "cve_growth_lambda.cve_growth_lambda"
   runtime       = "python3.12"
   timeout       = 15
-  layers = ["arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1"]
+  layers = [
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1",
+    "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
+  ]
 
   source_code_hash = data.archive_file.growth_zip.output_base64sha256
 

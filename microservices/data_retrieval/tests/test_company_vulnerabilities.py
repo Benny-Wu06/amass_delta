@@ -1,7 +1,6 @@
 import sys
 import os
 import json
-import pytest
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 

@@ -1,8 +1,12 @@
 import json
+import logging
 import urllib.request
 import boto3
 import os
 import gzip
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 s3 = boto3.client("s3")
 
@@ -14,6 +18,7 @@ def enrichment(event, context):
     epss = {}
     chunk = 80
     bucket_name = os.environ["BUCKET_NAME"]
+    logger.info("Starting enrichment, bucket=%s", bucket_name)
     nvd_data = [
         "reference/nvdcve-2.0-2026.json.gz",
         "reference/nvdcve-2.0-2025.json.gz",
@@ -82,7 +87,7 @@ def enrichment(event, context):
                 for entry in api_data.get("data", []):
                     epss[entry["cve"]] = entry.get("epss", "N/A")
         except Exception as e:
-            print(f"Error Getting EPSS: {e}")
+            logger.error("Error fetching EPSS for batch: %s", str(e))
 
     for cve in data.get("vulnerabilities", []):
         cve["cvss_score"] = nvd_data_cache.get(cve["cveID"], "Awaiting Analysis")
@@ -94,6 +99,7 @@ def enrichment(event, context):
         Body=json.dumps(data, indent=4),
         ContentType="application/json",
     )
+    logger.info("Success Enrichment complete, %d CVEs written to %s", len(cve_list), dest_key)
     return {
         "statusCode": 200,
         "body": json.dumps(f"Successfully enriched and saved to {dest_key}"),

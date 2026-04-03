@@ -1,9 +1,13 @@
 import datetime
+import logging
 from decimal import Decimal
 
 import psycopg2
 import os
 import json
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 conn = None
 
@@ -117,7 +121,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             "body": json.dumps(results),
         }
     except Exception as e:
-        print(f"Database error: {e}")
+        logger.error("Database error in company_vulnerabilities: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
