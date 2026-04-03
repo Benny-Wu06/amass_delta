@@ -146,6 +146,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: 'ap-southeast-2'
+      DB_HOST: 'amass-db.cfkgegkgec82.ap-southeast-2.rds.amazonaws.com'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
