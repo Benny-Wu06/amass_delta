@@ -16,9 +16,13 @@ conn = None
 # i.e getting ALL of a company's vulnerabilities by their name
 def lambda_handler(event, context):
 
-    path_params = event.get("pathParameters") or {}
-    query_params = event.get("queryStringParameters") or {}
+    path_params = event.get("pathParameters")
+    if path_params is None: path_params = {}
+    
+    query_params = event.get("queryStringParameters")
+    if query_params is None: query_params = {}
     target_company = path_params.get("company_name")
+    
 
     min_cvss = query_params.get("min_cvss")
     min_epss = query_params.get("min_epss")
@@ -26,12 +30,15 @@ def lambda_handler(event, context):
     validated_epss = None
 
     if not target_company:
-        logger.error("Error Company name is required in the URL")
         return {
             "statusCode": 400,
-            "body": json.dumps({"error": "Company name is required in the URL"}),
+            "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
+            "body": json.dumps({"error": "Company name is required in the URL", "received_params": path_params}),
         }
     
+    # handle whitespace
+    target_company = target_company.replace("+", " ").replace("%20", " ")
+
     # Validate Min_cvss and Min_epss
     if min_cvss is not None:
         try:
@@ -39,10 +46,8 @@ def lambda_handler(event, context):
             if 0 <= val <= 10:
                 validated_cvss = val
             else:
-                logger.error("Error min_cvss must be a number between 0 and 10")
                 return {"statusCode": 400, "body": json.dumps({"error": "min_cvss must be 0-10"})}
         except ValueError:
-            logger.error("Error min_cvss must be a number between 0 and 10")
             return {"statusCode": 400, "body": json.dumps({"error": "min_cvss must be 0-10"})}
 
 
@@ -52,18 +57,16 @@ def lambda_handler(event, context):
             if 0 <= val <= 1:
                 validated_epss = val
             else:
-                logger.error("Error min_epss must be a number between 0 and 1")
                 return {"statusCode": 400, "body": json.dumps({"error": "min_epss must be 0-1"})}
         except ValueError:
-            logger.error("Error min_epss must be a number between 0 and 1")
             return {"statusCode": 400, "body": json.dumps({"error": "min_epss must be 0-1"})}
 
     return get_company_vulnerabiltiies(target_company, validated_cvss, validated_epss)
 
 
 def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
+    conn = None
     try:
-        conn = None
         DB_PASSWORD = os.environ.get("DB_PASSWORD")
         DB_HOST = os.environ.get("DB_HOST")
         cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
@@ -84,11 +87,15 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         query = """
             SELECT 
                 v.cve_id, 
-                c.company_id, 
-                v.vulnerability_name, 
-                v.cvss_score, 
-                v.cvss_severity,
-                v.epss_score
+                c.id, 
+                v.vulnerability_name,
+                v.description,
+                v.date_added,
+                v.due_date,
+                v.cvss_score,
+                v.epss_score, 
+                c.risk_index,
+                c.risk_rating
             FROM vulnerabilities v
             JOIN companies c ON v.company_id = c.id
             WHERE c.company_name = %s
@@ -111,27 +118,56 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
         columns = [desc[0] for desc in cur.description]
         results = []
         for row in cur.fetchall():
-            row_dict = dict(zip(columns, row))
-            for key, value in row_dict.items():
-                # Check if the value is a Decimal or a Date
-                if isinstance(value, (Decimal, datetime.date)):
-                    row_dict[key] = str(value)
-            results.append(row_dict)
+            now_aware = datetime.datetime.now(datetime.timezone.utc)
+            vuln_item = {
+                "cve_id": row[0],
+                "name": row[2],
+                "description": row[3],
+                "dateAdded": str(row[4]) if row[4] else None,
+                "dueDate": str(row[5]) if row[5] else None,
+                "cvss": float(row[6]) if row[6] is not None else 0.0,
+                "epss": float(row[7]) if row[7] is not None else 0.0,
+                "risk_index": float(row[8]) if row[8] is not None else 0.0,
+                "risk_rating": row[9],
+                "time": {
+                    "timestamp": now_aware.isoformat().replace("+00:00", "Z"),
+                    "timezone": str(now_aware.tzinfo) 
+                }
+            }
+            results.append(vuln_item)
 
         cur.close()
-
-        logger.info("Success retrieved vulnerabilities for company: %s with filters min_cvss: %s, min_epss: %s", target_company, min_cvss, min_epss)
+        response_data = {
+            "company": target_company,
+            "cve_count": len(results),
+            "vulnerabilities": results,
+            "time": {
+                "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+                "timezone": "UTC"
+            }
+        }
         return {
             "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(results),
+            "headers": {"Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps(response_data),
         }
     except Exception as e:
-        logger.error("Error Database error in company_vulnerabilities: %s", str(e))
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Full Error: {error_details}")
+        logger.error("Database error in company_vulnerabilities: %s", str(e))
         return {
             "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Failed to retrieve data"}),
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*" 
+            },
+            "body": json.dumps({
+                "error": "Internal Server Error",
+                "message": "An unexpected error occurred while retrieving vulnerability data."
+            }),
         }
     finally:
         if conn:
