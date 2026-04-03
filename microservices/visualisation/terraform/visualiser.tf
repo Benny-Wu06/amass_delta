@@ -15,8 +15,8 @@ resource "aws_lambda_function" "visualiser_lambda" {
   memory_size = 1000 
 
   layers = [
-    "arn:aws:lambda:ap-southeast-2:455322614983:layer:visualiser:1"
-
+    "arn:aws:lambda:ap-southeast-2:455322614983:layer:visualiser:1",
+    "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
   ]
 
   source_code_hash = data.archive_file.visualiser_zip.output_base64sha256

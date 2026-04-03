@@ -16,6 +16,11 @@ resource "aws_iam_role_policy_attachment" "company_summary_vpc_access" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
+resource "aws_iam_role_policy_attachment" "company_summary_insights" {
+  role       = aws_iam_role.company_summary_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+}
+
 resource "aws_lambda_function" "company_summary" {
   function_name    = "company_summary_lambda"
   role             = aws_iam_role.company_summary_role.arn
@@ -23,8 +28,11 @@ resource "aws_lambda_function" "company_summary" {
   runtime          = "python3.12"
   filename         = data.archive_file.db_lambda_zip.output_path
   source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
-  layers = ["arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1"]
-  timeout          = 300
+  layers = [
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1",
+    "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
+  ]
+  timeout = 300
 
 
   # Networking: Must match your RDS VPC

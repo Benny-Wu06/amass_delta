@@ -11,7 +11,10 @@ resource "aws_lambda_function" "heatmap_lambda" {
   handler       = "heatmap_lambda.heatmap_lambda"
   runtime       = "python3.12"
   timeout       = 15
-  layers = ["arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1"]
+  layers = [
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1",
+    "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
+  ]
 
   source_code_hash = data.archive_file.heatmap_zip.output_base64sha256
 

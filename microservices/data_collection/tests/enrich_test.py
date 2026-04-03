@@ -5,7 +5,6 @@ import os
 import pytest
 import boto3
 from moto import mock_aws
-import urllib.request
 from unittest.mock import patch, MagicMock
 from microservices.data_collection.src.enrich import enrichment
 
