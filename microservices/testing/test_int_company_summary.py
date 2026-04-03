@@ -57,14 +57,9 @@ def lambda_client():
 @pytest.fixture(scope="module")
 def conn_db():
     conn = None
-    DB_PASSWORD = os.environ.get("DB_PASSWORD")
-    DB_HOST = os.environ.get("DIDDYBLUD_HOST")
+    DB_PASSWORD = os.environ.get("STAGING_DB_PASSWORD")
+    DB_HOST = os.environ.get("STAGING_DB_HOST")
     cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
-    print('\nDB_PASSWORD', DB_PASSWORD)
-
-    print('\n#######################')
-    print('\ndb_host', DB_HOST)
-    print('\n#######################')
     conn = psycopg2.connect(
             host=DB_HOST,
             port=5432,
