@@ -1,7 +1,7 @@
 import pytest
 import requests
 
-BASE_URL = "https://blj7h0zmba.execute-api.ap-southeast-2.amazonaws.com"
+BASE_URL = "https://7mz3fi8zw1.execute-api.ap-southeast-2.amazonaws.com"
 
 # MOCK INPUT (Retrieved from other routes by the user)
 GROWTH_INPUT = {

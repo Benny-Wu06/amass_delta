@@ -3,7 +3,7 @@ import pytest
 import requests
 import psycopg2
 
-BASE_URL = "https://blj7h0zmba.execute-api.ap-southeast-2.amazonaws.com"
+BASE_URL = "https://7mz3fi8zw1.execute-api.ap-southeast-2.amazonaws.com"
 
 # SEED DATA
 COMPANY_NAME_1 = "TestCorp1"
