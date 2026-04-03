@@ -150,9 +150,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             "body": json.dumps(response_data),
         }
     except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        print(f"Full Error: {error_details}")
+        print(f"Error retrieving vulnerabilities: {str(e)}")
         return {
             "statusCode": 500,
             "headers": {
@@ -160,9 +158,8 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
                 "Access-Control-Allow-Origin": "*" 
             },
             "body": json.dumps({
-                "error": "Failed to retrieve data",
-                "details": str(e),
-                "trace": error_details 
+                "error": "Internal Server Error",
+                "message": "An unexpected error occurred while retrieving vulnerability data."
             }),
         }
     finally:

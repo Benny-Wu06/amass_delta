@@ -98,7 +98,7 @@ def test_database_connection_error(mock_connect):
     response = lambda_handler(event, None)
 
     assert response["statusCode"] == 500
-    assert "Failed to retrieve data" in response["body"]
+    assert "Internal Server Error" in response["body"]
 
 @patch("psycopg2.connect")
 def test_filter_logic_applied(mock_connect):
