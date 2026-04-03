@@ -217,8 +217,8 @@ def test_null_cvss_epss(lambda_client):
     assert response_payload["statusCode"] == 200
     
     # check that null cvss and epss are handled correctly
-    assert body["cvss"] == -1.0
-    assert body["epss"] == -1.0
+    assert body["cvss"] == 0
+    assert body["epss"] == 0
     assert body["risk_index"] == 0
     assert body["risk_rating"] == "UNKNOWN"
 
