@@ -16,12 +16,14 @@ resource "aws_subnet" "subnet_a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "ap-southeast-2a"
+  map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "subnet_b" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.2.0/24"
   availability_zone = "ap-southeast-2b"
+  map_public_ip_on_launch = true
 }
 
 resource "aws_db_subnet_group" "main" {
@@ -73,6 +75,14 @@ resource "aws_security_group" "rds_sg" {
     to_port     = 5432
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  # allows for public access from any kind of traffic
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
