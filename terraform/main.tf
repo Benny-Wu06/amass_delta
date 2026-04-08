@@ -13,16 +13,16 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "subnet_a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "ap-southeast-2a"
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "ap-southeast-2a"
   map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "subnet_b" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "ap-southeast-2b"
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "ap-southeast-2b"
   map_public_ip_on_launch = true
 }
 
@@ -34,7 +34,7 @@ resource "aws_db_subnet_group" "main" {
 # internet gateway for accessing db
 resource "aws_internet_gateway" "amass_igw" {
   vpc_id = aws_vpc.main.id
-  tags = { Name = "amass-igw"}
+  tags   = { Name = "amass-igw" }
 }
 
 # route table for accessing db
@@ -46,7 +46,7 @@ resource "aws_route_table" "public_rt" {
     gateway_id = aws_internet_gateway.amass_igw.id
   }
 
-  tags = { Name = "amass-public-rt"}
+  tags = { Name = "amass-public-rt" }
 }
 
 resource "aws_route_table_association" "public_a" {
