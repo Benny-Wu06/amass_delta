@@ -29,6 +29,34 @@ resource "aws_db_subnet_group" "main" {
   subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
 }
 
+# internet gateway for accessing db
+resource "aws_internet_gateway" "amass_igw" {
+  vpc_id = aws_vpc.main.id
+  tags = { Name = "amass-igw"}
+}
+
+# route table for accessing db
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0" #public
+    gateway_id = aws_internet_gateway.amass_igw.id
+  }
+
+  tags = { Name = "amass-public-rt"}
+}
+
+resource "aws_route_table_association" "public_a" {
+  subnet_id      = aws_subnet.subnet_a.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "public_b" {
+  subnet_id      = aws_subnet.subnet_b.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
 resource "aws_security_group" "rds_sg" {
   name   = "vulnerability-db-sg"
   vpc_id = aws_vpc.main.id
