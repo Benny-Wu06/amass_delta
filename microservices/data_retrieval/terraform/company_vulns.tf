@@ -1,9 +1,6 @@
-#
-#  Package the Lambda function along with its dependencies (psycopg2)
-#
 data "archive_file" "db_lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../package" 
+  source_dir  = "${path.module}/../src" 
   output_path = "${path.module}/db_retrieval.zip"
 }
 
