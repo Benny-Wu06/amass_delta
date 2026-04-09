@@ -126,8 +126,12 @@ def cve_growth_lambda(event, context):
                 "headers": {"Content-Type": "application/json"},
                 "body": json.dumps(
                     {
-                        "company_name": company_name,
                         "data_points": data_points,
+                        "metadata": {
+                            "x_label": "Date",
+                            "y_label": "New Vulnerabilities",
+                            "title": f"{company_name} Vulnerability Growth"
+                        },
                         "summary": {
                             "total_period_increase": total_increase,
                             "peak_growth_day": peak_day,
