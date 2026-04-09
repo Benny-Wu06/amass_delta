@@ -132,7 +132,6 @@ jobs:
         run: terraform plan -input=false
         
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
         working-directory: ${{ matrix.directory }}
         run: terraform apply -auto-approve -input=false
 
