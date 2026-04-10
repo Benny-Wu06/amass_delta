@@ -8,6 +8,7 @@ data "archive_file" "db_lambda_zip" {
 }
 
 
+
 #
 # IAM Role for Database Access
 #
@@ -76,12 +77,12 @@ resource "aws_lambda_function" "company_vulnerabilities" {
 #
 resource "aws_lambda_function" "get_all_companies" {
     function_name = "get_all_companies_service"
-    role          = aws_iam_role.lambda_exec_role.arn
+    role          = role = aws_iam_role.company_vulnerabilities_role.arn
     handler       = "get_all_companies.lambda_handler"
     runtime       = "python3.12"
 
-    filename         = data.archive_file.get_all_companies_zip.output_path
-    source_code_hash = data.archive_file.get_all_companies_zip.output_base64sha256
+    filename         = data.archive_file.db_lambda_zip.output_path
+    source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
 
     vpc_config {
         subnet_ids         = var.private_subnet_ids
