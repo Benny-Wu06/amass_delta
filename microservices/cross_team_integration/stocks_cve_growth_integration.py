@@ -1,96 +1,171 @@
 import requests
 import json
-from datetime import datetime
+import os
+import psycopg2
+from datetime import datetime, timedelta
 
-# CHARLIE - FINANCIAL INTELLIGENCE PLATFORM
+# CONFIG
 BASE_URL_STOCKS = "https://tdxz7z58l6.execute-api.ap-southeast-2.amazonaws.com/prod"
-
-# AMASS - DATA BREACH & VULNERABILITY INTELLEGENCE PLATFORM
-BASE_URL_GROWTH = "https://7mz3fi8zw1.execute-api.ap-southeast-2.amazonaws.com/v1"
-
 EMAIL = "dearryllan@gmail.com"
 PASSWORD = "mypassword" 
 
-def test_external_stock_integration():
-    # initialise a list for diff_price
-    diff_price_analysis = []
+# --- DB CONFIGURATION CONSTANTS ---
+DB_HOST = os.environ.get("DB_HOST")
+DB_PORT = 5432
+DB_NAME = os.environ.get("DB_NAME", "postgres")
+DB_USER = os.environ.get("DB_USER", "postgres")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_SSL_MODE = "prefer"
+DB_SSL_ROOT_CERT = "/certs/global-bundle.pem"
+DB_TIMEOUT = 3
 
+def get_db_connection():
+    return psycopg2.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        sslmode=DB_SSL_MODE,
+        connect_timeout=DB_TIMEOUT,
+        sslrootcert=DB_SSL_ROOT_CERT,
+    )
+
+### CVE GROWTH ###
+def get_internal_cve_growth(company_name, days):
+    conn = None
     try:
-        # LOG IN: uses a verified email account
-        login_url = f"{BASE_URL_STOCKS}/auth/login"
-        login_headers = {"accept": "application/json", "Content-Type": "application/json"}
-        login_data = {"email": EMAIL, "password": PASSWORD}
-        response = requests.post(login_url, json=login_data, headers=login_headers)
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM companies WHERE company_name = %s;", (company_name,))
+            res = cur.fetchone()
+            if not res: return None
+            company_id = res[0]
 
-        # scrape the IdToken
-        auth_data = response.json()
-        id_token = auth_data['authentication']['IdToken']
+            # fetch data from db
+            query = """
+                SELECT date_added::text, COUNT(*) 
+                FROM vulnerabilities
+                WHERE company_id = %s 
+                AND date_added >= CURRENT_DATE - (%s || ' days')::interval
+                GROUP BY date_added ORDER BY date_added ASC;
+            """
+            cur.execute(query, (company_id, days))
+            raw_vuls = cur.fetchall()
 
-        # calculate date required
-        start_date_str = "2026-03-01"
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-        today = datetime.now()
-        
-        delta = today - start_date
-        days_to_trace = delta.days
-
-        # GET STOCKS: APPL as an exampke
-        TICKER = "APPL"
-        print(f"\n--- Step 2: Fetching {TICKER} Stock Prices ({start_date_str} to today) ---")
-        stocks_url = f"{BASE_URL_STOCKS}/stocks/{TICKER}/prices"
-        stock_headers = {"Authorization": f"Bearer {id_token}", "accept": "application/json"}
-        params = {"from": start_date_str, "to": today.strftime("%Y-%m-%d")}
-
-        stock_response = requests.get(stocks_url, headers=stock_headers, params=params)
-        
-        if stock_response.status_code == 200:
-            stock_json = stock_response.json()
-            print(f"Successfully fetched data for {TICKER}.")
+            daily_map = {row[0]: row[1] for row in raw_vuls}
+            data_points = []
+            ref_date = datetime.now()
             
-            for entry in stock_json.get("data", []):
-                date = entry.get("date")
-                open_price = entry.get("open")
-                close_price = entry.get("close")
-                
-                diff = round(close_price - open_price, 2)
-                
-                diff_price_analysis.append({
-                    "date": date,
-                    "difference": diff
+            for i in range(days - 1, -1, -1):
+                d = (ref_date - timedelta(days=i)).strftime("%Y-%m-%d")
+                data_points.append({"x": d, "y": daily_map.get(d, 0)})
+            
+            return data_points
+    finally:
+        if conn: conn.close()
+
+# COMAPNY SYMBOLS THAT ALIGN WITH BOTH CHARLIE AND AMASS
+VALID_COMPANY_SYMBOLS = {
+    "GOOGL": "Google", 
+    "AAPL": "Apple", 
+    "MSFT": "Microsoft", 
+    "AVGO": "Broadcom", 
+    "META": "Meta", 
+    "CSCO": "Cisco", 
+    "INTC": "Intel"
+}
+
+### INTEGRATION LOGIC ###
+def stocks_cve_growth_lambda(event, context):
+    try:
+        company_symbol = event.get("pathParameters", {}).get("company_symbol")
+
+        # use .get() so it doesn't crash if the symbol is missing
+        company_name = VALID_COMPANY_SYMBOLS.get(company_symbol)
+
+        # ERROR CHECK: If symbol is not in our allowed list
+        if not company_name:
+            return {
+                "statusCode": 404,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "error": f"Invalid or unsupported company symbol: {company_symbol}",
+                    "supported_symbols": list(VALID_COMPANY_SYMBOLS.keys())
                 })
-        else:
-            print(f"Failed to fetch stocks: {stock_response.status_code}")
+            }
 
-        # GET CVE-GROWTH: Apple since we fetched APPL ticker
-        COMPANY_NAME = "Apple"
-        growth_url = f"{BASE_URL_GROWTH}/growth/{COMPANY_NAME}"
-        growth_params = {"days": days_to_trace}
+        query_params = event.get("queryStringParameters") or {}
         
-        growth_response = requests.get(growth_url, params=growth_params)
+        # start date (defaults to 1st Jan 2025)
+        from_date_str = query_params.get("from", "2025-01-01") 
+        from_date = datetime.strptime(from_date_str, "%Y-%m-%d")
+        
+        # end date (deafults to 'today')
+        to_date_str = query_params.get("to", datetime.now().strftime("%Y-%m-%d"))
+        to_date = datetime.strptime(to_date_str, "%Y-%m-%d")
 
-        # MERGE DATA #
-        growth_json = growth_response.json() # Extract the dictionary first
-        growth_lookup = {
-            item["date"]: item["new_cves"] 
-            for item in growth_json.get("data_points", []) 
+        days_to_trace = (to_date - from_date).days
+
+        # ERROR CHECK: from after to
+        if days_to_trace < 0:
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "'from' date must be before 'to' date"})
+            }
+
+        # AUTH & FETCH STOCKS (Charlie API)
+        EMAIL = os.environ.get("CHARLIE_EMAIL")
+        PASSWORD = os.environ.get("CHARLIE_PASSWORD")
+        
+        login_res = requests.post(
+            f"{BASE_URL_STOCKS}/auth/login", 
+            json={"email": EMAIL, "password": PASSWORD}
+        )
+        login_res.raise_for_status()
+        id_token = login_res.json()['authentication']['IdToken']
+
+        # get stock prices for the specific range
+        stock_url = f"{BASE_URL_STOCKS}/stocks/{company_symbol}/prices"
+        stock_params = {"from": from_date_str, "to": to_date_str}
+        stock_resp = requests.get(
+            stock_url, 
+            headers={"Authorization": f"Bearer {id_token}"}, 
+            params=stock_params
+        )
+        stock_resp.raise_for_status()
+        
+        # GET CVE GROWTH
+        cve_data_points = get_internal_cve_growth(company_name, days_to_trace)
+        growth_lookup = {item["x"]: item["y"] for item in cve_data_points}
+
+        ### MERGE DATA ###
+        merged_data = []
+        for entry in stock_resp.json().get("data", []):
+            date_key = entry["date"]
+            merged_data.append({
+                "date": date_key,
+                "price_diff": round(entry["close"] - entry["open"], 2),
+                "cve_growth": growth_lookup.get(date_key, 0)
+            })
+
+        # RETURN STANDARDIZED RESPONSE
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps({
+                "company": company_name,
+                "period": {"from": from_date_str, "to": to_date_str},
+                "merged_results": merged_data
+            })
         }
 
-        merged_data = []
-        for finance_entry in diff_price_analysis:
-            current_date = finance_entry["date"]
-            
-            combined_entry = {
-                "date": current_date,
-                "cve_count_growth": growth_lookup.get(current_date, 0),
-                "price_diff": finance_entry["difference"]
-            }
-            
-            merged_data.append(combined_entry)
-
-        print(json.dumps(merged_data, indent=2))
-
     except Exception as e:
-        print(f"An error occurred: {e}")
-
-if __name__ == "__main__":
-    test_external_stock_integration()
+        print(f"Server Error: {str(e)}")
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": "Internal Server Error", "details": str(e)})
+        }
