@@ -97,6 +97,10 @@ variable "db_password" {
   sensitive = true
 }
 
+variable "ses_from_email" {
+  type        = string
+}
+
 output "db_endpoint" {
   value = aws_db_instance.postgres.endpoint
 }
@@ -129,6 +133,7 @@ module "data_collection" {
   subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
   api_id            = aws_apigatewayv2_api.unified_api.id
   api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
+  ses_from_email    = var.ses_from_email
 }
 
 module "data_retrieval" {

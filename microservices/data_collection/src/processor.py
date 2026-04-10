@@ -265,8 +265,11 @@ def lambda_handler(event, context):
                     "name": vuln.get("vulnerabilityName"),
                     "description": vuln.get("shortDescription"),
                     "date_added": vuln.get("dateAdded"),
-                })
-                inserted += 1
+                    "cvss_score": vuln.get("cvss_score"),
+                    "epss_score": vuln.get("epss_score"),
+                    "due_date": vuln.get("dueDate"),
+            })
+            inserted += 1
 
         conn.commit()
         logger.info("Inserted %d new vulnerabilities", inserted)
@@ -276,7 +279,7 @@ def lambda_handler(event, context):
                 TopicArn=SNS_TOPIC_ARN,
                 Message=json.dumps({"new_cves": new_cves_by_company}),
             )
-            logger.info("Published new CVE event to SNS for %d companies", len(new_cves_by_company))
+        logger.info("New CVE event to SNS for %d companies", len(new_cves_by_company))
 
         logger.info("Updating company stats")
         update_all_company_stats(cur)
