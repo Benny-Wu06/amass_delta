@@ -104,7 +104,7 @@ def invoke_visualiser(payload):
 def test_lambda_isolation():
     event = {
         "pathParameters": {"company_name": COMPANY_NAME_1},
-        "queryStringParameters": {"days": "7"}
+        "queryStringParameters": {"days": "30"}
     }
     
     result = invoke_visualiser(event)
