@@ -10,6 +10,7 @@ logger.setLevel(logging.INFO)
 # Variables definitions
 
 s3 = boto3.client("s3")
+sns = boto3.client("sns")
 
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = 5432
@@ -17,6 +18,7 @@ DB_NAME = os.environ.get("DB_NAME", "postgres")
 DB_USER = os.environ.get("DB_USER", "postgres")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
+SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN")
 CISA_KEY = "enriched/enriched.json"
 
 # Database connection
@@ -43,7 +45,7 @@ def init_db(cur):
     CREATE TABLE IF NOT EXISTS companies (
         id serial primary key,
         company_name text not null,
-        num_vulnerabilities integer, 
+        num_vulnerabilities integer,
         avg_cvss numeric,
         avg_epss numeric,
         risk_index numeric not null,
@@ -63,6 +65,15 @@ def init_db(cur):
         cvss_severity text,
         epss_score numeric,
         epss_percentile numeric
+    );
+
+    CREATE TABLE IF NOT EXISTS subscriptions (
+        id serial primary key,
+        email text not null,
+        company_name text not null,
+        created_at timestamp default now(),
+        is_active boolean default true,
+        UNIQUE(email, company_name)
     );
     """
     cur.execute(schema_sql)
@@ -241,16 +252,31 @@ def lambda_handler(event, context):
     logger.info("Found %d vulnerabilities to process", len(vulnerabilities))
 
     inserted = 0
+    new_cves_by_company = {}
 
     try:
         for vuln in vulnerabilities:
             company_name = vuln.get("vendorProject", "Unknown")
             company_id = get_or_create_company(cur, company_name)
             insert_vulnerability(cur, vuln, company_id)
-            inserted += 1
+            if cur.rowcount > 0:
+                new_cves_by_company.setdefault(company_name, []).append({
+                    "cve_id": vuln.get("cveID"),
+                    "name": vuln.get("vulnerabilityName"),
+                    "description": vuln.get("shortDescription"),
+                    "date_added": vuln.get("dateAdded"),
+                })
+                inserted += 1
 
         conn.commit()
-        logger.info("Inserted %d vulnerabilities", inserted)
+        logger.info("Inserted %d new vulnerabilities", inserted)
+
+        if new_cves_by_company and SNS_TOPIC_ARN:
+            sns.publish(
+                TopicArn=SNS_TOPIC_ARN,
+                Message=json.dumps({"new_cves": new_cves_by_company}),
+            )
+            logger.info("Published new CVE event to SNS for %d companies", len(new_cves_by_company))
 
         logger.info("Updating company stats")
         update_all_company_stats(cur)
