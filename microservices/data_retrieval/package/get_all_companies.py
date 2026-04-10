@@ -48,12 +48,14 @@ def get_all_companies():
                 "companies": companies_list
             }),
         }
+
     except Exception as e:
         logger.error("Failed to fetch company list: %s", str(e))
         return {
             "statusCode": 500,
             "body": json.dumps({"error": "Failed to retrieve company list"}),
         }
+
     finally:
         if conn:
             conn.close()
