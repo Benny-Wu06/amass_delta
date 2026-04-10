@@ -76,30 +76,36 @@ resource "aws_lambda_function" "company_vulnerabilities" {
 # Get all companies lambda
 #
 resource "aws_lambda_function" "get_all_companies" {
-    function_name = "get_all_companies_service"
-    role          = role = aws_iam_role.company_vulnerabilities_role.arn
-    handler       = "get_all_companies.lambda_handler"
-    runtime       = "python3.12"
+  function_name = "get_all_companies_service"
+  
+  role          = aws_iam_role.company_vulnerabilities_role.arn
+  
+  # AWS knows to look for get_all_companies.py inside the shared zip
+  handler       = "get_all_companies.lambda_handler"
+  runtime       = "python3.12"
 
-    filename         = data.archive_file.db_lambda_zip.output_path
-    source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
+  filename         = data.archive_file.db_lambda_zip.output_path
+  source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
+    
+  vpc_config {
+    subnet_ids         = var.private_subnet_ids
+    security_group_ids = [var.lambda_sg_id]
+  }
 
-    vpc_config {
-        subnet_ids         = var.private_subnet_ids
-        security_group_ids = [var.lambda_sg_id]
+  layers = [
+    "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1"
+  ]
+
+  environment {
+    variables = {
+      DB_HOST     = var.db_address
+      DB_NAME     = var.db_name
+      DB_USER     = var.db_user
+      DB_PASSWORD = var.db_password
+      CERT_PATH   = "global-bundle.pem"
     }
-
-    layers  = ["arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
-    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1"]
-    environment {
-        variables = {
-        DB_HOST     = var.db_address
-        DB_NAME     = var.db_name
-        DB_USER     = var.db_user
-        DB_PASSWORD = var.db_password
-        CERT_PATH   = "global-bundle.pem"
-            }
-        }
+  }
 }
 
 
