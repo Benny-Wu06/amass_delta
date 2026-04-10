@@ -30,6 +30,7 @@ def lambda_handler(event, context):
     validated_epss = None
 
     if not target_company:
+        logger.error("Error Company name is required in the URL")
         return {
             "statusCode": 400,
             "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
@@ -46,8 +47,10 @@ def lambda_handler(event, context):
             if 0 <= val <= 10:
                 validated_cvss = val
             else:
+                logger.error("Error min_cvss must be a number between 0 and 10")
                 return {"statusCode": 400, "body": json.dumps({"error": "min_cvss must be 0-10"})}
         except ValueError:
+            logger.error("Error min_cvss must be a number between 0 and 10")
             return {"statusCode": 400, "body": json.dumps({"error": "min_cvss must be 0-10"})}
 
 
@@ -57,8 +60,10 @@ def lambda_handler(event, context):
             if 0 <= val <= 1:
                 validated_epss = val
             else:
+                logger.error("Error min_epss must be a number between 0 and 1")
                 return {"statusCode": 400, "body": json.dumps({"error": "min_epss must be 0-1"})}
         except ValueError:
+            logger.error("Error min_epss must be a number between 0 and 1")
             return {"statusCode": 400, "body": json.dumps({"error": "min_epss must be 0-1"})}
 
     return get_company_vulnerabiltiies(target_company, validated_cvss, validated_epss)
@@ -137,6 +142,7 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             results.append(vuln_item)
 
         cur.close()
+        logger.info("Success retrieved vulnerabilities for company: %s with filters min_cvss: %s, min_epss: %s", target_company, min_cvss, min_epss)
         response_data = {
             "company": target_company,
             "cve_count": len(results),
@@ -154,10 +160,10 @@ def get_company_vulnerabiltiies(target_company, min_cvss=None, min_epss=None):
             "body": json.dumps(response_data),
         }
     except Exception as e:
+        logger.error("Error Database error in company_vulnerabilities: %s", str(e))
         import traceback
         error_details = traceback.format_exc()
         print(f"Full Error: {error_details}")
-        logger.error("Database error in company_vulnerabilities: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {
