@@ -32,10 +32,10 @@ resource "aws_db_subnet_group" "main" {
 }
 
 # internet gateway for accessing db
-# resource "aws_internet_gateway" "amass_igw" {
-#   vpc_id = aws_vpc.main.id
-#   tags   = { Name = "amass-igw" }
-# }
+resource "aws_internet_gateway" "amass_igw" {
+  vpc_id = aws_vpc.main.id
+  tags   = { Name = "amass-igw" }
+}
 
 # route table for accessing db
 resource "aws_route_table" "public_rt" {
