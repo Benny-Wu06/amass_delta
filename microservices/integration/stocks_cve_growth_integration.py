@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 
 # CONFIG
 BASE_URL_STOCKS = "https://tdxz7z58l6.execute-api.ap-southeast-2.amazonaws.com/prod"
-EMAIL = "dearryllan@gmail.com"
-PASSWORD = "mypassword" 
+CHARLIE_EMAIL = "dearryllan@gmail.com"
+CHARLIE_PASSWORD = "mypassword" 
 
 # --- DB CONFIGURATION CONSTANTS ---
 DB_HOST = os.environ.get("DB_HOST")
