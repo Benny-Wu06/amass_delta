@@ -13,20 +13,50 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "subnet_a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "ap-southeast-2a"
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "ap-southeast-2a"
+  map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "subnet_b" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "ap-southeast-2b"
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "ap-southeast-2b"
+  map_public_ip_on_launch = true
 }
 
 resource "aws_db_subnet_group" "main" {
   name       = "vulnerability-db-subnet-group"
   subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+}
+
+# internet gateway for accessing db
+resource "aws_internet_gateway" "amass_igw" {
+  vpc_id = aws_vpc.main.id
+  tags   = { Name = "amass-igw" }
+}
+
+# route table for accessing db
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0" #public
+    gateway_id = aws_internet_gateway.amass_igw.id
+  }
+
+  tags = { Name = "amass-public-rt" }
+}
+
+resource "aws_route_table_association" "public_a" {
+  subnet_id      = aws_subnet.subnet_a.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "public_b" {
+  subnet_id      = aws_subnet.subnet_b.id
+  route_table_id = aws_route_table.public_rt.id
 }
 
 resource "aws_security_group" "rds_sg" {
@@ -45,6 +75,14 @@ resource "aws_security_group" "rds_sg" {
     to_port     = 5432
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  # allows for public access from any kind of traffic
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -88,7 +126,7 @@ resource "aws_db_instance" "postgres" {
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
 
-  publicly_accessible = false
+  publicly_accessible = true
   skip_final_snapshot = true
 }
 
