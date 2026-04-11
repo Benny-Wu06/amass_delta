@@ -8,6 +8,7 @@ import os
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+# test to see if staging env gets updated
 
 # /v1/companies/{company_name}
 # get vulnerability statistics (avg cvss, epss) about a company
