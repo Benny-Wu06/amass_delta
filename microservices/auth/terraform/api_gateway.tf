@@ -17,7 +17,7 @@ resource "aws_apigatewayv2_stage" "auth_stage" {
   auto_deploy = true
 }
 
-# connects API gateway to your lambda
+# connects api gateway to your lambda
 resource "aws_apigatewayv2_integration" "auth_integration" {
   api_id                 = aws_apigatewayv2_api.auth_api.id
   integration_type       = "AWS_PROXY"
