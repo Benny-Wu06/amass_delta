@@ -128,6 +128,11 @@ resource "aws_db_instance" "postgres" {
 
   publicly_accessible = true
   skip_final_snapshot = true
+  
+  # don't setup db until igw is attached to vpc
+  depends_on = [
+    aws_internet_gateway.amass_igw
+  ]
 }
 
 variable "db_password" {
