@@ -87,3 +87,36 @@ def test_login_wrong_password(mock_db):
     
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid credentials"
+
+def test_logout_no_token(mock_db):
+    response = client.post("auth/logout")
+    # no token was given
+    assert response.status_code == 401
+
+def test_logout_invalid_token(mock_db):
+    # attempt logout with a fake token
+    response = client.post(
+        "/auth/logout",
+        headers={"Authorization": "Bearer this.is.fake"}
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid token"
+
+def test_logout_correct(mock_db):
+
+    correct_hash = hash_password("correct_password")
+    mock_db.fetchone.return_value = (correct_hash,)
+
+    payload = {"email": "student@unsw.edu.au", "password": "wrong_password"}
+    response = client.post("/auth/login", json=payload)
+    token = login_response.json()["access_token"]
+
+
+    response = client.post(
+        "auth/logout",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    
+    assert response.status_code == 200
+    assert response.json()["message"] == "Successfully logged out"

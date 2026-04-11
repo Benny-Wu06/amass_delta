@@ -3,6 +3,8 @@ from app.schemas import UserCreate, UserLogin
 from app.auth_utils import hash_password, verify_password, create_access_token
 import os
 import psycopg2
+from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends
 
 # --- DB CONFIGURATION CONSTANTS ---
 DB_HOST = os.environ.get("DB_HOST")
@@ -27,6 +29,8 @@ def get_db_connection():
     )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+oauth_schema = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 @router.post("/signup")
 def signup(user: UserCreate):
@@ -61,3 +65,26 @@ def login(user: UserLogin):
     
     token = create_access_token(data={"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
+
+@router.post("/logout")
+def logout(token: str = Depends(oauth2_scheme)):
+
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Inserting the token in black list, so user doesnt login again with same token
+    exp = payload.get("exp")
+    cur.execute(
+        "INSERT INTO token_blacklist (token, expires_at) VALUES (%s, to_timestamp(%s))",
+        (token, exp)
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return {"message": "Successfully logged out"}
