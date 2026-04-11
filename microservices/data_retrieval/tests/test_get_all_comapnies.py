@@ -1,7 +1,11 @@
+import sys
+import os
 import json
 import pytest
 from unittest.mock import MagicMock, patch
-from get_all_companies import get_all_companies
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+from get_all_companies import lambda_handler, get_all_companies
 
 @patch('psycopg2.connect')
 def test_get_all_companies_success(mock_connect):
