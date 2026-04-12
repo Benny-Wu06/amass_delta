@@ -60,9 +60,7 @@ def init_db(cur):
         date_added date not null,
         due_date date not null,
         cvss_score numeric,
-        cvss_severity text,
-        epss_score numeric,
-        epss_percentile numeric
+        epss_score numeric
     );
     """
     cur.execute(schema_sql)

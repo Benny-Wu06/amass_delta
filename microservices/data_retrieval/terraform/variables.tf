@@ -11,7 +11,7 @@ variable "lambda_sg_id" {
 variable "db_password" {
   description = "The password for the RDS instance"
   type        = string
-  sensitive   = true # This hides the password from your console logs
+  sensitive   = true # this hides the password in console logs
 }
 
 variable "vpc_id" {
