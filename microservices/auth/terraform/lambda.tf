@@ -2,7 +2,7 @@ data "archive_file" "auth_zip" {
   type        = "zip"
   source_dir  = "${path.module}/../"
   output_path = "${path.module}/auth.zip"
-  excludes    = ["terraform", "tests", "__pycache__"]
+  excludes    = ["terraform", "tests", "__pycache__", ".gitignore"]
 }
 
 resource "aws_lambda_function" "auth_lambda" {

@@ -30,7 +30,7 @@ def get_db_connection():
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-oauth_schema = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 @router.post("/signup")
 def signup(user: UserCreate):
@@ -67,7 +67,7 @@ def login(user: UserLogin):
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/logout")
-def logout(token: str = Depends(oauth2_scheme)):
+def logout(token: str = Depends(oauth2_schema)):
 
     payload = decode_access_token(token)
     if not payload:
