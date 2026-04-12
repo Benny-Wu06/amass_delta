@@ -89,7 +89,7 @@ def test_get_growth_returns_200():
 
     # verify structure
     body = response.json()
-    assert body["company_name"] == COMPANY_NAME_1
+    assert COMPANY_NAME_1 in body["metadata"]["title"]
     assert "data_points" in body
     assert "summary" in body
     assert isinstance(body["data_points"], list)
