@@ -1,5 +1,6 @@
 import pytest
 import os, sys
+import json
 
 from unittest.mock import MagicMock, patch
 current_dir = os.path.dirname(__file__)
@@ -35,6 +36,22 @@ def test_lambda_handler_success(mock_connect):
     assert "Apple" in data["companies"]
     assert "Google" in data["companies"]
     assert "Microsoft" in data["companies"]
+
+@patch('psycopg2.connect')
+def test_lambda_sorting_logic(mock_connect):
+    # Setup Mock: Database returns data in random/unsorted order
+    mock_conn = MagicMock()
+    mock_cursor = mock_conn.cursor.return_value
+    mock_cursor.fetchall.return_value = [("Zyxel",), ("Adobe",), ("Microsoft",)]
+    mock_connect.return_value = mock_conn
+
+    # Execute
+    response = lambda_handler({}, None)
+    data = json.loads(response["body"])
+    companies = data["companies"]
+
+    # Assert: The Lambda should have sorted these to ["Adobe", "Microsoft", "Zyxel"]
+    assert companies == ["Adobe", "Microsoft", "Zyxel"]
 
 @patch('psycopg2.connect')
 def test_lambda_handler_database_error(mock_connect):

@@ -38,7 +38,7 @@ def get_all_companies():
 
         rows = cur.fetchall()
         
-        companies_list = [row[0] for row in rows]
+        companies_list = sorted([row[0] for row in rows])
 
         return {
             "statusCode": 200,
