@@ -1,10 +1,21 @@
-#
-#  Package the Lambda function along with its dependencies (psycopg2)
-#
-data "archive_file" "db_lambda_zip" {
+data "archive_file" "data_retrieval_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../package" 
-  output_path = "${path.module}/db_retrieval.zip"
+  output_path = "${path.module}/data_retrieval_zip"
+
+  source {
+    content  = file("${path.module}/../src/company_vulnerabilities.py")
+    filename = "company_vulnerabilities.py"
+  }
+
+  source {
+    content  = file("${path.module}/../src/get_all_companies.py")
+    filename = "get_all_companies.py"
+  }
+
+  source {
+    content  = file("${path.module}/../src/global-bundle.pem")
+    filename = "global-bundle.pem"
+  }
 }
 
 
@@ -49,8 +60,8 @@ resource "aws_lambda_function" "company_vulnerabilities" {
   role             = aws_iam_role.company_vulnerabilities_role.arn
   handler          = "company_vulnerabilities.lambda_handler"
   runtime          = "python3.12"
-  filename         = data.archive_file.db_lambda_zip.output_path
-  source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
+  filename         = data.archive_file.data_retrieval_zip.output_path
+  source_code_hash = data.archive_file.data_retrieval_zip.output_base64sha256
   timeout = 300
   layers  = [
     "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
@@ -87,8 +98,8 @@ resource "aws_lambda_function" "get_all_companies" {
   handler       = "get_all_companies.lambda_handler"
   runtime       = "python3.12"
 
-  filename         = data.archive_file.db_lambda_zip.output_path
-  source_code_hash = data.archive_file.db_lambda_zip.output_base64sha256
+  filename         = data.archive_file.data_retrieval_zip.output_path
+  source_code_hash = data.archive_file.data_retrieval_zip.output_base64sha256
     
   vpc_config {
     subnet_ids         = var.private_subnet_ids
