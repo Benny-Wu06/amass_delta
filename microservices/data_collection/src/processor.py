@@ -67,13 +67,20 @@ def init_db(cur):
         epss_score numeric
     );
 
-    CREATE TABLE IF NOT EXISTS subscriptions (
+    CREATE TABLE IF NOT EXISTS watchlists (
         id serial primary key,
         email text not null,
-        company_name text not null,
+        name text not null,
         created_at timestamp default now(),
-        is_active boolean default true,
-        UNIQUE(email, company_name)
+        UNIQUE(email, name)
+    );
+
+    CREATE TABLE IF NOT EXISTS watchlist_companies (
+        id serial primary key,
+        watchlist_id integer not null references watchlists(id) ON DELETE CASCADE,
+        company_name text not null,
+        added_at timestamp default now(),
+        UNIQUE(watchlist_id, company_name)
     );
     """
     cur.execute(schema_sql)
