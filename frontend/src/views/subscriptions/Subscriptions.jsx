@@ -26,6 +26,8 @@ import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 
 const Subscriptions = () => {
   // this is why typescript is helpful i think
+
+  // fetch subscribed companies
   const companies = [
     {
       name: 'Microsoft',
@@ -64,11 +66,11 @@ const Subscriptions = () => {
                   <CTableHeaderCell className="bg-body-tertiary text-center">
                     RISK_INDEX
                   </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary">Risk Rating</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary">
-                    Last vulnerability
+                  <CTableHeaderCell className="bg-body-tertiary text-center">Risk Rating</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Last Vulnerability
                   </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary">Status</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">Status</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
@@ -77,10 +79,10 @@ const Subscriptions = () => {
                     <CTableDataCell className="text-center">
                       <div>{company.name}</div>
                     </CTableDataCell>
-                    <CTableDataCell>
+                    <CTableDataCell className='text-center'>
                       <div>{company.risk_index}</div>
                     </CTableDataCell>
-                    <CTableDataCell>
+                    <CTableDataCell className='text-center'>
                       <div>{company.risk_rating}</div>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
