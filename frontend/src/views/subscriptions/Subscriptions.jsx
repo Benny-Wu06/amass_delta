@@ -21,7 +21,7 @@ import {
   CTableRow,
 } from '@coreui/react'
 import Company from 'src/components/Company.jsx'
-
+import SubscribeButton from 'src/views/subscriptions/SubscribeButton.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 
 const Subscriptions = () => {
@@ -87,7 +87,7 @@ const Subscriptions = () => {
                       <div className="fw-semibold">{company.last_vuln}</div>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
-                      <div className="fw-semibold">{company.risk_rating}</div>
+                      <SubscribeButton></SubscribeButton>
                     </CTableDataCell>
                   </CTableRow>
                 ))}
