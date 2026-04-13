@@ -89,9 +89,16 @@ const _nav = [
     component: CNavItem,
     name: 'Subscriptions',
     to: '/subscriptions',
-    badge: {
-      color: 'info',
-    },
+  },
+  {
+    component: CNavItem,
+    name: 'Vulnerabilities',
+    to: '/vulnerabilities',
+  },
+  {
+    component: CNavItem,
+    name: 'Stock Tracker',
+    to: '/tracker',
   },
   {
     component: CNavTitle,
