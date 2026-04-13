@@ -56,6 +56,18 @@ import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import MainChart from './MainChart'
 
 const Dashboard = () => {
+  // this is why typescript is helpful i think
+  const exampleCompany = {
+    name: 'Microsoft',
+    num_vulnerabilities: 362,
+    avg_cvss: 7.8,
+    avg_epss: 0.526,
+    risk_index: 0.68,
+    risk_rating: 'HIGH',
+    earliest_vuln_date: '2026-04-10',
+    // something about cve growth here as well i think
+  }
+
   const tableExample = [
     {
       cve_id: 'CVE-2026-0001',
@@ -71,9 +83,18 @@ const Dashboard = () => {
   return (
     <>
       <CCard className="fs-3">TODO alert dropdown maybe should be a modal?</CCard>
-      <Company className="mb-4">blehh</Company>
       <CRow>
-        <CCol xs>
+        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
+        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
+        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
+        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
+        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
+        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
+        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
+        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
+      </CRow>
+      <CRow>
+        <CCol className="p-0" xs>
           <CCard className="mb-4">
             <CCardHeader>Recent CVEs</CCardHeader>
             <CTable align="middle" className="mb-0 border" hover responsive>
