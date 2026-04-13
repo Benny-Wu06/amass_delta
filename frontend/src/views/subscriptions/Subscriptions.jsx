@@ -19,6 +19,7 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CLink,
 } from '@coreui/react'
 import Company from 'src/components/Company.jsx'
 import SubscribeButton from 'src/views/subscriptions/SubscribeButton.jsx'
@@ -77,7 +78,9 @@ const Subscriptions = () => {
                 {companies.map((company, index) => (
                   <CTableRow key={index}>
                     <CTableDataCell className="text-center">
-                      <div>{company.name}</div>
+                      <CLink href={'#/companies/' + encodeURIComponent(company.name)}>
+                        {company.name}
+                      </CLink>
                     </CTableDataCell>
                     <CTableDataCell className='text-center'>
                       <div>{company.risk_index}</div>
