@@ -195,6 +195,20 @@ module "visualisation" {
   api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
 }
 
+module "integration" {
+  source            = "../microservices/integration/terraform"
+  vpc_id            = aws_vpc.main.id
+  subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  db_address        = aws_db_instance.postgres.address
+  db_name           = aws_db_instance.postgres.db_name
+  db_user           = aws_db_instance.postgres.username
+  db_password       = var.db_password
+  charlie_email     = var.charlie_email
+  charlie_password  = var.charlie_password
+  api_id            = aws_apigatewayv2_api.unified_api.id
+  api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
+}
+
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.ap-southeast-2.s3"
