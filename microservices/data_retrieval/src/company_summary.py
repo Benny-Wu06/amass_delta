@@ -25,7 +25,6 @@ def lambda_handler(event, context):
     target_company = str(target_company)
     return get_company_summary(target_company)
 
-
 def get_company_summary(target_company: str):
     conn = None
     try:
