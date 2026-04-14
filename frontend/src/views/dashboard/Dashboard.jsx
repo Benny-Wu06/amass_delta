@@ -52,8 +52,8 @@ import avatar2 from 'src/assets/images/avatars/2.jpg'
 import avatar3 from 'src/assets/images/avatars/3.jpg'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 
-import WidgetsBrand from '../widgets/WidgetsBrand'
-import WidgetsDropdown from '../widgets/WidgetsDropdown'
+import WidgetsBrand from '../_defaults/widgets/WidgetsBrand'
+import WidgetsDropdown from '../_defaults/widgets/WidgetsDropdown'
 import MainChart from './MainChart'
 
 const Dashboard = () => {

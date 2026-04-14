@@ -23,7 +23,6 @@ import {
   CLink,
 } from '@coreui/react'
 import Company from 'src/components/Company.jsx'
-import SubscribeButton from 'src/views/CompanyPage/SubscribeButton.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 
 const CompanyPage = () => {
