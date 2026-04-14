@@ -1,13 +1,13 @@
-import AppBreadcrumb from './AppBreadcrumb'
-import AppContent from './AppContent'
-import AppFooter from './AppFooter'
-import AppHeader from './AppHeader'
+import AppBreadcrumb from './_default/AppBreadcrumb'
+import AppContent from './_default/AppContent'
+import AppFooter from './_default/AppFooter'
+import AppHeader from './_default/AppHeader'
 import AppHeaderDropdown from './header/AppHeaderDropdown'
-import AppSidebar from './AppSidebar'
-import DocsComponents from './DocsComponents'
-import DocsIcons from './DocsIcons'
-import DocsLink from './DocsLink'
-import DocsExample from './DocsExample'
+import AppSidebar from './_default/AppSidebar'
+import DocsComponents from './_default/DocsComponents'
+import DocsIcons from './_default/DocsIcons'
+import DocsLink from './_default/DocsLink'
+import DocsExample from './_default/DocsExample'
 
 export {
   AppBreadcrumb,
