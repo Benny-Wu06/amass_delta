@@ -56,7 +56,28 @@ const CompanyPage = () => {
   return (
     <>
       <img src={dreamybull}></img>
-      <Company></Company>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      <img src={dreamybull}></img>
+      {/* <Company></Company> */}
     </>
   )
 }
