@@ -148,7 +148,6 @@ resource "aws_apigatewayv2_api" "unified_api" {
   name          = "amass-unified-api"
   protocol_type = "HTTP"
 
-
   cors_configuration {
     allow_origins = ["*"]
     allow_methods = ["GET", "OPTIONS", "POST", "PUT", "DELETE"]
