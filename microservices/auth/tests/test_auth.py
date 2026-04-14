@@ -108,10 +108,9 @@ def test_logout_correct(mock_db):
     correct_hash = hash_password("correct_password")
     mock_db.fetchone.return_value = (correct_hash,)
 
-    payload = {"email": "student@unsw.edu.au", "password": "wrong_password"}
+    payload = {"email": "student@unsw.edu.au", "password": "correct_password"}
     response = client.post("/auth/login", json=payload)
-    token = login_response.json()["access_token"]
-
+    token = response.json()["access_token"]
 
     response = client.post(
         "auth/logout",
