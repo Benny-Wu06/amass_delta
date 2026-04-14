@@ -147,6 +147,13 @@ output "db_endpoint" {
 resource "aws_apigatewayv2_api" "unified_api" {
   name          = "amass-unified-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["GET", "OPTIONS", "POST", "PUT", "DELETE"]
+    allow_headers = ["*"]
+    max_age       = 300
+  }
 }
 
 resource "aws_apigatewayv2_stage" "unified_stage" {

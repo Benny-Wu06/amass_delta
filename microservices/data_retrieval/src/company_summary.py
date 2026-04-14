@@ -8,6 +8,12 @@ import os
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+headers = {
+                "Access-Control-Allow-Origin": "*", # Required for CORS support to work
+                "Access-Control-Allow-Credentials": True, # Required for cookies, authorization headers with HTTPS
+                "Content-Type": "application/json"
+            }
+
 # test to see if staging env gets updated
 
 # /v1/companies/{company_name}
@@ -19,6 +25,7 @@ def lambda_handler(event, context):
     if not target_company:
         return {
             "statusCode": 400,
+            "headers": headers,
             "body": json.dumps({"error": "Company name is required in the URL"}),
         }
         
@@ -70,6 +77,7 @@ def get_company_summary(target_company: str):
         if not row:
             return {
                 "statusCode": 404,
+                "headers": headers,
                 "body": json.dumps({"error": "Company not found"})
             }
 
@@ -108,14 +116,14 @@ def get_company_summary(target_company: str):
         logger.info("Success retrieved summary for company: %s", target_company)
         return {
             "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers,
             "body": result,
         }
     except Exception:
         logger.error("Error: Company not found for ID: %s", target_company)
         return {
             "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers,
             "body": json.dumps({"error": "Failed to retrieve data"}),
         }
     finally:
