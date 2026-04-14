@@ -45,13 +45,17 @@ const Tooltips = React.lazy(() => import('./views/_defaults/base/tooltips/Toolti
 
 // Buttons
 const Buttons = React.lazy(() => import('./views/_defaults/buttons/buttons/Buttons'))
-const ButtonGroups = React.lazy(() => import('./views/_defaults/buttons/button-groups/ButtonGroups'))
+const ButtonGroups = React.lazy(
+  () => import('./views/_defaults/buttons/button-groups/ButtonGroups'),
+)
 const Dropdowns = React.lazy(() => import('./views/_defaults/buttons/dropdowns/Dropdowns'))
 
 //Forms
 const ChecksRadios = React.lazy(() => import('./views/_defaults/forms/checks-radios/ChecksRadios'))
 const ChipInput = React.lazy(() => import('./views/_defaults/forms/chip-input/ChipInput'))
-const FloatingLabels = React.lazy(() => import('./views/_defaults/forms/floating-labels/FloatingLabels'))
+const FloatingLabels = React.lazy(
+  () => import('./views/_defaults/forms/floating-labels/FloatingLabels'),
+)
 const FormControl = React.lazy(() => import('./views/_defaults/forms/form-control/FormControl'))
 const InputGroup = React.lazy(() => import('./views/_defaults/forms/input-group/InputGroup'))
 const Layout = React.lazy(() => import('./views/_defaults/forms/layout/Layout'))
