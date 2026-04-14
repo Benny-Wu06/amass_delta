@@ -15,9 +15,13 @@
 
 import React from 'react'
 
-// Dashboard
+// used routes
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Subscriptions = React.lazy(() => import('./views/subscriptions/Subscriptions'))
+const CompanyPage = React.lazy(() => import('./views/companies/CompanyPage'))
+const Vulnerabilties = React.lazy(() => import('./views/vulnerabilities/Vulnerabilities'))
+
+// DEFAULT ROUTES
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
@@ -91,6 +95,10 @@ export const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/subscriptions', name: 'Subscriptions', element: Subscriptions },
+  { path: '/vulnerabilities', name: 'Vulnerabilities', element: Vulnerabilities },
+  { path: '/companies/:company_name', name: 'Company', element: CompanyPage },
+
+  // DEFAULT ROUTES
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },

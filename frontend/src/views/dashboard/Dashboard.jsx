@@ -22,6 +22,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
+  cilBug,
   cibCcAmex,
   cibCcApplePay,
   cibCcMastercard,
@@ -101,10 +102,8 @@ const Dashboard = () => {
               <CTableHead className="text-nowrap">
                 <CTableRow>
                   {/* icon example */}
-                  {/* <CTableHeaderCell className="bg-body-tertiary">
-                    <CIcon icon={dreamybull} />
-                  </CTableHeaderCell> */}
                   <CTableHeaderCell className="bg-body-tertiary text-center">
+                    {/* <CIcon icon={cilBug} /> */}
                     CVE-ID
                   </CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary text-center">

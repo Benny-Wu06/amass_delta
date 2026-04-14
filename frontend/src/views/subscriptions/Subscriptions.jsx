@@ -67,11 +67,15 @@ const Subscriptions = () => {
                   <CTableHeaderCell className="bg-body-tertiary text-center">
                     RISK_INDEX
                   </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Risk Rating</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Risk Rating
+                  </CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary text-center">
                     Last Vulnerability
                   </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Status</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Status
+                  </CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
@@ -82,10 +86,10 @@ const Subscriptions = () => {
                         {company.name}
                       </CLink>
                     </CTableDataCell>
-                    <CTableDataCell className='text-center'>
+                    <CTableDataCell className="text-center">
                       <div>{company.risk_index}</div>
                     </CTableDataCell>
-                    <CTableDataCell className='text-center'>
+                    <CTableDataCell className="text-center">
                       <div>{company.risk_rating}</div>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
