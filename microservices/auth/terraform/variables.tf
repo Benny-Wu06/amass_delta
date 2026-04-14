@@ -19,3 +19,11 @@ variable "jwt_secret" {
   description = "Secret key for signing JWT tokens"
   sensitive   = true
 }
+
+variable "api_id" {
+  type = string
+}
+
+variable "api_execution_arn" {
+  type = string
+}
