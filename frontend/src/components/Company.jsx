@@ -11,7 +11,7 @@ const Company = ({ className, company, company_name }) => {
   useEffect(() => {
     const fetchCompany = async () => {
       try {
-        const response = await axios.get(`${STAGING_URL}/companies/${company_name}`)
+        const response = await axios.get(`${STAGING_URL}/v1/companies/${company_name}`)
         setCompanyData(response.data)
         console.log(response.data)
       } catch (error) {
