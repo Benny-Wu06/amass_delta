@@ -1,5 +1,5 @@
-import React from 'react'
-import { CFormCheck, CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle } from '@coreui/react'
+import React, { useState } from 'react'
+import { CButton, CFormCheck, CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle } from '@coreui/react'
 
 const AddCompanyDropdown = () => {
   const watchlists = [
@@ -8,9 +8,10 @@ const AddCompanyDropdown = () => {
     { id: 3, name: 'diddyblud watchlist' },
     { id: 4, name: 'fukumean'},
   ]
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <CDropdown>
+    <CDropdown autoClose="outside">
       <CDropdownToggle color="primary">Add</CDropdownToggle>
       <CDropdownMenu>
         {/* header */}
@@ -30,16 +31,33 @@ const AddCompanyDropdown = () => {
 
               <CFormCheck
                 id={`check-${watchlist.id}`}
-                // checked={isSelected}
+                checked={() => {}}
                 onChange={() => {}} 
                 style={{ pointerEvents: 'none', margin: 0 }} 
               />
             </CDropdownItem>
           )
         })}
-        <CDropdownItem>Watchlist1</CDropdownItem>
-        <CDropdownItem>Watchlist2</CDropdownItem>
-        <CDropdownItem>Watchlist3</CDropdownItem>
+        {/* footer for saving changes */}
+        <div className="d-flex justify-content-end align-items-center mt-2 pt-3 pb-2 px-3 border-top">
+          <CButton
+            variant="ghost"
+            color="secondary"
+            onClick={() => {}}
+            className="me-2 text-muted border-0 fw-semibold"
+          >
+            Cancel
+          </CButton>
+
+          <CButton
+            color="light"
+            shape="rounded"
+            onClick={() => {}}
+            className="fw-bold px-4 text-dark"
+          >
+            Done
+          </CButton>
+        </div>
       </CDropdownMenu>
     </CDropdown>
   )
