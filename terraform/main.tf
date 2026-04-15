@@ -215,8 +215,6 @@ module "integration" {
   db_name           = aws_db_instance.postgres.db_name
   db_user           = aws_db_instance.postgres.username
   db_password       = var.db_password
-  charlie_email     = var.charlie_email
-  charlie_password  = var.charlie_password
   api_id            = aws_apigatewayv2_api.unified_api.id
   api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
 }
