@@ -151,6 +151,13 @@ output "db_endpoint" {
 resource "aws_apigatewayv2_api" "unified_api" {
   name          = "amass-unified-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["GET", "OPTIONS", "POST", "PUT", "DELETE"]
+    allow_headers = ["*"]
+    max_age       = 300
+  }
 }
 
 resource "aws_apigatewayv2_stage" "unified_stage" {
@@ -219,6 +226,18 @@ module "visualisation" {
   db_address        = aws_db_instance.postgres.address
   db_name           = aws_db_instance.postgres.db_name
   db_user           = aws_db_instance.postgres.username
+  api_id            = aws_apigatewayv2_api.unified_api.id
+  api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
+}
+
+module "integration" {
+  source            = "../microservices/integration/terraform"
+  vpc_id            = aws_vpc.main.id
+  subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  db_address        = aws_db_instance.postgres.address
+  db_name           = aws_db_instance.postgres.db_name
+  db_user           = aws_db_instance.postgres.username
+  db_password       = var.db_password
   api_id            = aws_apigatewayv2_api.unified_api.id
   api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
 }

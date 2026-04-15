@@ -68,29 +68,46 @@ def generate_heatmap(data):
 
 
 def generate_line_graph(data):
+    # split fields
     df_line = pd.DataFrame(data["data_points"])
+    metadata = data.get("metadata", {})
     summary = data["summary"]
+
     plt.figure(figsize=(10, 6))
+
+    # use 'x' and 'y' from the generalised data
     ax = sns.lineplot(
-        data=df_line, x="date", y="new_cves", marker="o", linewidth=2.5, color="#d62708"
+        data=df_line, 
+        x="x", 
+        y="y", 
+        marker="o", 
+        linewidth=2.5, 
+        color="#d62708"
     )
 
-    ax.set_xlabel("Observation Date", fontweight="bold", labelpad=10)
-    ax.set_ylabel("New CVEs Reported", fontweight="bold", labelpad=10)
+    ax.set_xlabel(metadata.get("x_label", "X Axis"), fontweight="bold", labelpad=10)
+    ax.set_ylabel(metadata.get("y_label", "Y Axis"), fontweight="bold", labelpad=10)
     plt.title(
-        f"CVE Growth Trend: {data.get('company_name')}",
+        metadata.get("title", "Growth Trend"),
         fontsize=16,
         pad=20,
         fontweight="bold",
     )
 
-    stats_box = f"Total Increase: {summary['total_period_increase']}\nPeak: {summary['peak_growth_day']}"
-    plt.gca().annotate(
-        stats_box,
-        xy=(0.02, 0.9),
-        xycoords="axes fraction",
-        bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8),
-    )
+    # optional
+    if summary:
+        # Check for generalized keys or fall back to specific ones
+        total = summary.get("total_period_increase", "N/A")
+        peak = summary.get("peak_growth_day", "N/A")
+        
+        stats_box = f"Total: {total}\nPeak: {peak}"
+        plt.gca().annotate(
+            stats_box,
+            xy=(0.02, 0.9),
+            xycoords="axes fraction",
+            bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8),
+        )
+
     plt.tight_layout()
 
 

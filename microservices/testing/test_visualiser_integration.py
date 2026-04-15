@@ -5,14 +5,18 @@ BASE_URL = "https://7mz3fi8zw1.execute-api.ap-southeast-2.amazonaws.com"
 
 # MOCK INPUT (Retrieved from other routes by the user)
 GROWTH_INPUT = {
-    "company_name": "TestCorp1",
     "data_points": [
-        {"date": "2026-03-26", "new_cves": 0},
-        {"date": "2026-03-27", "new_cves": 2},
-        {"date": "2026-03-28", "new_cves": 0},
-        {"date": "2026-03-29", "new_cves": 4},
-        {"date": "2026-03-30", "new_cves": 1}
+        {"x": "2026-03-26", "y": 0},
+        {"x": "2026-03-27", "y": 2},
+        {"x": "2026-03-28", "y": 0},
+        {"x": "2026-03-29", "y": 4},
+        {"x": "2026-03-30", "y": 1}
     ],
+    "metadata": {
+        "x_label": "Date",
+        "y_label": "New Vulnerabilities",
+        "title": "TestCorp1 Vulnerability Growth"
+    },
     "summary": {"total_period_increase": 4, "peak_growth_day": "2026-03-29"}
 }
 
