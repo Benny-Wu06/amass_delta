@@ -48,11 +48,13 @@ const AllCompanies = () => {
 
   return (
     <>
-      <img src={dreamybull}></img>
       <CRow>
         <CCol className="p-0" xs>
           <CCard className="mb-4">
-            <CCardHeader>Companies ({numCompanies})</CCardHeader>
+            <CCardHeader>
+              <div>Companies ({numCompanies})</div>
+              <div>Sort by: TODO</div>
+              </CCardHeader>
             <CTable align="middle" className="mb-0 border" hover responsive>
               <CTableHead className="text-nowrap">
                 <CTableRow>
