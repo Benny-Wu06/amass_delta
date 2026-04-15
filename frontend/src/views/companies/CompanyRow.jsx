@@ -1,6 +1,6 @@
 import React from 'react'
 import { CTableRow, CTableDataCell, CButton } from '@coreui/react'
-import { useNavigate } from 'react-router-dom'
+import AddCompanyDropdown from './AddCompanyDropdown.jsx'
 
 const CompanyRow = ({ companyName }) => {
   return (
@@ -8,7 +8,7 @@ const CompanyRow = ({ companyName }) => {
       <CTableRow>
         <CTableDataCell className="text-center">{companyName}</CTableDataCell>
         <CTableDataCell className="text-center">
-          <CButton color="primary">Add</CButton>
+        <AddCompanyDropdown></AddCompanyDropdown>
         </CTableDataCell>
       </CTableRow>
     </>

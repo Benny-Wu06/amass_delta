@@ -54,6 +54,7 @@ const AllCompanies = () => {
             <CCardHeader>
               <div>Companies ({numCompanies})</div>
               <div>Sort by: TODO</div>
+              <div>TODO SEARCH bAR</div>
               </CCardHeader>
             <CTable align="middle" className="mb-0 border" hover responsive>
               <CTableHead className="text-nowrap">
