@@ -60,13 +60,8 @@ resource "aws_lambda_function" "company_vulnerabilities" {
   role             = aws_iam_role.company_vulnerabilities_role.arn
   handler          = "company_vulnerabilities.lambda_handler"
   runtime          = "python3.12"
-<<<<<<< HEAD
-  filename         = data.archive_file.company_vulnerabilities_zip.output_path
-  source_code_hash = data.archive_file.company_vulnerabilities_zip.output_base64sha256
-=======
   filename         = data.archive_file.data_retrieval_zip.output_path
   source_code_hash = data.archive_file.data_retrieval_zip.output_base64sha256
->>>>>>> 2b92f8fea70cd1e6e3500d0e644f53e8fb449c97
   timeout = 300
   layers  = [
     "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
