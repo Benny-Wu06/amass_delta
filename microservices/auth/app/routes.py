@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas import UserCreate, UserLogin
-from app.auth_utils import hash_password, verify_password, create_access_token, decode_access_token
+from microservices.auth.app.schemas import UserCreate, UserLogin
+from microservices.auth.app.auth_utils import hash_password, verify_password, create_access_token, decode_access_token
 import os
 import psycopg2
 from fastapi.security import OAuth2PasswordBearer

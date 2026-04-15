@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
-from app.main import app
-from app.auth_utils import hash_password
+from microservices.auth.app.main import app
+from microservices.auth.app.auth_utils import hash_password
 
 client = TestClient(app)
 
