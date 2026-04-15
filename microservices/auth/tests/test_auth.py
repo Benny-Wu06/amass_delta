@@ -9,7 +9,7 @@ client = TestClient(app)
 @pytest.fixture
 def mock_db():
     # patch where it is defined
-    with patch("app.routes.get_db_connection") as mocked_get_conn:
+    with patch("microservices.auth.app.routes.get_db_connection") as mocked_get_conn:
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         
@@ -21,7 +21,7 @@ def mock_db():
 ### TESTS ###
 def test_signup_flow(mock_db):
     # Setup: Assume email doesn't exist
-    mock_db.fetchone.return_value = None
+    mock_db.fetchone.side_effect = [None, (1,)]
     
     payload = {"email": "student@unsw.edu.au", "password": "password123"}
     response = client.post("/auth/signup", json=payload)
