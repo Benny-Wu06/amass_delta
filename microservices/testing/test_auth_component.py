@@ -4,6 +4,8 @@ import pytest
 import boto3
 import psycopg2
 from botocore.config import Config
+from microservices.auth.app.auth_utils import hash_password
+    
 
 # CONFIGURATION
 AWS_REGION = "ap-southeast-2"
@@ -143,3 +145,79 @@ def test_signup_invalid_json():
     
     # FastAPI returns 422 Unprocessable Entity for Pydantic validation errors
     assert result["statusCode"] == 422
+
+def test_login_success(conn_db, cleanup_user):
+
+    hashed_pwd = hash_password(TEST_PASSWORD)
+    cur = conn_db.cursor()
+    cur.execute(
+        "INSERT INTO users (email, hashed_password) VALUES (%s, %s);", 
+        (TEST_EMAIL, hashed_pwd)
+    )
+    conn_db.commit()
+    cur.close()
+
+    payload = {
+        "email": TEST_EMAIL,
+        "password": TEST_PASSWORD
+    }
+    
+    result = invoke_auth("/auth/login", "POST", body=payload)
+
+    assert result["statusCode"] == 200
+    assert result["function_error"] is None
+    assert "access_token" in result["body"]
+    assert result["body"]["token_type"] == "bearer"
+
+def test_login_fail(conn_db, cleanup_user):
+
+    hashed_pwd = hash_password(TEST_PASSWORD)
+    cur = conn_db.cursor()
+    cur.execute(
+        "INSERT INTO users (email, hashed_password) VALUES (%s, %s);", 
+        (TEST_EMAIL, hashed_pwd)
+    )
+    conn_db.commit()
+    cur.close()
+
+    payload = {
+        "email": TEST_EMAIL,
+        "password": "INCORRECT_PASSWORD"
+    }
+
+    result = invoke_auth("/auth/login", "POST", body=payload)
+
+    assert result["statusCode"] == 401
+    assert result["function_error"] is None
+    assert "access_token" in result["body"]
+    assert "access_token" not in result["body"]
+    assert "Invalid credentials" in str(result["body"])
+
+def test_logout_success(conn_db, cleanup_user):
+
+    hashed_pwd = hash_password(TEST_PASSWORD)
+    cur = conn_db.cursor()
+    cur.execute(
+        "INSERT INTO users (email, hashed_password) VALUES (%s, %s);", 
+        (TEST_EMAIL, hashed_pwd)
+    )
+    conn_db.commit()
+    cur.close()
+
+    login_payload = {"email": TEST_EMAIL, "password": TEST_PASSWORD}
+    login_result = invoke_auth("/auth/login", "POST", body=login_payload)
+
+    token = login_result["body"].get("access_token")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    result = invoke_auth("/auth/logout", "POST", headers=headers)
+
+    assert result["statusCode"] == 200
+    assert result["function_error"] is None
+    assert "Successfully logged out" in str(result["body"])
+
+    cur = conn_db.cursor()
+    cur.execute("SELECT token FROM token_blacklist WHERE token = %s;", (token,))
+    blacklisted = cur.fetchone()
+    cur.close()
+    assert blacklisted is not None

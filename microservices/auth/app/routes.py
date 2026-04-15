@@ -96,3 +96,19 @@ def logout(token: str = Depends(oauth2_schema)):
     conn.close()
 
     return {"message": "Successfully logged out"}
+
+def test_login_fail_invalid_password(conn_db, cleanup_user):
+    from microservices.auth.app.auth_utils import hash_password
+
+    hashed_pwd = hash_password(TEST_PASSWORD)
+    cur = conn_db.cursor()
+    cur.execute("INSERT INTO users (email, hashed_password) VALUES (%s, %s);", (TEST_EMAIL, hashed_pwd))
+    conn_db.commit()
+    cur.close()
+
+    payload = {"email": TEST_EMAIL, "password": "the_wrong_password"}
+    result = invoke_auth("/auth/login", "POST", body=payload)
+
+    assert result["statusCode"] == 401
+    assert "Invalid credentials" in str(result["body"])
+    assert "access_token" not in result["body"]
