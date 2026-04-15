@@ -85,7 +85,11 @@ const Dashboard = () => {
     <>
       <CCard className="fs-3">TODO alert dropdown maybe should be a modal?</CCard>
       <CRow>
-        <Company className="mb-4 mx-2" company={exampleCompany} company_name={exampleCompany.name}></Company>
+        <Company
+          className="mb-4 mx-2"
+          company={exampleCompany}
+          company_name={exampleCompany.name}
+        ></Company>
         {/* <Company className="mb-4 mx-2" company={exampleCompany}></Company>
         <Company className="mb-4 mx-2" company={exampleCompany}></Company>
         <Company className="mb-4 mx-2" company={exampleCompany}></Company>

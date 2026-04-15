@@ -22,13 +22,13 @@ import {
   CLink,
 } from '@coreui/react'
 import Company from 'src/components/Company.jsx'
-import SubscribeButton from 'src/views/watchlists/SubscribeButton.jsx'
+import SubscribeButton from 'src/components/SubscribeButton.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 
-const EditWatchlist = () => {
+const AllCompanies = () => {
   // this is why typescript is helpful i think
 
-  // get EditWatchlist
+  // get AllCompanies
 
   // fetch subscribed companies
   const companies = [
@@ -61,7 +61,7 @@ const EditWatchlist = () => {
       <CRow>
         <CCol className="p-0" xs>
           <CCard className="mb-4">
-            <CCardHeader>Your EditWatchlist</CCardHeader>
+            <CCardHeader>Your AllCompanies</CCardHeader>
             <CTable align="middle" className="mb-0 border" hover responsive>
               <CTableHead className="text-nowrap">
                 <CTableRow>
@@ -111,4 +111,4 @@ const EditWatchlist = () => {
   )
 }
 
-export default EditWatchlist
+export default AllCompanies

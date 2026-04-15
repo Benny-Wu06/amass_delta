@@ -92,6 +92,11 @@ const _nav = [
   },
   {
     component: CNavItem,
+    name: 'Companies',
+    to: '/companies',
+  },
+  {
+    component: CNavItem,
     name: 'Vulnerabilities',
     to: '/vulnerabilities',
   },

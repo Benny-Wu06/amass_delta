@@ -15,7 +15,7 @@ const Company = ({ className, company, company_name }) => {
         setCompanyData(response.data)
         console.log(response.data)
       } catch (error) {
-        console.error("Failed to fetch company:", error)
+        console.error('Failed to fetch company:', error)
       } finally {
         setLoading(false)
       }
@@ -27,21 +27,20 @@ const Company = ({ className, company, company_name }) => {
   if (!companyData) return <div>No data found.</div>
   return (
     <>
-    <CCard className={className} style={{ width: '18rem' }}>
-      <CCardBody>
-        <CCardTitle>{company.name}</CCardTitle>
-        <CCardSubtitle className="mb-2 text-body-secondary">{company.risk_rating}</CCardSubtitle>
-        cvss: {company.avg_cvss}
-        <br />
-        epss: {company.avg_epss}
-        <br />
-        risk_index: {company.risk_index}
-        <br />
-        last_vuln_date: {company.earliest_vuln_date}
-      </CCardBody>
-    </CCard>
+      <CCard className={className} style={{ width: '18rem' }}>
+        <CCardBody>
+          <CCardTitle>{company.name}</CCardTitle>
+          <CCardSubtitle className="mb-2 text-body-secondary">{company.risk_rating}</CCardSubtitle>
+          cvss: {company.avg_cvss}
+          <br />
+          epss: {company.avg_epss}
+          <br />
+          risk_index: {company.risk_index}
+          <br />
+          last_vuln_date: {company.earliest_vuln_date}
+        </CCardBody>
+      </CCard>
     </>
-
   )
 }
 
