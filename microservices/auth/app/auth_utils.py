@@ -1,16 +1,15 @@
 import jwt
+import bcrypt
 from datetime import datetime, timedelta, timezone
-from passlib.context import CryptContext
 
 SECRET_KEY = "DDYBLD"
 ALGORITHM = "HS256"
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str):
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password[:72].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password[:72], hashed_password)
+    return bcrypt.checkpw(plain_password[:72].encode('utf-8'), hashed_password.encode('utf-8'))
 
 def create_access_token(data: dict):
     to_encode = data.copy()

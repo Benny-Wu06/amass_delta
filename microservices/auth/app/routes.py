@@ -45,11 +45,12 @@ def signup(user: UserCreate):
         # hash and save
         hashed_pwd = hash_password(user.password)
         cur.execute(
-            "INSERT INTO users (email, hashed_password) VALUES (%s, %s)",
+            "INSERT INTO users (email, hashed_password) VALUES (%s, %s) RETURNING id",
             (user.email, hashed_pwd)
         )
+        user_id = cur.fetchone()[0]
         conn.commit()
-        return {"message": "User created successfully"}
+        return {"message": "User created successfully", "email": user.email, "id": user_id}
     finally:
         cur.close()
         conn.close()
