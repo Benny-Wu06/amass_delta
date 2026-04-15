@@ -17,7 +17,8 @@ import React from 'react'
 
 // used routes
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
-const Subscriptions = React.lazy(() => import('./views/subscriptions/Subscriptions'))
+const Watchlists = React.lazy(() => import('./views/watchlists/Watchlists'))
+const EditWatchlist = React.lazy(() => import('./views/watchlists/EditWatchlist'))
 const CompanyPage = React.lazy(() => import('./views/companies/CompanyPage'))
 const Vulnerabilities = React.lazy(() => import('./views/vulnerabilities/Vulnerabilities'))
 
@@ -98,7 +99,8 @@ const Widgets = React.lazy(() => import('./views/_defaults/widgets/Widgets'))
 export const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/subscriptions', name: 'Subscriptions', element: Subscriptions },
+  { path: '/watchlists', name: 'Watchlists', element: Watchlists },
+  { path: '/watchlists/:watchlist_id', name: 'Edit Watchlist', element: EditWatchlist },
   { path: '/vulnerabilities', name: 'Vulnerabilities', element: Vulnerabilities },
   { path: '/companies/:company_name', name: 'Company', element: CompanyPage },
 

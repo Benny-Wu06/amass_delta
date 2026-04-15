@@ -87,8 +87,8 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Subscriptions',
-    to: '/subscriptions',
+    name: 'Watchlists',
+    to: '/watchlists',
   },
   {
     component: CNavItem,
