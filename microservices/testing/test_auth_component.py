@@ -52,17 +52,36 @@ def cleanup_user(conn_db):
     cur.close()
 
 # HELPER: Follows your specific Mangum-compatible structure
+# def invoke_auth(path, method, body=None, headers=None):
+#     payload = {
+#         "resource": "/{proxy+}",
+#         "path": path,
+#         "httpMethod": method,
+#         "headers": headers or {"Content-Type": "application/json"},
+#         "body": json.dumps(body) if body else None,
+#         "requestContext": {
+#             "resourcePath": "/{proxy+}",
+#             "httpMethod": method,
+#             "path": path
+#         }
+#     }
 def invoke_auth(path, method, body=None, headers=None):
     payload = {
-        "resource": "/{proxy+}",
-        "path": path,
-        "httpMethod": method,
-        "headers": headers or {"Content-Type": "application/json"},
+        "version": "2.0",
+        "routeKey": f"{method} {path}",
+        "rawPath": path,
+        "rawQueryString": "",
+        "headers": headers or {"content-type": "application/json"},
         "body": json.dumps(body) if body else None,
+        "isBase64Encoded": False,
         "requestContext": {
-            "resourcePath": "/{proxy+}",
-            "httpMethod": method,
-            "path": path
+            "http": {
+                "method": method,
+                "path": path,
+                "protocol": "HTTP/1.1",
+                "sourceIp": "127.0.0.1",
+                "userAgent": "test"
+            }
         }
     }
     
