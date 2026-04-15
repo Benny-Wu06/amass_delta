@@ -4,17 +4,17 @@ data "archive_file" "stocks_cve_growth_zip" {
   output_path = "${path.module}/stocks_cve.zip"
 }
 
-# resource "aws_security_group" "integration_sg" {
-#   name   = "integration-lambda-sg"
-#   vpc_id = var.vpc_id
+resource "aws_security_group" "integration_sg" {
+  name   = "integration-lambda-sg"
+  vpc_id = var.vpc_id
 
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-# }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 resource "aws_iam_role" "integration_role" {
   name = "integration_lambda_role"
@@ -52,7 +52,7 @@ resource "aws_lambda_function" "stocks_cve_growth_lambda" {
   layers = [
     "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1",
     "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
-    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-requests:4"
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-requests:23"
   ]
 
   source_code_hash = data.archive_file.stocks_cve_growth_zip.output_base64sha256
@@ -68,8 +68,6 @@ resource "aws_lambda_function" "stocks_cve_growth_lambda" {
       DB_NAME          = var.db_name
       DB_USER          = var.db_user
       DB_PASSWORD      = var.db_password
-      CHARLIE_EMAIL    = var.charlie_email
-      CHARLIE_PASSWORD = var.charlie_password
     }
   }
 }
