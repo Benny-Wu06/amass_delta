@@ -35,19 +35,19 @@ const Watchlists = () => {
   const watchlists = [
     {
       id: 1,
-      name: 'watchlist1',
+      name: 'diddy watchlist',
     },
     {
       id: 2,
-      name: 'watchlist2',
+      name: 'faang',
     },
       {
       id: 3,
-      name: 'watchlist3',
+      name: 'diddyblud watchlist',
     },
     {
       id: 4,
-      name: 'watchlist4',
+      name: 'fukumean',
     },
   ]
 
