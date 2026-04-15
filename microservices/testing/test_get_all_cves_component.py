@@ -1,7 +1,10 @@
 import json
-import os
+import os, sys
 from unittest.mock import patch, MagicMock
 from datetime import date
+current_dir = os.path.dirname(__file__)
+src_path = os.path.abspath(os.path.join(current_dir, '..', 'data_retrieval', 'src'))
+sys.path.insert(0, src_path)
 from get_all_cves import lambda_handler
 
 @patch('psycopg2.connect')
