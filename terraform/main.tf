@@ -163,6 +163,10 @@ output "api_url" {
   value = aws_apigatewayv2_api.unified_api.api_endpoint
 }
 
+resource "aws_sns_topic" "cve_alerts" {
+  name = "amass-cve-alerts"
+}
+
 module "data_collection" {
   source            = "../microservices/data_collection/terraform"
   vpc_id            = aws_vpc.main.id
@@ -176,7 +180,21 @@ module "data_collection" {
   subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
   api_id            = aws_apigatewayv2_api.unified_api.id
   api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
+  sns_topic_arn     = aws_sns_topic.cve_alerts.arn
+}
+
+module "subscription" {
+  source            = "../microservices/subscription/terraform"
+  vpc_id            = aws_vpc.main.id
+  subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  db_address        = aws_db_instance.postgres.address
+  db_name           = aws_db_instance.postgres.db_name
+  db_user           = aws_db_instance.postgres.username
+  db_password       = var.db_password
+  api_id            = aws_apigatewayv2_api.unified_api.id
+  api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
   ses_from_email    = var.ses_from_email
+  sns_topic_arn     = aws_sns_topic.cve_alerts.arn
 }
 
 module "data_retrieval" {

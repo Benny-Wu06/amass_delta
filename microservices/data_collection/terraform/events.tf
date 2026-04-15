@@ -1,7 +1,7 @@
 
 resource "aws_cloudwatch_event_rule" "twelve_hour_timer" {
   name                = "cisa-twelve-hour-timer"
-  schedule_expression = "rate(12 hours)"
+  schedule_expression = "rate(1 hours)"
 }
 
 resource "aws_cloudwatch_event_target" "run_scraper" {
