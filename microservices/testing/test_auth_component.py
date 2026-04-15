@@ -189,7 +189,6 @@ def test_login_fail(conn_db, cleanup_user):
 
     assert result["statusCode"] == 401
     assert result["function_error"] is None
-    assert "access_token" in result["body"]
     assert "access_token" not in result["body"]
     assert "Invalid credentials" in str(result["body"])
 
