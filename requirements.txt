@@ -27,3 +27,4 @@ passlib[bcrypt]
 uvicorn
 httpx
 email-validator>=2.0.0
+PyJWT==2.8.0
