@@ -6,19 +6,26 @@ from microservices.visualisation.src.visualiser.visualiser import generate_plot_
 
 def test_visualiser_data_points_success():
     dummy_data_points = {
-        "company_name": "Microsoft",
         "data_points": [
-            {"date": "2026-03-05", "new_cves": 5},
-            {"date": "2026-03-06", "new_cves": 2},
-            {"date": "2026-03-07", "new_cves": 4},
-            {"date": "2026-03-08", "new_cves": 5},
-            {"date": "2026-03-09", "new_cves": 0},
-            {"date": "2026-03-10", "new_cves": 2},
-            {"date": "2026-03-11", "new_cves": 0},
-            {"date": "2026-03-12", "new_cves": 3},
-            {"date": "2026-03-13", "new_cves": 1},
+            {"x": "2026-03-05", "y": 5},
+            {"x": "2026-03-06", "y": 2},
+            {"x": "2026-03-07", "y": 4},
+            {"x": "2026-03-08", "y": 5},
+            {"x": "2026-03-09", "y": 0},
+            {"x": "2026-03-10", "y": 2},
+            {"x": "2026-03-11", "y": 0},
+            {"x": "2026-03-12", "y": 3},
+            {"x": "2026-03-13", "y": 1},
         ],
-        "summary": {"total_period_increase": 22, "peak_growth_day": "2026-03-12"},
+        "metadata": {
+            "x_label": "Date",
+            "y_label": "New Vulnerabilities",
+            "title": "Microsoft Vulnerability Growth"
+        },
+        "summary": {
+            "total_period_increase": 22,
+            "peak_growth_day": "2026-03-12"
+        },
     }
 
     try:
@@ -43,17 +50,17 @@ def test_visualiser_heatmap_grid_success():
     dummy_heatmap_grid = {
         "company_name": "Apple",
         "heatmap_grid": [
-            {"cvss": "0-2", "epss": "0-0.2", "count": 3},
-            {"cvss": "2-4", "epss": "0-0.2", "count": 4},
-            {"cvss": "4-6", "epss": "0-0.2", "count": 0},
-            {"cvss": "6-8", "epss": "0-0.2", "count": 0},
-            {"cvss": "8-10", "epss": "0-0.2", "count": 6},
-            {"cvss": "0-2", "epss": "0.2-0.4", "count": 5},
-            {"cvss": "2-4", "epss": "0.2-0.4", "count": 5},
-            {"cvss": "4-6", "epss": "0.2-0.4", "count": 0},
-            {"cvss": "6-8", "epss": "0.2-0.4", "count": 2},
-            {"cvss": "8-10", "epss": "0.2-0.4", "count": 1},
-            {"cvss": "8-10", "epss": "0.8-1.0", "count": 1},
+            {"cvss_range": "0-2", "epss_range": "0-0.2", "cve_count": 3},
+            {"cvss_range": "2-4", "epss_range": "0-0.2", "cve_count": 4},
+            {"cvss_range": "4-6", "epss_range": "0-0.2", "cve_count": 0},
+            {"cvss_range": "6-8", "epss_range": "0-0.2", "cve_count": 0},
+            {"cvss_range": "8-10", "epss_range": "0-0.2", "cve_count": 6},
+            {"cvss_range": "0-2", "epss_range": "0.2-0.4", "cve_count": 5},
+            {"cvss_range": "2-4", "epss_range": "0.2-0.4", "cve_count": 5},
+            {"cvss_range": "4-6", "epss_range": "0.2-0.4", "cve_count": 0},
+            {"cvss_range": "6-8", "epss_range": "0.2-0.4", "cve_count": 2},
+            {"cvss_range": "8-10", "epss_range": "0.2-0.4", "cve_count": 1},
+            {"cvss_range": "8-10", "epss_range": "0.8-1.0", "cve_count": 1},
         ],
     }
 
