@@ -41,7 +41,7 @@ const CompanyPage = () => {
     }
     fetchCompany()
     fetchCompanyVulns()
-  }, [])
+  }, [company_name])
 
   return (
     <>

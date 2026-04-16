@@ -27,7 +27,7 @@ const Vulnerabilities = () => {
       cve_id: 'CVE-2026-0001',
       company: 'diddyblud_inc',
       description:
-        'very long long description supre not good and bad holy shit lets see how this renders ok',
+        'TODO connect to backend',
       risk_index: 9,
       risk_rating: 'DEATH',
       due_date: '2026-04-12',
@@ -36,7 +36,7 @@ const Vulnerabilities = () => {
       cve_id: 'CVE-2026-0001',
       company: 'diddyblud_inc',
       description:
-        'very long long description supre not good and bad holy shit lets see how this renders ok',
+        'TODO connect to backend',
       risk_index: 9,
       risk_rating: 'DEATH',
       due_date: '2026-04-12',
@@ -45,7 +45,7 @@ const Vulnerabilities = () => {
       cve_id: 'CVE-2026-0001',
       company: 'diddyblud_inc',
       description:
-        'very long long description supre not good and bad holy shit lets see how this renders ok',
+        'TODO connect to backend',
       risk_index: 9,
       risk_rating: 'DEATH',
       due_date: '2026-04-12',
