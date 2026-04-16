@@ -53,20 +53,6 @@ def cleanup_user(conn_db):
     conn_db.commit()
     cur.close()
 
-# HELPER: Follows your specific Mangum-compatible structure
-# def invoke_auth(path, method, body=None, headers=None):
-#     payload = {
-#         "resource": "/{proxy+}",
-#         "path": path,
-#         "httpMethod": method,
-#         "headers": headers or {"Content-Type": "application/json"},
-#         "body": json.dumps(body) if body else None,
-#         "requestContext": {
-#             "resourcePath": "/{proxy+}",
-#             "httpMethod": method,
-#             "path": path
-#         }
-#     }
 def invoke_auth(path, method, body=None, headers=None):
     payload = {
         "version": "2.0",
@@ -96,12 +82,10 @@ def invoke_auth(path, method, body=None, headers=None):
     raw_payload = response["Payload"].read().decode("utf-8")
     parsed = json.loads(raw_payload)
 
-    # --- NEW DEBUG BLOCK ---
+    # DEBUG 
     if "statusCode" not in parsed:
-        # This catches "errorMessage" or "stackTrace" from AWS crashes
         error_msg = parsed.get("errorMessage", "Unknown AWS Error")
         pytest.fail(f"Lambda Crashed: {error_msg}\nFull Response: {raw_payload}")
-    # -----------------------
             
     return {
         "statusCode": parsed.get("statusCode"),
@@ -124,17 +108,14 @@ def test_signup_success(cleanup_user):
     assert "id" in result["body"]
 
 def test_signup_duplicate_email(conn_db, cleanup_user):
-    # 1. Manual insert to ensure user exists
     cur = conn_db.cursor()
     cur.execute("INSERT INTO users (email, hashed_password) VALUES (%s, %s);", (TEST_EMAIL, "already_hashed"))
     conn_db.commit()
     cur.close()
     
-    # 2. Try to signup with same email
     payload = {"email": TEST_EMAIL, "password": TEST_PASSWORD}
     result = invoke_auth("/auth/signup", "POST", body=payload)
     
-    # FastAPI usually returns 400 for existing users
     assert result["statusCode"] == 400 
     assert "already registered" in str(result["body"]).lower()
 
@@ -143,7 +124,7 @@ def test_signup_invalid_json():
     
     result = invoke_auth("/auth/signup", "POST", body=payload)
     
-    # FastAPI returns 422 Unprocessable Entity for Pydantic validation errors
+    # returns 422 unprocessable entity
     assert result["statusCode"] == 422
 
 def test_login_success(conn_db, cleanup_user):
