@@ -26,7 +26,7 @@ def test_get_all_cves_success(mock_connect):
     assert body["cves"][0]["cve_id"] == "CVE-2024-0002"
     
     mock_cur.execute.assert_called_with(
-        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM cves ORDER BY date_added DESC;"
+        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM vulnerabilities ORDER BY date_added DESC;"
     )
 
 @patch('psycopg2.connect')
@@ -48,7 +48,7 @@ def test_get_all_cves_sorting_logic_due_date(mock_connect):
     assert body["cves"][1]["cve_id"] == "CVE-2024-2222"
 
     mock_cur.execute.assert_called_with(
-        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM cves ORDER BY due_date ASC;"
+        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM vulnerabilities ORDER BY due_date ASC;"
     )
 
 @patch('psycopg2.connect')
@@ -70,7 +70,7 @@ def test_get_all_cves_sorting_logic_date_added(mock_connect):
     assert body["cves"][1]["date_added"] == "2024-01-05"
 
     mock_cur.execute.assert_called_with(
-        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM cves ORDER BY date_added DESC;"
+        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM vulnerabilities ORDER BY date_added DESC;"
     )
 
 @patch('psycopg2.connect')
