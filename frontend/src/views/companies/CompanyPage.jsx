@@ -1,51 +1,74 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import classNames from 'classnames'
+import axios from 'axios'
 
 import Graph from 'src/components/Graph.jsx'
 import Company from 'src/components/Company.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
-import { CRow } from '@coreui/react'
+import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge } from '@coreui/react'
+import { STAGING_URL } from '../../vars'
 
 const CompanyPage = () => {
   const { company_name } = useParams()
+  const [companyData, setCompanyData] = useState(null)
+  const [loading, setLoading] = useState(true)
   const companyName = company_name
-  // fetch subscribed companies
-  const companies = [
-    {
-      name: 'Microsoft',
-      num_vulnerabilities: 362,
-      avg_cvss: 7.8,
-      avg_epss: 0.526,
-      risk_index: 0.68,
-      risk_rating: 'HIGH',
-      earliest_vuln_date: '2026-04-10',
-      // something about cve growth here as well i think
-    },
-    {
-      name: 'Microsoft',
-      num_vulnerabilities: 362,
-      avg_cvss: 7.8,
-      avg_epss: 0.526,
-      risk_index: 0.68,
-      risk_rating: 'HIGH',
-      earliest_vuln_date: '2026-04-10',
-      last_vuln: '2026-04-11',
-      // something about cve growth here as well i think
-    },
-  ]
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      try {
+        const response = await axios.get(`${STAGING_URL}/v1/companies/${company_name}`)
+        setCompanyData(response.data)
+        console.log(response.data)
+      } catch (error) {
+        console.log('Failed to fetch company:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchCompany(company_name)
+  }, [company_name])
 
   return (
     <>
       <h2 className="mx-2 mb-4">{companyName}</h2>
-      <CRow>
-        <Graph header={"Company Heatmap"}></Graph>
-        <Graph header={"CVE Growth vs. Time"}></Graph>
+      <CRow className="mb-4">
+        <Graph header={'Company Heatmap'}></Graph>
+        <Graph header={'CVE Growth vs. Time'}></Graph>
       </CRow>
 
       <CRow>
-        <div>metrics</div>
-        <Graph header={"Stock Price vs. CVE GROWTH"}></Graph>
+        {companyData ? (
+          <CCol md={6}>
+            <CCard className="h-150">
+              <CCardHeader>Metrics</CCardHeader>
+              <CCardBody>
+                <CRow>
+                  <CCol xs={6}>
+                    <p className="text-muted mb-0">Risk Index</p>
+                    <h3 className="text-warning">{companyData.risk_index}</h3>
+                  </CCol>
+                  <CCol xs={6}>
+                    <p className="text-muted mb-0">Risk Rating</p>
+                    <h3>{companyData.risk_rating}</h3>
+                  </CCol>
+                </CRow>
+                <hr />
+                <div className="mt-3">
+                  <p><strong>CVE Count:</strong> {companyData.cve_count}</p>
+                  <p><strong>Avg CVSS:</strong> {companyData.avg_cvss}</p>
+                <p><strong>Avg EPSS:</strong> {companyData.avg_epss}</p>
+                <p><strong>Latest Vulnerability Date:</strong> {"2026-03-14"}</p>
+                </div>
+              </CCardBody>
+            </CCard>
+          </CCol>
+        ) : (
+          <div>loading</div>
+        )}
+
+        <Graph header={'Stock Price vs. CVE GROWTH'}></Graph>
       </CRow>
     </>
   )

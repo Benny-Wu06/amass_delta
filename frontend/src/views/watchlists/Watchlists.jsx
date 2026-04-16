@@ -41,7 +41,7 @@ const Watchlists = () => {
       id: 2,
       name: 'faang',
     },
-      {
+    {
       id: 3,
       name: 'diddyblud watchlist',
     },

@@ -1,17 +1,26 @@
-import React, { useState } from 'react'
-import { CButton, CFormCheck, CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle } from '@coreui/react'
+import React, { useEffect, useState } from 'react'
+import {
+  CButton,
+  CFormCheck,
+  CDropdown,
+  CDropdownItem,
+  CDropdownMenu,
+  CDropdownToggle,
+} from '@coreui/react'
 
 const AddCompanyDropdown = () => {
   const watchlists = [
     { id: 1, name: 'diddy watchlist' },
     { id: 2, name: 'faang' },
     { id: 3, name: 'diddyblud watchlist' },
-    { id: 4, name: 'fukumean'},
+    { id: 4, name: 'fukumean' },
   ]
   const [isOpen, setIsOpen] = useState(false)
+  const [savedLists, setSavedLists] = useState([])
+  const [pendingLists, setPendingLists] = useState([])
 
   return (
-    <CDropdown autoClose="outside">
+    <CDropdown visible={isOpen} autoClose="outside">
       <CDropdownToggle color="primary">Add</CDropdownToggle>
       <CDropdownMenu>
         {/* header */}
@@ -22,18 +31,19 @@ const AddCompanyDropdown = () => {
         {watchlists.map((watchlist) => {
           return (
             <CDropdownItem
-            key={watchlist.id}
-            className="d-flex align-items-center justify-content-between"
-              style={{cursor: 'pointer'}}
+              key={watchlist.id}
+              onClick={(e) => handleToggleItem(e, watchlist.id)}
+              className="d-flex align-items-center justify-content-between"
+              style={{ cursor: 'pointer' }}
               // onClick={(e) => handleToggleItem(e, list.id)}
             >
               <span>{watchlist.name}</span>
 
               <CFormCheck
                 id={`check-${watchlist.id}`}
-                checked={() => {}}
-                onChange={() => {}} 
-                style={{ pointerEvents: 'none', margin: 0 }} 
+                // checked={isSelected}
+                onChange={() => {}}
+                style={{ pointerEvents: 'none', margin: 0 }}
               />
             </CDropdownItem>
           )
@@ -43,8 +53,9 @@ const AddCompanyDropdown = () => {
           <CButton
             variant="ghost"
             color="secondary"
-            onClick={() => {}}
+            // onClick={handleCancel}
             className="me-2 text-muted border-0 fw-semibold"
+            style={{ textDecoration: 'none' }}
           >
             Cancel
           </CButton>
@@ -52,7 +63,7 @@ const AddCompanyDropdown = () => {
           <CButton
             color="light"
             shape="rounded"
-            onClick={() => {}}
+            // onClick={handleDone}
             className="fw-bold px-4 text-dark"
           >
             Done

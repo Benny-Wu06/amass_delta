@@ -13,7 +13,12 @@ const CompanyRow = ({ companyName }) => {
       <CTableRow>
         <CTableDataCell className="text-center">{companyName}</CTableDataCell>
         <CTableDataCell className="text-center">
-          <CButton color="primary" onClick={() => {navigate(`/companies/${companyName}`)}}>
+          <CButton
+            color="primary"
+            onClick={() => {
+              navigate(`/companies/${companyName}`)
+            }}
+          >
             View
           </CButton>
           <AddCompanyDropdown></AddCompanyDropdown>

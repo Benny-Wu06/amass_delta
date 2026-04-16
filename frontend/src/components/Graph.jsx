@@ -16,7 +16,7 @@ import {
   CHeader,
 } from '@coreui/react'
 
-const Graph = ({header}) => {
+const Graph = ({ header }) => {
   return (
     <>
       <CCol md={6}>
