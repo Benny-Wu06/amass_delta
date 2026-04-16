@@ -84,6 +84,17 @@ const VulnInfo = ({}) => {
             </CCardBody>
           </CCard>
         </CCol>
+
+        <CCol md={6}>
+          <CCard>
+            <CCardHeader className="text-white">
+              <h4>Remediation</h4>
+            </CCardHeader>
+            <CCardBody>
+              <p>fix this and do this, fetch from cisa kev</p>
+            </CCardBody>
+          </CCard>
+        </CCol>
       </CRow>
     </>
   )
