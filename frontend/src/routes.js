@@ -18,6 +18,7 @@ import React from 'react'
 // used routes
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Watchlists = React.lazy(() => import('./views/watchlists/Watchlists'))
+const ViewWatchlist = React.lazy(() => import('./views/watchlists/ViewWatchlist'))
 const AllCompanies = React.lazy(() => import('./views/companies/AllCompanies'))
 const CompanyPage = React.lazy(() => import('./views/companies/CompanyPage'))
 const Vulnerabilities = React.lazy(() => import('./views/vulnerabilities/Vulnerabilities'))
@@ -102,7 +103,7 @@ export const routes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/watchlists', name: 'Watchlists', element: Watchlists },
   { path: '/companies', name: 'Companies', element: AllCompanies },
-  // { path: '/watchlists/:watchlist_id', name: 'ViewWatchlist', element: ViewWatchlist },
+  { path: '/watchlists/:watchlist_id', name: 'ViewWatchlist', element: ViewWatchlist },
   { path: '/vulnerabilities', name: 'Vulnerabilities', element: Vulnerabilities },
   { path: '/vulnerabilities/:cveId', name: 'VulnInfo', element: VulnInfo },
   { path: '/companies/:company_name', name: 'Company', element: CompanyPage },
