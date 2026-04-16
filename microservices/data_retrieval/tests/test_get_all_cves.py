@@ -15,8 +15,8 @@ def test_get_all_cves_success(mock_connect):
     mock_conn.cursor.return_value = mock_cur
 
     mock_cur.fetchall.return_value = [
-        ("CVE-2024-0002", 4.2, "Medium", date(2024, 1, 5), date(2024, 2, 5)),
-        ("CVE-2024-0001", 8.5, "High", date(2024, 1, 1), date(2024, 2, 1))
+        ("CVE-2024-0002", 4.2, "Medium", date(2024, 1, 5), date(2024, 2, 5), "Google"),
+        ("CVE-2024-0001", 8.5, "High", date(2024, 1, 1), date(2024, 2, 1), "Apple")
     ]
 
     response = get_all_cves("date_added")
@@ -24,10 +24,21 @@ def test_get_all_cves_success(mock_connect):
 
     assert response["statusCode"] == 200
     assert body["cves"][0]["cve_id"] == "CVE-2024-0002"
+    assert body["cves"][0]["company_name"] == "Google"
     
-    mock_cur.execute.assert_called_with(
-        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM vulnerabilities ORDER BY date_added DESC;"
-    )
+    expected_query = """
+            SELECT 
+                v.cve_id, 
+                c.risk_index, 
+                c.risk_rating, 
+                v.date_added, 
+                v.due_date,
+                c.company_name
+            FROM vulnerabilities v
+            LEFT JOIN companies c ON v.company_id = c.id
+            ORDER BY v.date_added DESC;
+        """
+    mock_cur.execute.assert_called_with(expected_query)
 
 @patch('psycopg2.connect')
 def test_get_all_cves_sorting_logic_due_date(mock_connect):
@@ -36,8 +47,8 @@ def test_get_all_cves_sorting_logic_due_date(mock_connect):
     mock_conn.cursor.return_value = mock_cur
     
     mock_cur.fetchall.return_value = [
-        ("CVE-2024-1111", 9.0, "Critical", date(2024, 1, 1), date(2024, 2, 1)),
-        ("CVE-2024-2222", 4.2, "Medium", date(2024, 1, 10), date(2024, 2, 5))
+        ("CVE-2024-1111", 9.0, "Critical", date(2024, 1, 1), date(2024, 2, 1), "Google"),
+        ("CVE-2024-2222", 4.2, "Medium", date(2024, 1, 10), date(2024, 2, 5), "Apple")
     ]
 
     event = {"queryStringParameters": {"sort_by": "due_date"}}
@@ -45,11 +56,23 @@ def test_get_all_cves_sorting_logic_due_date(mock_connect):
     body = json.loads(response["body"])
 
     assert body["cves"][0]["cve_id"] == "CVE-2024-1111"
+    assert body["cves"][0]["company_name"] == "Google"
     assert body["cves"][1]["cve_id"] == "CVE-2024-2222"
+    assert body["cves"][1]["company_name"] == "Apple"
 
-    mock_cur.execute.assert_called_with(
-        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM vulnerabilities ORDER BY due_date ASC;"
-    )
+    expected_query = """
+            SELECT 
+                v.cve_id, 
+                c.risk_index, 
+                c.risk_rating, 
+                v.date_added, 
+                v.due_date,
+                c.company_name
+            FROM vulnerabilities v
+            LEFT JOIN companies c ON v.company_id = c.id
+            ORDER BY v.due_date ASC;
+        """
+    mock_cur.execute.assert_called_with(expected_query)
 
 @patch('psycopg2.connect')
 def test_get_all_cves_sorting_logic_date_added(mock_connect):
@@ -58,8 +81,8 @@ def test_get_all_cves_sorting_logic_date_added(mock_connect):
     mock_conn.cursor.return_value = mock_cur
     
     mock_cur.fetchall.return_value = [
-        ("CVE-2024-1111", 9.0, "Critical", date(2024, 3, 3), date(2024, 4, 5)),
-        ("CVE-2024-2222", 4.2, "Medium", date(2024, 1, 5), date(2024, 2, 5))
+        ("CVE-2024-1111", 9.0, "Critical", date(2024, 3, 3), date(2024, 4, 5), "Google"),
+        ("CVE-2024-2222", 4.2, "Medium", date(2024, 1, 5), date(2024, 2, 5), "Apple")
     ]
 
     event = {"queryStringParameters": {"sort_by": "date_added"}}
@@ -67,11 +90,22 @@ def test_get_all_cves_sorting_logic_date_added(mock_connect):
     body = json.loads(response["body"])
 
     assert body["cves"][0]["date_added"] == "2024-03-03"
+    assert body["cves"][0]["company_name"] == "Google"
     assert body["cves"][1]["date_added"] == "2024-01-05"
 
-    mock_cur.execute.assert_called_with(
-        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM vulnerabilities ORDER BY date_added DESC;"
-    )
+    expected_query = """
+            SELECT 
+                v.cve_id, 
+                c.risk_index, 
+                c.risk_rating, 
+                v.date_added, 
+                v.due_date,
+                c.company_name
+            FROM vulnerabilities v
+            LEFT JOIN companies c ON v.company_id = c.id
+            ORDER BY v.date_added DESC;
+        """
+    mock_cur.execute.assert_called_with(expected_query)
 
 @patch('psycopg2.connect')
 def test_get_all_cves_db_error(mock_connect):

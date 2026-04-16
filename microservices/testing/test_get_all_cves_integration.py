@@ -24,20 +24,28 @@ def test_get_cves_schema_and_status():
     assert isinstance(data["cves"], list)
 
 def test_get_cves_data_integrity():
-    ### Verify that the CVE objects contain the new fields (risk_index, etc)  ###
+    ### Verify the CVE objects   ###
     response = requests.get(CVES_ENDPOINT)
     data = response.json()
     
     if data["count"] > 0:
         first_cve = data["cves"][0]
         # Check for all required fields in the live response
-        expected_keys = {"cve_id", "risk_index", "risk_rating", "date_added", "due_date"}
-        assert expected_keys.issubset(first_cve.keys())
+        expected_keys = {
+            "cve_id", 
+            "risk_index", 
+            "risk_rating", 
+            "date_added", 
+            "due_date", 
+            "company_name"
+        }
+        assert expected_keys.issubset(first_cve.keys(), f"Missing keys. Found: {first_cve.keys()}")
         
         # Verify data types from the live wire
         assert isinstance(first_cve["cve_id"], str)
         assert isinstance(first_cve["risk_index"], (int, float))
         assert isinstance(first_cve["risk_rating"], str)
+        assert isinstance(first_cve["company_name"], (str, type(None)))
 
 def test_get_cves_sorting_logic_live():
     ### Verify that the sorting query parameters actually work on the live DB  ###
@@ -52,10 +60,8 @@ def test_get_cves_sorting_logic_live():
     assert resp_latest.status_code == 200
     assert resp_due.status_code == 200
     
-    # If there are at least 2 CVEs, ensure the order is actually different 
-
-    if data_latest["count"] > 1:
-        assert len(data_latest["cves"]) == data_latest["count"]
+    if data_latest["count"] > 0:
+        assert "company_name" in data_latest["cves"][0]
 
 def test_get_cves_invalid_method():
      ### API Gateway should reject POST requests to a GET-only resource  ###

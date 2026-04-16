@@ -16,7 +16,7 @@ def test_lambda_contract_success(mock_connect):
     mock_connect.return_value = mock_conn
     mock_conn.cursor.return_value = mock_cur
     mock_cur.fetchall.return_value = [
-        ("CVE-2026-0001", 9.8, "Critical", date(2026, 4, 1), date(2026, 5, 1))
+        ("CVE-2026-0001", 9.8, "Critical", date(2026, 4, 1), date(2026, 5, 1), "Google")
     ]
 
     # Simulate a real API Gateway Event
@@ -40,21 +40,35 @@ def test_lambda_contract_success(mock_connect):
     assert "count" in body
     assert isinstance(body["cves"], list)
     assert body["cves"][0]["cve_id"] == "CVE-2026-0001"
+    assert body["cves"][0]["company_name"] == "Google"
 
 @patch('psycopg2.connect')
 def test_lambda_default_behavior_no_params(mock_connect):
     ### Verifies the component handles a missing queryStringParameters key (default behavior) ### 
-    mock_connect.return_value = MagicMock()
-    mock_connect.return_value.cursor.return_value.fetchall.return_value = []
+    mock_conn = MagicMock()
+    mock_cur = MagicMock()
+    mock_connect.return_value = mock_conn
+    mock_conn.cursor.return_value = mock_cur
+    mock_cur.fetchall.return_value = []
 
     event = {"queryStringParameters": None}
 
     response = lambda_handler(event, None)
     
     assert response["statusCode"] == 200
-    mock_connect.return_value.cursor.return_value.execute.assert_called_with(
-        "SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM cves ORDER BY date_added DESC;"
-    )
+    expected_query = """
+            SELECT 
+                v.cve_id, 
+                c.risk_index, 
+                c.risk_rating, 
+                v.date_added, 
+                v.due_date,
+                c.company_name
+            FROM vulnerabilities v
+            LEFT JOIN companies c ON v.company_id = c.id
+            ORDER BY v.date_added DESC;
+        """
+    mock_cur.execute.assert_called_with(expected_query)
 
 def test_lambda_missing_env_vars():
     ###  Verifies the component handles system/env failures gracefully ### 

@@ -41,7 +41,18 @@ def get_all_cves(sort_column):
         cur = conn.cursor()
 
         # Update query to select the correct fields and use the dynamic sort
-        query = f"SELECT cve_id, risk_index, risk_rating, date_added, due_date FROM vulnerabilities ORDER BY {db_column} {direction};"
+        query = f"""
+            SELECT 
+                v.cve_id, 
+                c.risk_index, 
+                c.risk_rating, 
+                v.date_added, 
+                v.due_date,
+                c.company_name
+            FROM vulnerabilities v
+            LEFT JOIN companies c ON v.company_id = c.id
+            ORDER BY {db_column} {direction};
+        """
         cur.execute(query)
         rows = cur.fetchall()
         
@@ -51,7 +62,8 @@ def get_all_cves(sort_column):
                 "risk_index": row[1],
                 "risk_rating": row[2],
                 "date_added": row[3],
-                "due_date": row[4]
+                "due_date": row[4],
+                "company_name": row[5]
             } for row in rows
         ]
 
