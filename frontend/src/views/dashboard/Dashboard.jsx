@@ -83,20 +83,29 @@ const Dashboard = () => {
 
   return (
     <>
-      <CCard className="fs-3">TODO alert dropdown maybe should be a modal?</CCard>
+      <CCard className="fs-3 mb-4">TODO alert dropdown maybe should be a modal?</CCard>
       <CRow>
-        <Company
-          className="mb-4 mx-2"
-          company={exampleCompany}
-          company_name={exampleCompany.name}
-        ></Company>
-        {/* <Company className="mb-4 mx-2" company={exampleCompany}></Company>
-        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
-        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
-        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
-        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
-        <Company className="mb-4 mx-2" company={exampleCompany}></Company>
-        <Company className="mb-4 mx-2" company={exampleCompany}></Company> */}
+        <CCol md={3}>
+          <Company
+            className="mb-4 mx-2"
+            company={exampleCompany}
+            company_name={exampleCompany.name}
+          ></Company>
+        </CCol>
+        <CCol md={3}>
+          <Company
+            className="mb-4 mx-2"
+            company={exampleCompany}
+            company_name={exampleCompany.name}
+          ></Company>
+        </CCol>
+        <CCol md={6}>
+          <Company
+            className="mb-4 mx-2"
+            company={exampleCompany}
+            company_name={exampleCompany.name}
+          ></Company>
+        </CCol>
       </CRow>
       <CRow>
         <CCol className="p-0" xs>

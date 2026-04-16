@@ -29,7 +29,7 @@ const Company = ({ className, company, company_name }) => {
     <>
       <CCard className={className} style={{ width: '18rem' }}>
         <CCardBody>
-          <CCardTitle>{company.name}</CCardTitle>
+          <CCardTitle>this card should now show info about watchlists</CCardTitle>
           <CCardSubtitle className="mb-2 text-body-secondary">{company.risk_rating}</CCardSubtitle>
           cvss: {company.avg_cvss}
           <br />

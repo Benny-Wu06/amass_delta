@@ -10,7 +10,12 @@ const Watchlist = ({ watchlist }) => {
       <CTableRow>
         <CTableDataCell className="text-center">{watchlist.name}</CTableDataCell>
         <CTableDataCell className="text-center">
-          <CButton color="primary" onClick={() => {navigate(`/watchlists/${watchlist.id}`)}}>
+          <CButton
+            color="primary"
+            onClick={() => {
+              navigate(`/watchlists/${watchlist.id}`)
+            }}
+          >
             Edit
           </CButton>
         </CTableDataCell>
