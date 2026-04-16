@@ -8,10 +8,12 @@ import Company from 'src/components/Company.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge } from '@coreui/react'
 import { STAGING_URL } from '../../vars'
+import VulnerabilityTable from '../vulnerabilities/VulnerabilityTable.jsx'
 
 const CompanyPage = () => {
   const { company_name } = useParams()
   const [companyData, setCompanyData] = useState(null)
+  const [vulns, setVulns] = useState([])
   const [loading, setLoading] = useState(true)
   const companyName = company_name
 
@@ -27,8 +29,19 @@ const CompanyPage = () => {
         setLoading(false)
       }
     }
-    fetchCompany(company_name)
-  }, [company_name])
+
+    const fetchCompanyVulns = async () => {
+      try {
+        const response = await axios.get(`${STAGING_URL}/v1/companies/${company_name}/vulnerabilities`)
+        console.log(response.data)
+        setVulns(response.data.vulnerabilities)
+      } catch (error) {
+        console.log('failed,', error)
+      }
+    }
+    fetchCompany()
+    fetchCompanyVulns()
+  }, [])
 
   return (
     <>
@@ -38,7 +51,7 @@ const CompanyPage = () => {
         <Graph header={'CVE Growth vs. Time'}></Graph>
       </CRow>
 
-      <CRow>
+      <CRow className="mb-4">
         {companyData ? (
           <CCol md={6}>
             <CCard className="h-150">
@@ -56,10 +69,18 @@ const CompanyPage = () => {
                 </CRow>
                 <hr />
                 <div className="mt-3">
-                  <p><strong>CVE Count:</strong> {companyData.cve_count}</p>
-                  <p><strong>Avg CVSS:</strong> {companyData.avg_cvss}</p>
-                <p><strong>Avg EPSS:</strong> {companyData.avg_epss}</p>
-                <p><strong>Latest Vulnerability Date:</strong> {"2026-03-14"}</p>
+                  <p>
+                    <strong>CVE Count:</strong> {companyData.cve_count}
+                  </p>
+                  <p>
+                    <strong>Avg CVSS:</strong> {companyData.avg_cvss}
+                  </p>
+                  <p>
+                    <strong>Avg EPSS:</strong> {companyData.avg_epss}
+                  </p>
+                  <p>
+                    <strong>Latest Vulnerability Date:</strong> {'hardcoded diddyblud'}
+                  </p>
                 </div>
               </CCardBody>
             </CCard>
@@ -70,6 +91,8 @@ const CompanyPage = () => {
 
         <Graph header={'Stock Price vs. CVE GROWTH'}></Graph>
       </CRow>
+
+      <VulnerabilityTable vulns={vulns}></VulnerabilityTable>
     </>
   )
 }
