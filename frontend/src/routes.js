@@ -21,6 +21,7 @@ const Watchlists = React.lazy(() => import('./views/watchlists/Watchlists'))
 const AllCompanies = React.lazy(() => import('./views/companies/AllCompanies'))
 const CompanyPage = React.lazy(() => import('./views/companies/CompanyPage'))
 const Vulnerabilities = React.lazy(() => import('./views/vulnerabilities/Vulnerabilities'))
+const VulnInfo = React.lazy(() => import('./views/vulnerabilities/VulnInfo'))
 
 // DEFAULT ROUTES
 const Colors = React.lazy(() => import('./views/_defaults/theme/colors/Colors'))
@@ -103,6 +104,7 @@ export const routes = [
   { path: '/companies', name: 'Companies', element: AllCompanies },
   // { path: '/watchlists/:watchlist_id', name: 'ViewWatchlist', element: ViewWatchlist },
   { path: '/vulnerabilities', name: 'Vulnerabilities', element: Vulnerabilities },
+  { path: '/vulnerabilities/cve_id', name: 'VulnInfo', element: VulnInfo },
   { path: '/companies/:company_name', name: 'Company', element: CompanyPage },
 
   // DEFAULT ROUTES
