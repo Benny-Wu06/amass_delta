@@ -26,8 +26,7 @@ const Vulnerabilities = () => {
     {
       cve_id: 'CVE-2026-0001',
       company: 'diddyblud_inc',
-      description:
-        'TODO connect to backend',
+      description: 'TODO connect to backend',
       risk_index: 9,
       risk_rating: 'DEATH',
       due_date: '2026-04-12',
@@ -35,8 +34,7 @@ const Vulnerabilities = () => {
     {
       cve_id: 'CVE-2026-0001',
       company: 'diddyblud_inc',
-      description:
-        'TODO connect to backend',
+      description: 'TODO connect to backend',
       risk_index: 9,
       risk_rating: 'DEATH',
       due_date: '2026-04-12',
@@ -44,8 +42,7 @@ const Vulnerabilities = () => {
     {
       cve_id: 'CVE-2026-0001',
       company: 'diddyblud_inc',
-      description:
-        'TODO connect to backend',
+      description: 'TODO connect to backend',
       risk_index: 9,
       risk_rating: 'DEATH',
       due_date: '2026-04-12',

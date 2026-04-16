@@ -32,7 +32,9 @@ const CompanyPage = () => {
 
     const fetchCompanyVulns = async () => {
       try {
-        const response = await axios.get(`${STAGING_URL}/v1/companies/${company_name}/vulnerabilities`)
+        const response = await axios.get(
+          `${STAGING_URL}/v1/companies/${company_name}/vulnerabilities`,
+        )
         console.log(response.data)
         setVulns(response.data.vulnerabilities)
       } catch (error) {
