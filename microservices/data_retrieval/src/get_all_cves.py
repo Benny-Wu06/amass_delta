@@ -3,15 +3,18 @@ import psycopg2
 import json
 import os
 from datetime import date, datetime
+from decimal import Decimal
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # Helper to handle Date serialization in JSON
-def date_serializer(obj):
+def date_serialiser(obj):
     if isinstance(obj, (date, datetime)):
         return obj.isoformat()
-    raise TypeError(f"Type {type(obj)} not serializable")
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError(f"Type {type(obj)} not serialisable")
 
 def lambda_handler(event, context):
     query_params = event.get("queryStringParameters") or {}
@@ -23,10 +26,10 @@ def get_all_cves(sort_column):
     conn = None
 
     allowed_sorts = {
-        "date_added": ("date_added", "DESC"),
-        "due_date": ("due_date", "ASC")
+        "date_added": ("v.date_added", "DESC"),
+        "due_date": ("v.due_date", "ASC")
     }
-    db_column, direction = allowed_sorts.get(sort_column, ("date_added", "DESC"))
+    db_column, direction = allowed_sorts.get(sort_column, ("v.date_added", "DESC"))
 
     try:
         conn = psycopg2.connect(
@@ -73,7 +76,7 @@ def get_all_cves(sort_column):
             "body": json.dumps({
                 "count": len(cve_list),
                 "cves": cve_list
-            }, default=date_serializer), 
+            }, default=date_serialiser), 
         }
 
     except Exception as e:

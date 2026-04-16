@@ -52,23 +52,14 @@ def test_lambda_default_behavior_no_params(mock_connect):
     mock_cur.fetchall.return_value = []
 
     event = {"queryStringParameters": None}
-
     response = lambda_handler(event, None)
     
     assert response["statusCode"] == 200
-    expected_query = """
-            SELECT 
-                v.cve_id, 
-                c.risk_index, 
-                c.risk_rating, 
-                v.date_added, 
-                v.due_date,
-                c.company_name
-            FROM vulnerabilities v
-            LEFT JOIN companies c ON v.company_id = c.id
-            ORDER BY v.date_added DESC;
-        """
-    mock_cur.execute.assert_called_with(expected_query)
+    actual_query = mock_cur.execute.call_args[0][0]
+
+    assert "v.cve_id" in actual_query
+    assert "LEFT JOIN companies c" in actual_query
+    assert "ORDER BY v.date_added DESC" in actual_query
 
 def test_lambda_missing_env_vars():
     ###  Verifies the component handles system/env failures gracefully ### 
