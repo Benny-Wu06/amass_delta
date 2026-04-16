@@ -2,25 +2,15 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import classNames from 'classnames'
 
-// import {
-//   CCard,
-//   CHeader,
-//   CHeaderBrand
-// } from '@coreui/react'
-
-import { 
-  CRow, CCol, CCard, CCardBody, CCardHeader,
-  CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell,
-  CPagination, CPaginationItem, CBadge,
-  CHeader
-} from '@coreui/react'
+import Graph from 'src/components/Graph.jsx'
 import Company from 'src/components/Company.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
+import { CRow } from '@coreui/react'
 
 const CompanyPage = () => {
   const { company_name } = useParams()
   const companyName = company_name
-  // fetch subscribed companies 
+  // fetch subscribed companies
   const companies = [
     {
       name: 'Microsoft',
@@ -48,18 +38,14 @@ const CompanyPage = () => {
   return (
     <>
       <h2 className="mx-2 mb-4">{companyName}</h2>
+      <CRow>
+        <Graph header={"Company Heatmap"}></Graph>
+        <Graph header={"CVE Growth vs. Time"}></Graph>
+      </CRow>
 
-      <CRow className="mb-4">
-        <CCol md={6}>
-          <CCard className="h-150">
-            <CCardHeader>Company Heatmap</CCardHeader>
-            <CCardBody className="d-flex align-items-center justify-content-center">
-              <div style={{ height: '250px', background: '#2f84d9ff', width: '100%' }}>
-                CONNECT TO HEATMAP
-              </div>
-            </CCardBody>
-          </CCard>
-        </CCol>
+      <CRow>
+        <div>metrics</div>
+        <Graph header={"Stock Price vs. CVE GROWTH"}></Graph>
       </CRow>
     </>
   )
