@@ -31,6 +31,8 @@
     "chart.js": "^4.5.1",
     "classnames": "^2.5.1",
     "core-js": "^3.49.0",
+    "highcharts": "^12.6.0",
+    "highcharts-react-official": "^3.2.3",
     "prop-types": "^15.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

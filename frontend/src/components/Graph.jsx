@@ -1,52 +1,106 @@
-import React from 'react'
-import { CCol, CCard, CCardBody, CCardHeader } from '@coreui/react'
+import React, { useEffect, useRef } from 'react'
+import Highcharts from 'highcharts'
+import HighchartsReact from 'highcharts-react-official'
+import { CCol, CCard, CCardHeader, CCardBody } from '@coreui/react'
+
+// Use this specific import style for modules
+import HeatmapModule from 'highcharts/modules/heatmap'
+
+// Initialize immediately if Highcharts is available
+if (typeof HeatmapModule === 'function') {
+  HeatmapModule(Highcharts)
+}
 
 const Graph = ({ header, data, type }) => {
-  const getCellColor = (count) => {
-    if (count === 0) return '#2a2e32' // Darker gray for dark mode
-    if (count < 10) return '#4d3800'  // Dark Yellow
-    if (count < 30) return '#662222'  // Dark Red
-    return '#e55353'                 // CoreUI Danger Red
+  const chartComponentRef = useRef(null)
+
+  // Data Guard to prevent rendering before data arrives
+  if (type === 'heatmap' && (!data || data.length === 0)) {
+    return (
+      <CCol md={6}>
+        <CCard className="mb-4">
+          <CCardHeader>{header}</CCardHeader>
+          <CCardBody className="d-flex align-items-center justify-content-center" style={{ height: '350px' }}>
+            <div className="text-muted text-center">Loading Heatmap...</div>
+          </CCardBody>
+        </CCard>
+      </CCol>
+    )
+  }
+
+  if (type === 'heatmap') {
+    const cvssCategories = ['0-2', '2-4', '4-6', '6-8', '8-10']
+    const epssCategories = ['0-0.2', '0.2-0.4', '0.4-0.6', '0.6-0.8', '0.8-1.0']
+
+    const chartData = data.map((item) => [
+      cvssCategories.indexOf(item.cvss_range) === -1 ? 0 : cvssCategories.indexOf(item.cvss_range),
+      epssCategories.indexOf(item.epss_range) === -1 ? 0 : epssCategories.indexOf(item.epss_range),
+      item.cve_count || 0,
+    ])
+
+    const options = {
+      chart: { type: 'heatmap', height: '350px', backgroundColor: 'transparent' },
+      title: { text: null },
+      xAxis: {
+        categories: cvssCategories,
+        title: { text: 'CVSS Score', style: { color: '#8a93a2' } },
+        labels: { style: { color: '#8a93a2' } }
+      },
+      yAxis: {
+        categories: epssCategories,
+        title: { text: 'EPSS Score', style: { color: '#8a93a2' } },
+        labels: { style: { color: '#8a93a2' } },
+        reversed: true
+      },
+      colorAxis: {
+        min: 0,
+        minColor: '#2a2e32',
+        maxColor: '#e55353',
+      },
+      legend: {
+        align: 'right',
+        layout: 'vertical',
+        verticalAlign: 'middle',
+        symbolHeight: 200,
+        title: { text: 'CVEs', style: { color: '#8a93a2' } },
+        labels: { style: { color: '#8a93a2' } }
+      },
+      series: [{
+        name: 'Vulnerabilities',
+        borderWidth: 1,
+        borderColor: '#3c4147',
+        data: chartData,
+        dataLabels: { enabled: false },
+        tooltip: {
+          headerFormat: 'Risk Grid<br/>',
+          pointFormat: 'CVSS: <b>{point.xCategory}</b>, EPSS: <b>{point.yCategory}</b> <br/>Count: <b>{point.value}</b>'
+        }
+      }],
+      credits: { enabled: false }
+    }
+
+    return (
+      <CCol md={6}>
+        <CCard className="mb-4">
+          <CCardHeader>{header}</CCardHeader>
+          <CCardBody>
+            <HighchartsReact 
+                highcharts={Highcharts} 
+                options={options} 
+                ref={chartComponentRef} 
+            />
+          </CCardBody>
+        </CCard>
+      </CCol>
+    )
   }
 
   return (
     <CCol md={6}>
-      <CCard className="h-100 mb-4">
+      <CCard className="mb-4">
         <CCardHeader>{header}</CCardHeader>
-        <CCardBody>
-          {type === 'heatmap' && data ? (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(5, 1fr)',
-              gap: '5px',
-              width: '100%',
-              height: '250px'
-            }}>
-              {data.map((cell, index) => (
-                <div
-                  key={index}
-                  title={`CVSS: ${cell.cvss_range} | EPSS: ${cell.epss_range}`}
-                  style={{
-                    backgroundColor: getCellColor(cell.cve_count),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    border: '1px solid #dee2e6',
-                    borderRadius: '2px',
-                    color: cell.cve_count > 30 ? 'white' : 'black'
-                  }}
-                >
-                  {cell.cve_count > 0 ? cell.cve_count : ''}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ height: '250px', background: '#f8f9fa', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span className="text-muted">No data available</span>
-            </div>
-          )}
+        <CCardBody className="d-flex align-items-center justify-content-center" style={{ height: '350px' }}>
+          <div className="text-muted">No Data Available</div>
         </CCardBody>
       </CCard>
     </CCol>
