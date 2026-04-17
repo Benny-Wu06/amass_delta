@@ -1,6 +1,6 @@
 data "archive_file" "stocks_cve_growth_zip" {
   type        = "zip"
-  source_file = "${path.module}/../stocks_cve_growth_lambda.py"
+  source_file = "${path.module}/../src/stocks_cve_growth_lambda.py"
   output_path = "${path.module}/stocks_cve.zip"
 }
 
