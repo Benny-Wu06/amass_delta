@@ -41,8 +41,22 @@ const CompanyPage = () => {
         console.log('failed,', error)
       }
     }
+
+    const fetchCompanyGraphs = async () => {
+      try {
+        const response = await axios.get(
+          `${STAGING_URL}/v1/heatmap/${company_name}`,
+        )
+        console.log(response.data)
+        setGraphs(response.data.vulnerabilities)
+      } catch (error) {
+        console.log('failed,', error)
+      }
+    }
+
     fetchCompany()
     fetchCompanyVulns()
+    fetchCompanyGraphs()
   }, [company_name])
 
   return (
