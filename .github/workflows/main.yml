@@ -163,8 +163,10 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Run Integration Tests
         env:
-          DB_HOST: ${{ secrets.STAGING_DB_HOST }}
-          DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          # DB_HOST: ${{ secrets.STAGING_DB_HOST }}
+          DB_HOST: amass-db.c14q0aeuin1w.ap-southeast-2.rds.amazonaws.com
+          # DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          DB_PASSWORD: Bennyiscool
           AWS_DEFAULT_REGION: ap-southeast-2
         run: |
           python3 -m pytest --html=report.html --self-contained-html
