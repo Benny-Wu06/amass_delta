@@ -38,7 +38,9 @@ const Graph = ({ header, data, type }) => {
       item.cve_count || 0,
     ])
 
-    const options = {
+    const maxCount = Math.max(...data.map(i => i.cve_count || 0), 1);
+
+   const options = {
       chart: { type: 'heatmap', height: '350px', backgroundColor: 'transparent' },
       title: { text: null },
       xAxis: {
@@ -52,10 +54,16 @@ const Graph = ({ header, data, type }) => {
         labels: { style: { color: '#8a93a2' } },
         reversed: true
       },
+      
       colorAxis: {
         min: 0,
-        minColor: '#2a2e32',
-        maxColor: '#e55353',
+        max: maxCount,
+        stops: [
+          [0, '#2b2e32'],   // Zero: Grey
+          [0.33, '#d6d464'], // Mid1: Yellow
+          [0.66, '#d8834b'], // Mid2: Orange
+          [1, '#d64b4b']    // High: Red
+        ],
       },
       legend: {
         align: 'right',
@@ -68,8 +76,8 @@ const Graph = ({ header, data, type }) => {
       series: [{
         name: 'Vulnerabilities',
         borderWidth: 1,
-        borderColor: '#3c4147',
-        data: chartData,
+        borderColor: '#3c4147', 
+        data: chartData,        
         dataLabels: { enabled: false },
         tooltip: {
           headerFormat: 'Risk Grid<br/>',
