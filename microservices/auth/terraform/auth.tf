@@ -40,7 +40,7 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
 resource "aws_lambda_function" "auth_lambda" {
   filename         = data.archive_file.auth_zip.output_path
   function_name    = "auth-service"
-  role             = aws_iam_role.auth_lambda_role.arn
+  role             = aws_iam_role.auth_role.arn
   handler          = "auth_lambda.auth_lambda"
   runtime          = "python3.11"
   timeout          = 30
