@@ -139,7 +139,7 @@ jobs:
     needs: terraform-staging
     name: Integration Testing
     runs-on: ubuntu-latest
-    environment: staging
+    # environment: staging
     env:
       TF_VAR_aws_suffix: "staging"
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -164,7 +164,7 @@ jobs:
       - name: Run Integration Tests
         env:
           DB_HOST: ${{ secrets.STAGING_DB_HOST }}
-          DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD}}
+          DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
           AWS_DEFAULT_REGION: ap-southeast-2
         run: |
           python3 -m pytest --html=report.html --self-contained-html
