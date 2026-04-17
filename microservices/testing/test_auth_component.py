@@ -4,8 +4,11 @@ import pytest
 import boto3
 import psycopg2
 from botocore.config import Config
-from microservices.auth.app.auth_utils import hash_password
-    
+# from microservices.auth.app.auth_utils import hash_password
+import bcrypt
+
+def hash_password(password):
+    return bcrypt.hashpw(password[:72].encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 # CONFIGURATION
 AWS_REGION = "ap-southeast-2"
