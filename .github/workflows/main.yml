@@ -93,6 +93,7 @@ jobs:
     name: Terraform Staging
     runs-on: ubuntu-latest
     environment: staging
+    concurrency: staging-environment
     env:
       TF_VAR_aws_suffix: "staging"
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
@@ -131,7 +132,6 @@ jobs:
         run: terraform plan -input=false
         
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
         working-directory: ${{ matrix.directory }}
         run: terraform apply -auto-approve -input=false
 
@@ -139,7 +139,8 @@ jobs:
     needs: terraform-staging
     name: Integration Testing
     runs-on: ubuntu-latest
-    # environment: staging
+    environment: staging
+    concurrency: staging-environment
     env:
       TF_VAR_aws_suffix: "staging"
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -162,12 +163,6 @@ jobs:
           pip install pytest pytest-mock pytest-cov psycopg2-binary pytest-html
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Run Integration Tests
-        env:
-          # DB_HOST: ${{ secrets.STAGING_DB_HOST }}
-          DB_HOST: amass-db.c14q0aeuin1w.ap-southeast-2.rds.amazonaws.com
-          # DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-          DB_PASSWORD: Bennyiscool
-          AWS_DEFAULT_REGION: ap-southeast-2
         run: |
           python3 -m pytest --html=report.html --self-contained-html
       - name: Upload Test Report
