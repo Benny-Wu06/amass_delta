@@ -33,7 +33,7 @@ resource "aws_iam_role" "auth_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
-  role       = aws_iam_role.integration_role.name
+  role       = aws_iam_role.auth_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
@@ -54,7 +54,7 @@ resource "aws_lambda_function" "auth_lambda" {
 
   vpc_config {
     subnet_ids         = var.subnet_ids
-    security_group_ids = [aws_security_group.integration_sg.id]
+    security_group_ids = [aws_security_group.auth_sg.id]
   }
 
   environment {
