@@ -4,11 +4,7 @@ import pytest
 import boto3
 import psycopg2
 from botocore.config import Config
-# from microservices.auth.app.auth_utils import hash_password
-import bcrypt
-
-def hash_password(password):
-    return bcrypt.hashpw(password[:72].encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+from microservices.auth.app.auth_utils import hash_password
 
 # CONFIGURATION
 AWS_REGION = "ap-southeast-2"
@@ -24,8 +20,8 @@ lambda_client = boto3.client(
 @pytest.fixture(scope="module")
 def conn_db():
     conn = None
-    DB_PASSWORD = os.environ.get("DB_PASSWORD")
-    DB_HOST = os.environ.get("DB_HOST")
+    DB_PASSWORD = os.environ.get("STAGING_DB_PASSWORD")
+    DB_HOST = os.environ.get("STAGING_DB_HOST")
     cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
     print('\nDB_PASSWORD', DB_PASSWORD)
     print('\ndb_host', DB_HOST)
