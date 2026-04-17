@@ -162,6 +162,10 @@ jobs:
           pip install pytest pytest-mock pytest-cov psycopg2-binary pytest-html
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Run Integration Tests
+        env:
+          DB_HOST: ${{ secrets.STAGING_DB_HOST }}
+          DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD}}
+          AWS_DEFAULT_REGION: ap-southeast-2
         run: |
           python3 -m pytest --html=report.html --self-contained-html
       - name: Upload Test Report
