@@ -18,6 +18,7 @@ DB_USER = os.environ.get("DB_USER", "postgres")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
 CISA_KEY = "enriched/enriched.json"
+cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
 
 # Database connection
 
@@ -29,8 +30,9 @@ def get_db_connection():
         database=DB_NAME,
         user=DB_USER,
         password=DB_PASSWORD,
-        sslmode="prefer",
+        sslmode="require",
         connect_timeout=3,
+        sslrootcert=cert_path,
     )
     return conn
 
@@ -60,9 +62,7 @@ def init_db(cur):
         date_added date not null,
         due_date date not null,
         cvss_score numeric,
-        cvss_severity text,
-        epss_score numeric,
-        epss_percentile numeric
+        epss_score numeric
     );
     """
     cur.execute(schema_sql)

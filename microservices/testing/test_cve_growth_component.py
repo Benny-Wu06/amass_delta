@@ -1,9 +1,16 @@
 import json
 import os
 import pytest
+from datetime import datetime, timedelta
 import boto3
 import psycopg2
 from botocore.config import Config
+
+today = datetime.now()
+
+# dynamically get cves from x num of days ago
+def days_ago(days):
+    return (today - timedelta(days=days)).strftime("%Y-%m-%d")
 
 # CONFIGURATION
 AWS_REGION = "ap-southeast-2"
@@ -18,12 +25,12 @@ lambda_client = boto3.client(
 # SEED DATA
 COMPANY_NAME_1 = "TestCorp1"
 VULNS_1 = [
-    ("CVE-2026-001", 7.7, 0.77, "2026-01-10"),
-    ("CVE-2026-002", 6.6, 0.11, "2026-03-28"),
-    ("CVE-2026-003", 2.2, 0.66, "2026-03-30"), 
-    ("CVE-2026-004", 3.3, 0.88, "2026-03-30"),
-    ("CVE-2026-005", 9.9, 0.88, "2026-03-30"),
-    ("CVE-2026-006", 4.4, 0.22, "2026-03-31"),
+    ("CVE-2026-001", 7.7, 0.77, days_ago(90)), 
+    ("CVE-2026-002", 6.6, 0.11, days_ago(6)),  
+    ("CVE-2026-003", 2.2, 0.66, days_ago(5)),  
+    ("CVE-2026-004", 3.3, 0.88, days_ago(5)),  
+    ("CVE-2026-005", 9.9, 0.88, days_ago(5)),  
+    ("CVE-2026-006", 4.4, 0.22, days_ago(4)),  
 ]
 
 COMPANY_NAME_2 = "TestCorp2"
@@ -104,7 +111,7 @@ def invoke_visualiser(payload):
 def test_lambda_isolation():
     event = {
         "pathParameters": {"company_name": COMPANY_NAME_1},
-        "queryStringParameters": {"days": "7"}
+        "queryStringParameters": {"days": "30"}
     }
     
     result = invoke_visualiser(event)
@@ -116,7 +123,7 @@ def test_lambda_isolation():
     summary = body["summary"]
     # should not account one old CVE
     assert summary["total_period_increase"] == 5
-    assert summary["peak_growth_day"] == "2026-03-30"
+    assert summary["peak_growth_day"] == days_ago(5)
 
 def test_lambda_success():
     event = {"pathParameters": {"company_name": COMPANY_NAME_2}}
