@@ -14,6 +14,7 @@ const CompanyPage = () => {
   const { company_name } = useParams()
   const [companyData, setCompanyData] = useState(null)
   const [vulns, setVulns] = useState([])
+  const [heatmapData, setHeatmapData] = useState([])
   const [loading, setLoading] = useState(true)
   const companyName = company_name
 
@@ -42,13 +43,13 @@ const CompanyPage = () => {
       }
     }
 
-    const fetchCompanyGraphs = async () => {
+    const fetchCompanyHeatmap = async () => {
       try {
         const response = await axios.get(
           `${STAGING_URL}/v1/heatmap/${company_name}`,
         )
-        console.log(response.data)
-        setGraphs(response.data.vulnerabilities)
+        const parsedBody = JSON.parse(response.data.body);
+        setHeatmapData(parsedBody.heatmap_grid);
       } catch (error) {
         console.log('failed,', error)
       }
@@ -56,14 +57,16 @@ const CompanyPage = () => {
 
     fetchCompany()
     fetchCompanyVulns()
-    fetchCompanyGraphs()
+    fetchCompanyHeatmap()
   }, [company_name])
 
   return (
     <>
       <h2 className="mx-2 mb-4">{companyName}</h2>
       <CRow className="mb-4">
-        <Graph header={'Company Heatmap'}></Graph>
+        <CCol md={6}>
+          <Graph header={'Company Heatmap'} data={heatmapData} type="heatmap" />
+        </CCol>
         <Graph header={'CVE Growth vs. Time'}></Graph>
       </CRow>
 
