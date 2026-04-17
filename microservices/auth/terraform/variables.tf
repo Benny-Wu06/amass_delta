@@ -1,23 +1,26 @@
-variable "db_host" {
-  description = "PostgreSQL database host"
+variable "vpc_id" {
+  type = string
 }
 
-variable "db_password" {
-  description = "PostgreSQL database password"
-  sensitive   = true
+variable "subnet_ids" {
+  type = list(string)
+}
+
+variable "db_address" {
+  type = string
 }
 
 variable "db_name" {
-  default = "postgres"
+  type = string
 }
 
 variable "db_user" {
-  default = "postgres"
+  type = string
 }
 
-variable "jwt_secret" {
-  description = "Secret key for signing JWT tokens"
-  sensitive   = true
+variable "db_password" {
+  type      = string
+  sensitive = true
 }
 
 variable "api_id" {
