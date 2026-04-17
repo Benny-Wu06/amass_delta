@@ -14,6 +14,7 @@ const CompanyPage = () => {
   const { company_name } = useParams()
   const [companyData, setCompanyData] = useState(null)
   const [vulns, setVulns] = useState([])
+  const [heatmapData, setHeatmapData] = useState([])
   const [loading, setLoading] = useState(true)
   const companyName = company_name
 
@@ -42,35 +43,53 @@ const CompanyPage = () => {
       }
     }
 
-    const fetchCompanyGraphs = async () => {
+    const fetchCompanyHeatmap = async () => {
       try {
         const response = await axios.get(
           `${STAGING_URL}/v1/heatmap/${company_name}`,
         )
-        console.log(response.data)
-        setGraphs(response.data.vulnerabilities)
+        let grid = [];
+    
+        // If body is already an object, use it. If it's a string, parse it.
+        const data = typeof response.data.body === 'string' 
+        ? JSON.parse(response.data.body) 
+        : response.data;
+
+        setHeatmapData(data.heatmap_grid || []);
       } catch (error) {
-        console.log('failed,', error)
+        console.log('failed fetching heatmap,', error)
       }
     }
 
     fetchCompany()
     fetchCompanyVulns()
-    fetchCompanyGraphs()
+    fetchCompanyHeatmap()
   }, [company_name])
+
+  const latestDate = vulns && vulns.length > 0 
+    ? new Date(
+        Math.max(...vulns.map(v => {
+            const d = new Date(v.date_added || v.published_date);
+            return isNaN(d.getTime()) ? 0 : d.getTime();
+        }))
+        ).toLocaleDateString()
+    : 'No records found';
 
   return (
     <>
       <h2 className="mx-2 mb-4">{companyName}</h2>
+      
+      {/* Row 1: Charts */}
       <CRow className="mb-4">
-        <Graph header={'Company Heatmap'}></Graph>
-        <Graph header={'CVE Growth vs. Time'}></Graph>
+        {/* Only call the heatmap once and pass the data */}
+        <Graph header={'Company Risk Heatmap'} data={heatmapData} type="heatmap" />
+        <Graph header={'CVE Growth vs. Time'} />
       </CRow>
 
       <CRow className="mb-4">
         {companyData ? (
           <CCol md={6}>
-            <CCard className="h-150">
+            <CCard className="h-100"> 
               <CCardHeader>Metrics</CCardHeader>
               <CCardBody>
                 <CRow>
@@ -85,30 +104,26 @@ const CompanyPage = () => {
                 </CRow>
                 <hr />
                 <div className="mt-3">
-                  <p>
-                    <strong>CVE Count:</strong> {companyData.cve_count}
-                  </p>
-                  <p>
-                    <strong>Avg CVSS:</strong> {companyData.avg_cvss}
-                  </p>
-                  <p>
-                    <strong>Avg EPSS:</strong> {companyData.avg_epss}
-                  </p>
-                  <p>
-                    <strong>Latest Vulnerability Date:</strong> {'hardcoded diddyblud'}
-                  </p>
+                  <p><strong>CVE Count:</strong> {companyData.cve_count}</p>
+                  <p><strong>Avg CVSS:</strong> {companyData.avg_cvss}</p>
+                  <p><strong>Avg EPSS:</strong> {companyData.avg_epss}</p>
+                  <p><strong>Latest Update:</strong> {latestDate}</p>
                 </div>
               </CCardBody>
             </CCard>
           </CCol>
         ) : (
-          <div>loading</div>
+          <CCol md={6}>
+            <CCard className="h-100 d-flex align-items-center justify-content-center">
+              <div>Loading metrics...</div>
+            </CCard>
+          </CCol>
         )}
 
-        <Graph header={'Stock Price vs. CVE GROWTH'}></Graph>
+        <Graph header={'Stock Price vs. CVE GROWTH'} />
       </CRow>
 
-      <VulnerabilityTable vulns={vulns}></VulnerabilityTable>
+      <VulnerabilityTable vulns={vulns} />
     </>
   )
 }
