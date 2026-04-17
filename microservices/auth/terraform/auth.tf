@@ -59,7 +59,7 @@ resource "aws_lambda_function" "auth_lambda" {
 
   environment {
     variables = {
-      DB_HOST     = var.db_host
+      DB_HOST     = var.db_address
       DB_PASSWORD = var.db_password
       DB_NAME     = var.db_name
       DB_USER     = var.db_user
