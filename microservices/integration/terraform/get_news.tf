@@ -1,0 +1,92 @@
+data "archive_file" "get_news_zip" {
+  type        = "zip"
+  source_file = "${path.module}/../src/get_news_lambda.py"
+  output_path = "${path.module}/get_news.zip"
+}
+
+resource "aws_security_group" "integration_sg" {
+  name   = "integration-lambda-sg"
+  vpc_id = var.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_iam_role" "integration_role" {
+  name = "integration_lambda_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
+  role       = aws_iam_role.integration_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "company_vulnerabilities_insights" {
+  role       = aws_iam_role.integration_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+}
+
+resource "aws_lambda_function" "get_news_lambda" {
+  filename      = data.archive_file.get_news_zip.output_path
+  function_name = "integration_get_news"
+  role          = aws_iam_role.integration_role.arn
+  handler       = "get_news_lambda.get_news_lambda"
+  runtime       = "python3.12"
+  timeout       = 30
+
+  layers = [
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1",
+    "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
+    "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-requests:23"
+  ]
+
+  source_code_hash = data.archive_file.get_news_zip.output_base64sha256
+
+  vpc_config {
+    subnet_ids         = var.subnet_ids
+    security_group_ids = [aws_security_group.integration_sg.id]
+  }
+
+  environment {
+    variables = {
+      DB_HOST          = var.db_address
+      DB_NAME          = var.db_name
+      DB_USER          = var.db_user
+      DB_PASSWORD      = var.db_password
+    }
+  }
+}
+
+resource "aws_apigatewayv2_integration" "get_news_lambda_int" {
+  api_id           = var.api_id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.get_news_lambda.invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "stocks_cve_route" {
+  api_id    = var.api_id
+  route_key = "GET /v1/integration/{company_symbol}"
+  target    = "integrations/${aws_apigatewayv2_integration.get_news_lambda_int.id}"
+}
+
+resource "aws_lambda_permission" "stocks_cve_api_gw_perm" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_news_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_execution_arn}/*/*"
+}
