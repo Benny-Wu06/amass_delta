@@ -15,13 +15,19 @@ import {
   CTableRow,
   CSpinner,
   CBadge,
-  CButton
+  CButton,
+  CFormInput,
+  CInputGroup,
+  CInputGroupText
 } from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import { cilSearch } from '@coreui/icons'
 
 const Vulnerabilities = () => {
   const [vulns, setVulns] = useState([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState('date_added')
+  const [searchTerm, setSearchTerm] = useState('')
   
   const navigate = useNavigate()
 
@@ -48,6 +54,14 @@ const Vulnerabilities = () => {
     fetchCVEs()
   }, [sortBy])
 
+  const filteredVulns = vulns.filter((item) => {
+    const search = searchTerm.toLowerCase()
+    return (
+      item.cve_id.toLowerCase().includes(search) || 
+      item.company_name.toLowerCase().includes(search)
+    )
+  })
+
   const getBadgeColor = (rating) => {
     switch (rating) {
       case 'CRITICAL': return 'danger'
@@ -63,19 +77,31 @@ const Vulnerabilities = () => {
         <CCard className="mb-4">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <strong>Vulnerability Feed</strong>
-            <div>
-              <button 
-                className={`btn btn-sm ${sortBy === 'date_added' ? 'btn-primary' : 'btn-outline-secondary'} me-2`}
-                onClick={() => setSortBy('date_added')}
-              >
-                Date Added
-              </button>
-              <button 
-                className={`btn btn-sm ${sortBy === 'due_date' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                onClick={() => setSortBy('due_date')}
-              >
-                Due Date
-              </button>
+            <div className="d-flex align-items-center gap-3">
+              <div style={{ width: '250px' }}>
+                <CInputGroup size="sm">
+                  <CInputGroupText><CIcon icon={cilSearch} /></CInputGroupText>
+                  <CFormInput 
+                    placeholder="Search CVE or Company..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </CInputGroup>
+              </div>
+                <div>
+                <button 
+                    className={`btn btn-sm ${sortBy === 'date_added' ? 'btn-primary' : 'btn-outline-secondary'} me-2`}
+                    onClick={() => setSortBy('date_added')}
+                >
+                    Date Added
+                </button>
+                <button 
+                    className={`btn btn-sm ${sortBy === 'due_date' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    onClick={() => setSortBy('due_date')}
+                >
+                    Due Date
+                </button>
+                </div>
             </div>
           </CCardHeader>
           
@@ -89,41 +115,51 @@ const Vulnerabilities = () => {
                   <CTableHeaderCell className="bg-body-tertiary">Vendor</CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary text-center">Risk Index</CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary text-center">Rating</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">{sortBy === 'date_added' ? 'Date Added' : 'Due Date'}</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center text-primary fw-bold">
+                    {sortBy === 'date_added' ? 'Date Added' : 'Due Date'}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">Actions</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {vulns.map((item) => (
-                  <CTableRow key={item.cve_id}>
-                    <CTableDataCell className="text-center font-monospace small">
-                      {item.cve_id}
-                    </CTableDataCell>
-                    <CTableDataCell className="fw-semibold">
-                      {item.company_name}
-                    </CTableDataCell>
-                    <CTableDataCell className="text-center">
-                      {(item.risk_index * 100).toFixed(1)}%
-                    </CTableDataCell>
-                    <CTableDataCell className="text-center">
-                      <CBadge color={getBadgeColor(item.risk_rating)}>
-                        {item.risk_rating}
-                      </CBadge>
-                    </CTableDataCell>
-                    <CTableDataCell className="text-center small">
-                      {sortBy === 'date_added' ? item.date_added : item.due_date}
-                    </CTableDataCell>
-                    <CTableDataCell className="text-center">
+                {filteredVulns.length > 0 ? (
+                  filteredVulns.map((item) => (
+                    <CTableRow key={item.cve_id}>
+                      <CTableDataCell className="text-center font-monospace small">
+                        {item.cve_id}
+                      </CTableDataCell>
+                      <CTableDataCell className="fw-semibold">
+                        {item.company_name}
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        {(item.risk_index * 100).toFixed(1)}%
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        <CBadge color={getBadgeColor(item.risk_rating)}>
+                          {item.risk_rating}
+                        </CBadge>
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center small">
+                        {sortBy === 'date_added' ? item.date_added : item.due_date}
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
                         <CButton 
-                            color="primary" 
-                            type="button"
-                            size="sm"
-                            onClick={() => navigate(`/vulnerabilities/${item.cve_id}`)}
+                          color="primary" 
+                          size="sm"
+                          onClick={() => navigate(`/vulnerabilities/${item.cve_id}`)}
                         >
-                            View
+                          View
                         </CButton>
+                      </CTableDataCell>
+                    </CTableRow>
+                  ))
+                ) : (
+                  <CTableRow>
+                    <CTableDataCell colSpan={6} className="text-center p-4 text-muted">
+                      No results found for "{searchTerm}"
                     </CTableDataCell>
                   </CTableRow>
-                ))}
+                )}
               </CTableBody>
             </CTable>
           )}
