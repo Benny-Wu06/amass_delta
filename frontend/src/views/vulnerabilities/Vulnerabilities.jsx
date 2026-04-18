@@ -33,6 +33,8 @@ const Vulnerabilities = () => {
   const [sortBy, setSortBy] = useState('date_added')
   const [searchTerm, setSearchTerm] = useState('')
   const [dateRange, setDateRange] = useState('all')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   
   const navigate = useNavigate()
 
@@ -65,13 +67,19 @@ const Vulnerabilities = () => {
     const matchesSearch = item.cve_id.toLowerCase().includes(search) || 
                           item.company_name.toLowerCase().includes(search)
 
-    if (dateRange === 'all') return matchesSearch
-
     const itemDate = new Date(sortBy === 'date_added' ? item.date_added : item.due_date)
-    const filterDate = new Date()
-    filterDate.setDate(filterDate.getDate() - parseInt(dateRange))
+
+    const matchesCustomDate = (!startDate || itemDate >= new Date(startDate)) &&
+                              (!endDate || itemDate <= new Date(endDate))
+
+    let matchesPreset = true
+    if (dateRange !== 'all') {
+        const filterDate = new Date()
+        filterDate.setDate(filterDate.getDate() - parseInt(dateRange))
+        matchesPreset = itemDate >= filterDate
+    }
     
-    return matchesSearch && itemDate >= filterDate
+    return matchesSearch && matchesCustomDate && matchesPreset
   })
 
   const getBadgeColor = (rating) => {
@@ -103,6 +111,23 @@ const Vulnerabilities = () => {
                   <CDropdownItem onClick={() => setDateRange('90')}>Last 90 Days</CDropdownItem>
                 </CDropdownMenu>
               </CDropdown>
+              <div className="d-flex align-items-center gap-1 border-start ps-2">
+              <CFormInput 
+                type="date" 
+                size="sm" 
+                style={{ width: '130px' }}
+                value={startDate}
+                onChange={(e) => { setStartDate(e.target.value); setDateRange('all'); }} 
+              />
+                <span className="small text-muted">to</span>
+                <CFormInput 
+                    type="date" 
+                    size="sm" 
+                    style={{ width: '130px' }}
+                    value={endDate}
+                    onChange={(e) => { setEndDate(e.target.value); setDateRange('all'); }} 
+                />
+                </div>
                 {/* Search bar*/}
               <div style={{ width: '250px' }}>
                 <CInputGroup size="sm">
