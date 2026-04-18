@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import classNames from 'classnames'
 import axios from 'axios'
 
+import Heatmap from 'src/components/Heatmap.jsx'
 import Graph from 'src/components/Graph.jsx'
 import Company from 'src/components/Company.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
@@ -15,6 +16,7 @@ const CompanyPage = () => {
   const [companyData, setCompanyData] = useState(null)
   const [vulns, setVulns] = useState([])
   const [heatmapData, setHeatmapData] = useState([])
+  const [graphData, setGraphData] = useState(null)
   const [loading, setLoading] = useState(true)
   const companyName = company_name
 
@@ -61,9 +63,24 @@ const CompanyPage = () => {
       }
     }
 
+    const fetchCompanyGrowth = async () => {
+      try {
+        const response = await axios.get(
+          `${STAGING_URL}/v1/growth/${company_name}`,
+        )
+        
+        console.log("Axios Response Data:", response.data);
+        setGraphData(response.data)
+
+      } catch (error) {
+        console.log('failed fetching growth ,', error)
+      }
+    }
+
     fetchCompany()
     fetchCompanyVulns()
     fetchCompanyHeatmap()
+    fetchCompanyGrowth()
   }, [company_name])
 
   const latestDate = vulns && vulns.length > 0 
@@ -82,8 +99,8 @@ const CompanyPage = () => {
       {/* Row 1: Charts */}
       <CRow className="mb-4">
         {/* Only call the heatmap once and pass the data */}
-        <Graph header={'Company Risk Heatmap'} data={heatmapData} type="heatmap" />
-        <Graph header={'CVE Growth vs. Time'} />
+        <Heatmap header={'Company Risk Heatmap'} data={heatmapData} type="heatmap" />
+        <Graph header={'CVE Growth vs. Time'} rawResponse={graphData} />
       </CRow>
 
       <CRow className="mb-4">
@@ -120,7 +137,7 @@ const CompanyPage = () => {
           </CCol>
         )}
 
-        <Graph header={'Stock Price vs. CVE GROWTH'} />
+        <Heatmap header={'Stock Price vs. CVE GROWTH'} />
       </CRow>
 
       <VulnerabilityTable vulns={vulns} />
