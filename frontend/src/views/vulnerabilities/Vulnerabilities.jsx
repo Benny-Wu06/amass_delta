@@ -24,7 +24,7 @@ const Vulnerabilities = () => {
   const [sortBy, setSortBy] = useState('date_added')
   
   const navigate = useNavigate()
-  
+
   useEffect(() => {
     const fetchCVEs = async () => {
       setLoading(true)
@@ -89,7 +89,7 @@ const Vulnerabilities = () => {
                   <CTableHeaderCell className="bg-body-tertiary">Vendor</CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary text-center">Risk Index</CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary text-center">Rating</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Due Date</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">{sortBy === 'date_added' ? 'Date Added' : 'Due Date'}</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
@@ -110,7 +110,7 @@ const Vulnerabilities = () => {
                       </CBadge>
                     </CTableDataCell>
                     <CTableDataCell className="text-center small">
-                      {item.due_date}
+                      {sortBy === 'date_added' ? item.date_added : item.due_date}
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
                         <CButton 
