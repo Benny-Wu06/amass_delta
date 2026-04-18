@@ -1,17 +1,10 @@
-import React from 'react'
-import classNames from 'classnames'
-
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import { STAGING_URL } from '../../vars'
 import {
-  CAvatar,
-  CButton,
-  CButtonGroup,
   CCard,
-  CCardTitle,
-  CCardBody,
-  CCardFooter,
   CCardHeader,
   CCol,
-  CProgress,
   CRow,
   CTable,
   CTableBody,
@@ -19,110 +12,110 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CSpinner,
+  CBadge
 } from '@coreui/react'
 
 const Vulnerabilities = () => {
-  const vulns = [
-    {
-      cve_id: 'CVE-2026-0001',
-      company: 'diddyblud_inc',
-      description: 'TODO connect to backend',
-      risk_index: 9,
-      risk_rating: 'DEATH',
-      due_date: '2026-04-12',
-    },
-    {
-      cve_id: 'CVE-2026-0001',
-      company: 'diddyblud_inc',
-      description: 'TODO connect to backend',
-      risk_index: 9,
-      risk_rating: 'DEATH',
-      due_date: '2026-04-12',
-    },
-    {
-      cve_id: 'CVE-2026-0001',
-      company: 'diddyblud_inc',
-      description: 'TODO connect to backend',
-      risk_index: 9,
-      risk_rating: 'DEATH',
-      due_date: '2026-04-12',
-    },
-    {
-      cve_id: 'CVE-2026-0001',
-      company: 'diddyblud_inc',
-      description:
-        'very long long description supre not good and bad holy shit lets see how this renders ok',
-      risk_index: 9,
-      risk_rating: 'DEATH',
-      due_date: '2026-04-12',
-    },
-    {
-      cve_id: 'CVE-2026-0001',
-      company: 'diddyblud_inc',
-      description:
-        'very long long description supre not good and bad holy shit lets see how this renders ok',
-      risk_index: 9,
-      risk_rating: 'DEATH',
-      due_date: '2026-04-12',
-    },
-  ]
+  const [vulns, setVulns] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [sortBy, setSortBy] = useState('date_added')
+
+  useEffect(() => {
+    const fetchCVEs = async () => {
+      setLoading(true)
+      try {
+        const response = await axios.get(`${STAGING_URL}/v1/cves`, {
+          params: { sort_by: sortBy }
+        })
+        
+        const parsedBody = typeof response.data.body === 'string' 
+          ? JSON.parse(response.data.body) 
+          : response.data
+
+        setVulns(parsedBody.cves || [])
+      } catch (error) {
+        console.error('Error fetching CVEs:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCVEs()
+  }, [sortBy])
+
+  const getBadgeColor = (rating) => {
+    switch (rating) {
+      case 'CRITICAL': return 'danger'
+      case 'HIGH': return 'warning'
+      case 'MEDIUM': return 'info'
+      default: return 'secondary'
+    }
+  }
 
   return (
-    <>
-      <CRow>
-        <CCol className="p-0" xs>
-          <CCard className="mb-4">
-            <CCardHeader>Recent CVEs</CCardHeader>
+    <CRow>
+      <CCol className="p-0" xs>
+        <CCard className="mb-4">
+          <CCardHeader className="d-flex justify-content-between align-items-center">
+            <strong>Vulnerability Feed</strong>
+            <div>
+              <button 
+                className={`btn btn-sm ${sortBy === 'date_added' ? 'btn-primary' : 'btn-outline-secondary'} me-2`}
+                onClick={() => setSortBy('date_added')}
+              >
+                Date Added
+              </button>
+              <button 
+                className={`btn btn-sm ${sortBy === 'due_date' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                onClick={() => setSortBy('due_date')}
+              >
+                Due Date
+              </button>
+            </div>
+          </CCardHeader>
+          
+          {loading ? (
+            <div className="text-center p-5"><CSpinner color="primary" /></div>
+          ) : (
             <CTable align="middle" className="mb-0 border" hover responsive>
-              <CTableHead className="text-nowrap">
+              <CTableHead>
                 <CTableRow>
-                  {/* icon example */}
-                  <CTableHeaderCell className="bg-body-tertiary text-center">
-                    {/* <CIcon icon={cilBug} /> */}
-                    CVE-ID
-                  </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">
-                    Company
-                  </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary">Description</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">
-                    Risk Index
-                  </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary">Risk Rating</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary">Due Date</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">CVE-ID</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary">Vendor</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">Risk Index</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">Rating</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">Due Date</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {vulns.map((item, index) => (
-                  <CTableRow v-for="item in tableItems" key={index}>
-                    <CTableDataCell className="text-center">
-                      <div>{item.cve_id}</div>
+                {vulns.map((item) => (
+                  <CTableRow key={item.cve_id}>
+                    <CTableDataCell className="text-center font-monospace small">
+                      {item.cve_id}
                     </CTableDataCell>
-                    <CTableDataCell>
-                      <div>{item.company}</div>
-                    </CTableDataCell>
-                    <CTableDataCell>
-                      <div>{item.description}</div>
+                    <CTableDataCell className="fw-semibold">
+                      {item.company_name}
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
-                      <div className="fw-semibold">{item.risk_index}</div>
+                      {(item.risk_index * 100).toFixed(1)}%
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
-                      <div className="fw-semibold">{item.risk_rating}</div>
+                      <CBadge color={getBadgeColor(item.risk_rating)}>
+                        {item.risk_rating}
+                      </CBadge>
                     </CTableDataCell>
-                    <CTableDataCell className="text-center">
-                      <div>{item.due_date}</div>
-                      {/* <div className="small text-body-secondary text-nowrap">Last login</div>
-                            <div className="fw-semibold text-nowrap">{item.activity}</div> */}
+                    <CTableDataCell className="text-center small">
+                      {item.due_date}
                     </CTableDataCell>
                   </CTableRow>
                 ))}
               </CTableBody>
             </CTable>
-          </CCard>
-        </CCol>
-      </CRow>
-    </>
+          )}
+        </CCard>
+      </CCol>
+    </CRow>
   )
 }
 
