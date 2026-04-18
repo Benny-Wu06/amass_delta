@@ -1,118 +1,93 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import { CCol, CCard, CCardHeader, CCardBody } from '@coreui/react'
 
-// Use this specific import style for modules
-import HeatmapModule from 'highcharts/modules/heatmap'
+const Graph = ({ header, rawResponse }) => {
+  console.log("Graph component received:", rawResponse);
 
-// Initialize immediately if Highcharts is available
-if (typeof HeatmapModule === 'function') {
-  HeatmapModule(Highcharts)
-}
+  const parsedData = rawResponse;
 
-const Graph = ({ header, data, type }) => {
-  const chartComponentRef = useRef(null)
-
-  // Data Guard to prevent rendering before data arrives
-  if (type === 'heatmap' && (!data || data.length === 0)) {
+  // Data Check - Use the direct reference
+  if (!parsedData || !parsedData.data_points) {
     return (
       <CCol md={6}>
         <CCard className="mb-4">
           <CCardHeader>{header}</CCardHeader>
           <CCardBody className="d-flex align-items-center justify-content-center" style={{ height: '350px' }}>
-            <div className="text-muted text-center">Loading Heatmap...</div>
+            <div className="text-muted text-center">
+              No growth data available <br />
+              <small>Wait for data to load...</small>
+            </div>
           </CCardBody>
         </CCard>
       </CCol>
-    )
+    );
   }
 
-  if (type === 'heatmap') {
-    const cvssCategories = ['0-2', '2-4', '4-6', '6-8', '8-10']
-    const epssCategories = ['0-0.2', '0.2-0.4', '0.4-0.6', '0.6-0.8', '0.8-1.0']
+  // Mapping logic remains the same
+  const categories = parsedData.data_points.map(point => point.date);
+  const seriesData = parsedData.data_points.map(point => point.new_cves);
 
-    const chartData = data.map((item) => [
-      cvssCategories.indexOf(item.cvss_range) === -1 ? 0 : cvssCategories.indexOf(item.cvss_range),
-      epssCategories.indexOf(item.epss_range) === -1 ? 0 : epssCategories.indexOf(item.epss_range),
-      item.cve_count || 0,
-    ])
+  const options = {
+    chart: { type: 'area', height: '350px', backgroundColor: 'transparent' },
+    title: { text: null },
+    accessibility: { enabled: false },
+    xAxis: {
+      categories: categories,
+      labels: {
+        style: { color: '#8a93a2' },
+        formatter: function () {
 
-    const maxCount = Math.max(...data.map(i => i.cve_count || 0), 1);
-
-   const options = {
-      chart: { type: 'heatmap', height: '350px', backgroundColor: 'transparent' },
-      title: { text: null },
-      xAxis: {
-        categories: cvssCategories,
-        title: { text: 'CVSS Score', style: { color: '#8a93a2' } },
-        labels: { style: { color: '#8a93a2' } }
-      },
-      yAxis: {
-        categories: epssCategories,
-        title: { text: 'EPSS Score', style: { color: '#8a93a2' } },
-        labels: { style: { color: '#8a93a2' } },
-        reversed: true
-      },
-      
-      colorAxis: {
-        min: 0,
-        max: maxCount,
-        stops: [
-          [0, '#2b2e32'],   // Zero: Grey
-          [0.33, '#d6d464'], // Mid1: Yellow
-          [0.66, '#d8834b'], // Mid2: Orange
-          [1, '#d64b4b']    // High: Red
-        ],
-      },
-      legend: {
-        align: 'right',
-        layout: 'vertical',
-        verticalAlign: 'middle',
-        symbolHeight: 200,
-        title: { text: 'CVEs', style: { color: '#8a93a2' } },
-        labels: { style: { color: '#8a93a2' } }
-      },
-      series: [{
-        name: 'Vulnerabilities',
-        borderWidth: 1,
-        borderColor: '#3c4147', 
-        data: chartData,        
-        dataLabels: { enabled: false },
-        tooltip: {
-          headerFormat: 'Risk Grid<br/>',
-          pointFormat: 'CVSS: <b>{point.xCategory}</b>, EPSS: <b>{point.yCategory}</b> <br/>Count: <b>{point.value}</b>'
+          return this.pos % 5 === 0 ? this.value : '';
         }
-      }],
-      credits: { enabled: false }
-    }
-
-    return (
-      <CCol md={6}>
-        <CCard className="mb-4">
-          <CCardHeader>{header}</CCardHeader>
-          <CCardBody>
-            <HighchartsReact 
-                highcharts={Highcharts} 
-                options={options} 
-                ref={chartComponentRef} 
-            />
-          </CCardBody>
-        </CCard>
-      </CCol>
-    )
-  }
+      },
+      lineColor: '#3c4147'
+    },
+    yAxis: {
+      title: { 
+        text: parsedData.metadata?.y_label || 'Count', 
+        style: { color: '#8a93a2' } 
+      },
+      labels: { style: { color: '#8a93a2' } },
+      gridLineColor: '#3c4147'
+    },
+    colors: ['#e55353'],
+    plotOptions: {
+      area: {
+        fillColor: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [
+            [0, 'rgba(229, 83, 83, 0.4)'],
+            [1, 'rgba(229, 83, 83, 0)']
+          ]
+        },
+        marker: { radius: 3 },
+        lineWidth: 2,
+      }
+    },
+    series: [{
+      name: 'New CVEs',
+      data: seriesData
+    }],
+    tooltip: {
+      backgroundColor: '#2a2e32',
+      style: { color: '#ffffff' },
+      shared: true
+    },
+    credits: { enabled: false }
+  };
 
   return (
     <CCol md={6}>
       <CCard className="mb-4">
         <CCardHeader>{header}</CCardHeader>
-        <CCardBody className="d-flex align-items-center justify-content-center" style={{ height: '350px' }}>
-          <div className="text-muted">No Data Available</div>
+        <CCardBody>
+          <HighchartsReact highcharts={Highcharts} options={options} />
         </CCardBody>
       </CCard>
     </CCol>
-  )
+  );
 }
 
-export default Graph
+export default Graph;
