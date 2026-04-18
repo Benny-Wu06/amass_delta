@@ -81,7 +81,7 @@ resource "aws_security_group" "rds_sg" {
   ingress {
     from_port   = 5432
     to_port     = 5432
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -128,6 +128,11 @@ resource "aws_db_instance" "postgres" {
 
   publicly_accessible = true
   skip_final_snapshot = true
+
+  # don't setup db until igw is attached to vpc
+  depends_on = [
+    aws_internet_gateway.amass_igw
+  ]
 }
 
 variable "db_password" {
@@ -142,6 +147,13 @@ output "db_endpoint" {
 resource "aws_apigatewayv2_api" "unified_api" {
   name          = "amass-unified-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["GET", "OPTIONS", "POST", "PUT", "DELETE"]
+    allow_headers = ["*"]
+    max_age       = 300
+  }
 }
 
 resource "aws_apigatewayv2_stage" "unified_stage" {
@@ -195,11 +207,26 @@ module "visualisation" {
   api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
 }
 
+module "integration" {
+  source            = "../microservices/integration/terraform"
+  vpc_id            = aws_vpc.main.id
+  subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  db_address        = aws_db_instance.postgres.address
+  db_name           = aws_db_instance.postgres.db_name
+  db_user           = aws_db_instance.postgres.username
+  db_password       = var.db_password
+  api_id            = aws_apigatewayv2_api.unified_api.id
+  api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
+}
+
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.ap-southeast-2.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = [aws_vpc.main.main_route_table_id]
+  route_table_ids = [
+    aws_vpc.main.main_route_table_id,
+    aws_route_table.public_rt.id,
+  ]
 }
 
 terraform {

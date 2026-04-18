@@ -16,7 +16,7 @@ def calculate_growth_stats(vulnerability_counts, days, reference_date=None):
         target_date = (reference_date - timedelta(days=i)).strftime("%Y-%m-%d")
         count = daily_counts.get(target_date, 0)
 
-        data_points.append({"date": target_date, "new_cves": count})
+        data_points.append({"x": target_date, "y": count})
 
         total_increase += count
         if count > peak_val:
