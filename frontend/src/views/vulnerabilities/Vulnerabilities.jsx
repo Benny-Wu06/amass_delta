@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { STAGING_URL } from '../../vars'
 import {
@@ -13,14 +14,17 @@ import {
   CTableHeaderCell,
   CTableRow,
   CSpinner,
-  CBadge
+  CBadge,
+  CButton
 } from '@coreui/react'
 
 const Vulnerabilities = () => {
   const [vulns, setVulns] = useState([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState('date_added')
-
+  
+  const navigate = useNavigate()
+  
   useEffect(() => {
     const fetchCVEs = async () => {
       setLoading(true)
@@ -107,6 +111,16 @@ const Vulnerabilities = () => {
                     </CTableDataCell>
                     <CTableDataCell className="text-center small">
                       {item.due_date}
+                    </CTableDataCell>
+                    <CTableDataCell className="text-center">
+                        <CButton 
+                            color="primary" 
+                            type="button"
+                            size="sm"
+                            onClick={() => navigate(`/vulnerabilities/${item.cve_id}`)}
+                        >
+                            View
+                        </CButton>
                     </CTableDataCell>
                   </CTableRow>
                 ))}
