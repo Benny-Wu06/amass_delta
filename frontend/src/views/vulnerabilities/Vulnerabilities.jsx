@@ -18,16 +18,21 @@ import {
   CButton,
   CFormInput,
   CInputGroup,
-  CInputGroupText
+  CInputGroupText,
+  CDropdown,
+  CDropdownToggle,
+  CDropdownMenu,
+  CDropdownItem
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilSearch } from '@coreui/icons'
+import { cilSearch, cilFilter } from '@coreui/icons'
 
 const Vulnerabilities = () => {
   const [vulns, setVulns] = useState([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState('date_added')
   const [searchTerm, setSearchTerm] = useState('')
+  const [dateRange, setDateRange] = useState('all')
   
   const navigate = useNavigate()
 
@@ -54,12 +59,19 @@ const Vulnerabilities = () => {
     fetchCVEs()
   }, [sortBy])
 
+
   const filteredVulns = vulns.filter((item) => {
     const search = searchTerm.toLowerCase()
-    return (
-      item.cve_id.toLowerCase().includes(search) || 
-      item.company_name.toLowerCase().includes(search)
-    )
+    const matchesSearch = item.cve_id.toLowerCase().includes(search) || 
+                          item.company_name.toLowerCase().includes(search)
+
+    if (dateRange === 'all') return matchesSearch
+
+    const itemDate = new Date(sortBy === 'date_added' ? item.date_added : item.due_date)
+    const filterDate = new Date()
+    filterDate.setDate(filterDate.getDate() - parseInt(dateRange))
+    
+    return matchesSearch && itemDate >= filterDate
   })
 
   const getBadgeColor = (rating) => {
@@ -77,7 +89,21 @@ const Vulnerabilities = () => {
         <CCard className="mb-4">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <strong>Vulnerability Feed</strong>
-            <div className="d-flex align-items-center gap-3">
+            <div className="d-flex align-items-center gap-2">
+                {/* Date filter dropdown*/}
+              <CDropdown variant="btn-group">
+                <CDropdownToggle color="secondary" size="sm" variant="outline">
+                  <CIcon icon={cilFilter} className="me-1" />
+                  {dateRange === 'all' ? 'All Dates' : `Last ${dateRange} Days`}
+                </CDropdownToggle>
+                <CDropdownMenu>
+                  <CDropdownItem onClick={() => setDateRange('all')}>All Time</CDropdownItem>
+                  <CDropdownItem onClick={() => setDateRange('7')}>Last 7 Days</CDropdownItem>
+                  <CDropdownItem onClick={() => setDateRange('30')}>Last 30 Days</CDropdownItem>
+                  <CDropdownItem onClick={() => setDateRange('90')}>Last 90 Days</CDropdownItem>
+                </CDropdownMenu>
+              </CDropdown>
+                {/* Search bar*/}
               <div style={{ width: '250px' }}>
                 <CInputGroup size="sm">
                   <CInputGroupText><CIcon icon={cilSearch} /></CInputGroupText>
@@ -87,6 +113,7 @@ const Vulnerabilities = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </CInputGroup>
+                {/* Sort buttons*/}
               </div>
                 <div>
                 <button 
