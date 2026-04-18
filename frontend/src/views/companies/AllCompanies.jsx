@@ -20,6 +20,9 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CFormInput,
+  CInputGroup,
+  CInputGroupText,
   CLink,
 } from '@coreui/react'
 import Company from 'src/components/Company.jsx'
@@ -27,11 +30,14 @@ import SubscribeButton from 'src/components/SubscribeButton.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 import { BASE_URL } from '../../vars'
 import CompanyRow from './CompanyRow.jsx'
+import CIcon from '@coreui/icons-react'
+import { cilSearch } from '@coreui/icons'
 
 const AllCompanies = () => {
   const [companyNames, setCompanyNames] = useState([])
   const [numCompanies, setNumCompanies] = useState(0)
-  // this is why typescript is helpful i think
+  const [searchTerm, setSearchTerm] = useState('') 
+
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
@@ -46,15 +52,31 @@ const AllCompanies = () => {
     fetchCompanies()
   }, [])
 
+  const filteredCompanies = companyNames.filter((name) =>
+    name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
   return (
     <>
       <CRow>
         <CCol className="p-0" xs>
           <CCard className="mb-4">
             <CCardHeader>
-              <div>Companies ({numCompanies})</div>
-              <div>Sort by: TODO</div>
-              <div>TODO SEARCH bAR</div>
+              <div>
+                <strong>Companies</strong> <small className="text-muted">({filteredCompanies.length})</small>
+              </div>
+              <div style={{ width: '300px' }}>
+                <CInputGroup size="sm">
+                  <CInputGroupText>
+                    <CIcon icon={cilSearch} />
+                  </CInputGroupText>
+                  <CFormInput
+                    placeholder="Search companies..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </CInputGroup>
+              </div>
             </CCardHeader>
             <CTable align="middle" className="mb-0 border" hover responsive>
               <CTableHead className="text-nowrap">
@@ -63,9 +85,17 @@ const AllCompanies = () => {
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {companyNames.map((name, index) => (
-                  <CompanyRow companyName={name} key={index}></CompanyRow>
-                ))}
+                {filteredCompanies.length > 0 ? (
+                  filteredCompanies.map((name, index) => (
+                    <CompanyRow companyName={name} key={index} />
+                  ))
+                ) : (
+                  <CTableRow>
+                    <CTableDataCell className="text-center p-3 text-muted">
+                      No companies found matching "{searchTerm}"
+                    </CTableDataCell>
+                  </CTableRow>
+                )}
               </CTableBody>
             </CTable>
           </CCard>
