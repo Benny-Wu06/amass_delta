@@ -1,19 +1,7 @@
 data "archive_file" "stocks_cve_growth_zip" {
   type        = "zip"
-  source_file = "${path.module}/../stocks_cve_growth_lambda.py"
+  source_file = "${path.module}/../src/stocks_cve_growth_lambda.py"
   output_path = "${path.module}/stocks_cve.zip"
-}
-
-resource "aws_security_group" "integration_sg" {
-  name   = "integration-lambda-sg"
-  vpc_id = var.vpc_id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 resource "aws_iam_role" "integration_role" {
@@ -31,16 +19,6 @@ resource "aws_iam_role" "integration_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
-  role       = aws_iam_role.integration_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-}
-
-resource "aws_iam_role_policy_attachment" "company_vulnerabilities_insights" {
-  role       = aws_iam_role.integration_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
-}
-
 resource "aws_lambda_function" "stocks_cve_growth_lambda" {
   filename      = data.archive_file.stocks_cve_growth_zip.output_path
   function_name = "integration_stocks_cve_growth"
@@ -56,11 +34,6 @@ resource "aws_lambda_function" "stocks_cve_growth_lambda" {
   ]
 
   source_code_hash = data.archive_file.stocks_cve_growth_zip.output_base64sha256
-
-  vpc_config {
-    subnet_ids         = var.subnet_ids
-    security_group_ids = [aws_security_group.integration_sg.id]
-  }
 
   environment {
     variables = {
