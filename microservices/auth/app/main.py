@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import router as auth_router
+from microservices.auth.app.routes import router as auth_router
 
 # init FastAPI
 app = FastAPI(
