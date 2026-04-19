@@ -21,10 +21,7 @@ VULNS = [
 lambda_client = boto3.client(
     "lambda", 
     region_name=AWS_REGION,
-    config=Config(read_timeout=300,    # 5 minutes
-        connect_timeout=300,
-        retries={'max_attempts': 0}
-    )
+    config=Config(read_timeout=30, connect_timeout=10)
 )
 
 @pytest.fixture(scope="module")
@@ -68,7 +65,7 @@ def seed_db(conn_db):
 
     yield
 
-    # 3. Cleanup after test
+    # cleanup
     cur = conn_db.cursor()
     try:
         test_ids = tuple(v[0] for v in VULNS)
@@ -107,3 +104,57 @@ def test_stocks_cve_unsupported_symbol():
     event = {"pathParameters": {"company_symbol": "INVALID_TICKER"}}
     result = invoke_lambda(event)
     assert result["statusCode"] == 404
+
+def test_stocks_cve_data_merge_accuracy():
+    # We seeded VULNS with 2 entries on 2026-04-10
+    event = {
+        "pathParameters": {"company_symbol": "MSFT"},
+        "queryStringParameters": {"from": "2026-04-10", "to": "2026-04-10"}
+    }
+    result = invoke_lambda(event)
+    
+    assert result["statusCode"] == 200
+    merged_results = result["body"].get("merged_results", [])
+    
+    # Check if April 10th exists in the response and has cve_growth = 2
+    target_date = "2026-04-10"
+    day_entry = next((item for item in merged_results if item["date"] == target_date), None)
+    
+    assert day_entry is not None, f"Date {target_date} missing from results"
+    assert day_entry["cve_growth"] == 2
+    assert "price_diff" in day_entry
+
+def test_stocks_cve_invalid_date_range():
+    event = {
+        "pathParameters": {"company_symbol": "MSFT"},
+        "queryStringParameters": {"from": "2026-05-01", "to": "2026-04-01"}
+    }
+    result = invoke_lambda(event)
+    
+    assert result["statusCode"] == 400
+    assert "error" in result["body"]
+
+def test_stocks_cve_missing_query_params():
+    event = {
+        "pathParameters": {"company_symbol": "AAPL"}
+    }
+    result = invoke_lambda(event)
+    
+    assert result["statusCode"] == 200
+    assert result["body"]["company"] == "Apple"
+    # verify period defaults are applied
+    assert "period" in result["body"]
+    assert result["body"]["period"]["from"] == "2025-01-01"
+
+def test_stocks_cve_no_data_period():
+    # future date
+    event = {
+        "pathParameters": {"company_symbol": "GOOGL"},
+        "queryStringParameters": {"from": "2029-01-01", "to": "2029-01-02"}
+    }
+    result = invoke_lambda(event)
+    
+    assert result["statusCode"] == 200
+    # return an empty list or entries with 0s
+    # just want to make sure it doesn't 500
+    assert isinstance(result["body"]["merged_results"], list)
