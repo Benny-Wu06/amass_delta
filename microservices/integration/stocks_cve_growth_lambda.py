@@ -85,6 +85,17 @@ def stocks_cve_growth_lambda(event, context):
         from_str = query_params.get("from", "2025-01-01")
         to_str = query_params.get("to", datetime.now().strftime("%Y-%m-%d"))
 
+        # ERROR CHECK: invalid date range
+        if from_str > to_str:
+            return {
+                "statusCode": 400,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "error": "Invalid date range: 'from' date must be before 'to' date.",
+                    "provided": {"from": from_str, "to": to_str}
+                })
+            }
+
         # auth CHARLIE
         EMAIL = os.environ.get("CHARLIE_EMAIL", "dearryllan@gmail.com")
         PASSWORD = os.environ.get("CHARLIE_PASSWORD", "mypassword")
