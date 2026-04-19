@@ -1,6 +1,6 @@
 data "archive_file" "stocks_cve_growth_zip" {
   type        = "zip"
-  source_file = "${path.module}/../stocks_cve_growth_lambda.py"
+  source_file = "${path.module}/../src/stocks_cve_growth_lambda.py"
   output_path = "${path.module}/stocks_cve.zip"
 }
 
@@ -17,11 +17,6 @@ resource "aws_iam_role" "integration_role" {
       }
     }]
   })
-}
-
-resource "aws_iam_role_policy_attachment" "company_vulnerabilities_insights" {
-  role       = aws_iam_role.integration_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
 }
 
 resource "aws_lambda_function" "stocks_cve_growth_lambda" {

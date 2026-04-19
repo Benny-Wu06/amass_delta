@@ -1,10 +1,10 @@
 import json
 import pytest
 from unittest.mock import MagicMock, patch
-from microservices.integration.stocks_cve_growth_lambda import stocks_cve_growth_lambda
+from microservices.integration.src.stocks_cve_growth_lambda import stocks_cve_growth_lambda
 
 # path constants
-LAMBDA_PATH = "microservices.integration.stocks_cve_growth_lambda"
+LAMBDA_PATH = "microservices.integration.src.stocks_cve_growth_lambda"
 
 # setup mock DB
 def setup_mock_db(mock_get_db):
