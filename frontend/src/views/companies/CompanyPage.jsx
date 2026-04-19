@@ -11,26 +11,54 @@ import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge } from '@coreui/react
 import { STAGING_URL } from '../../vars'
 import VulnerabilityTable from '../vulnerabilities/VulnerabilityTable.jsx'
 
+const SYMBOL_MAP = {
+  'Google': 'GOOGL',
+  'Apple': 'AAPL',
+  'Microsoft': 'MSFT',
+  'Broadcom': 'AVGO',
+  'Meta': 'META',
+  'Cisco': 'CSCO',
+  'Intel': 'INTC'
+};
+
 const CompanyPage = () => {
   const { company_name } = useParams()
   const [companyData, setCompanyData] = useState(null)
   const [vulns, setVulns] = useState([])
   const [heatmapData, setHeatmapData] = useState([])
   const [graphData, setGraphData] = useState(null)
+  const [growthData, setGrowthData] = useState([])
+  const [stockVsCVEData, setStockVsCVEData] = useState(null)
   const [loading, setLoading] = useState(true)
   const companyName = company_name
 
   useEffect(() => {
+    setCompanyData(null);
+    setGraphData(null);
+    setStockVsCVEData(null);
+    setHeatmapData([]);
+    setLoading(true);
+
+    const parseLambdaData = (res) => {
+      return typeof res.data.body === 'string' 
+        ? JSON.parse(res.data.body) 
+        : res.data;
+    };
+
     const fetchCompany = async () => {
       try {
         const response = await axios.get(`${STAGING_URL}/v1/companies/${company_name}`)
         setCompanyData(response.data)
-        console.log(response.data)
-      } catch (error) {
-        console.log('Failed to fetch company:', error)
-      } finally {
-        setLoading(false)
-      }
+
+        const ticker = SYMBOL_MAP[company_name];
+
+        if (ticker) {
+          fetchStockVsCVE(ticker);
+        } else {
+          console.error(`No symbol mapping found for: ${company_name}`);
+        }
+
+     } catch (e) { console.error(e); }
     }
 
     const fetchCompanyVulns = async () => {
@@ -52,7 +80,6 @@ const CompanyPage = () => {
         )
         let grid = [];
     
-        // If body is already an object, use it. If it's a string, parse it.
         const data = typeof response.data.body === 'string' 
         ? JSON.parse(response.data.body) 
         : response.data;
@@ -63,7 +90,7 @@ const CompanyPage = () => {
       }
     }
 
-    const fetchCompanyGrowth = async () => {
+    const fetchCompanyGraph = async () => {
       try {
         const response = await axios.get(
           `${STAGING_URL}/v1/growth/${company_name}`,
@@ -77,10 +104,20 @@ const CompanyPage = () => {
       }
     }
 
+    const fetchStockVsCVE = async (symbol) => {
+      try {
+        const response = await axios.get(`${STAGING_URL}/v1/integration/${symbol}`)
+        const data = parseLambdaData(response)
+        setStockVsCVEData(data)
+      } catch (error) {
+        console.error('Failed fetching stock integration:', error)
+      }
+    }
+
     fetchCompany()
     fetchCompanyVulns()
     fetchCompanyHeatmap()
-    fetchCompanyGrowth()
+    fetchCompanyGraph()
   }, [company_name])
 
   const latestDate = vulns && vulns.length > 0 
@@ -96,9 +133,7 @@ const CompanyPage = () => {
     <>
       <h2 className="mx-2 mb-4">{companyName}</h2>
       
-      {/* Row 1: Charts */}
       <CRow className="mb-4">
-        {/* Only call the heatmap once and pass the data */}
         <Heatmap header={'Company Risk Heatmap'} data={heatmapData} type="heatmap" />
         <Graph header={'CVE Growth vs. Time'} rawResponse={graphData} />
       </CRow>
@@ -137,7 +172,13 @@ const CompanyPage = () => {
           </CCol>
         )}
 
-        <Heatmap header={'Stock Price vs. CVE GROWTH'} />
+        
+          <Graph 
+            header={'Stock Price vs. CVE GROWTH'} 
+            rawResponse={stockVsCVEData}
+            type="stock_correlation"
+           />
+          
       </CRow>
 
       <VulnerabilityTable vulns={vulns} />
