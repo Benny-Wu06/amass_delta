@@ -6,8 +6,6 @@ from datetime import datetime, timedelta
 
 # CONFIG
 BASE_URL_STOCKS = "https://tdxz7z58l6.execute-api.ap-southeast-2.amazonaws.com/prod"
-CHARLIE_EMAIL = "dearryllan@gmail.com"
-CHARLIE_PASSWORD = "mypassword" 
 
 # --- DB CONFIGURATION CONSTANTS ---
 DB_HOST = os.environ.get("DB_HOST")
@@ -32,36 +30,25 @@ def get_db_connection():
     )
 
 ### CVE GROWTH ###
-def get_internal_cve_growth(company_name, days):
+def get_internal_cve_growth(company_name, from_date, to_date):
     conn = None
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute("SELECT id FROM companies WHERE company_name = %s;", (company_name,))
             res = cur.fetchone()
-            if not res: return None
+            if not res: return {}
             company_id = res[0]
 
-            # fetch data from db
             query = """
                 SELECT date_added::text, COUNT(*) 
                 FROM vulnerabilities
                 WHERE company_id = %s 
-                AND date_added >= CURRENT_DATE - (%s || ' days')::interval
+                AND date_added >= %s AND date_added <= %s
                 GROUP BY date_added ORDER BY date_added ASC;
             """
-            cur.execute(query, (company_id, days))
-            raw_vuls = cur.fetchall()
-
-            daily_map = {row[0]: row[1] for row in raw_vuls}
-            data_points = []
-            ref_date = datetime.now()
-            
-            for i in range(days - 1, -1, -1):
-                d = (ref_date - timedelta(days=i)).strftime("%Y-%m-%d")
-                data_points.append({"x": d, "y": daily_map.get(d, 0)})
-            
-            return data_points
+            cur.execute(query, (company_id, from_date, to_date))
+            return {row[0]: row[1] for row in cur.fetchall()}
     finally:
         if conn: conn.close()
 
@@ -79,9 +66,8 @@ VALID_COMPANY_SYMBOLS = {
 ### INTEGRATION LOGIC ###
 def stocks_cve_growth_lambda(event, context):
     try:
-        company_symbol = event.get("pathParameters", {}).get("company_symbol")
-
-        # use .get() so it doesn't crash if the symbol is missing
+        path_params = event.get("pathParameters") or {}
+        company_symbol = path_params.get("company_symbol")
         company_name = VALID_COMPANY_SYMBOLS.get(company_symbol)
 
         # ERROR CHECK: If symbol is not in our allowed list
@@ -96,60 +82,67 @@ def stocks_cve_growth_lambda(event, context):
             }
 
         query_params = event.get("queryStringParameters") or {}
-        
-        # start date (defaults to 1st Jan 2025)
-        from_date_str = query_params.get("from", "2025-01-01") 
-        from_date = datetime.strptime(from_date_str, "%Y-%m-%d")
-        
-        # end date (deafults to 'today')
-        to_date_str = query_params.get("to", datetime.now().strftime("%Y-%m-%d"))
-        to_date = datetime.strptime(to_date_str, "%Y-%m-%d")
+        from_str = query_params.get("from", "2025-01-01")
+        to_str = query_params.get("to", datetime.now().strftime("%Y-%m-%d"))
 
-        days_to_trace = (to_date - from_date).days
-
-        # ERROR CHECK: from after to
-        if days_to_trace < 0:
+        # ERROR CHECK: invalid date range
+        if from_str > to_str:
             return {
                 "statusCode": 400,
-                "body": json.dumps({"error": "'from' date must be before 'to' date"})
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "error": "Invalid date range: 'from' date must be before 'to' date.",
+                    "provided": {"from": from_str, "to": to_str}
+                })
             }
 
-        # AUTH & FETCH STOCKS (Charlie API)
-        EMAIL = os.environ.get("CHARLIE_EMAIL")
-        PASSWORD = os.environ.get("CHARLIE_PASSWORD")
+        # auth CHARLIE
+        EMAIL = os.environ.get("CHARLIE_EMAIL", "dearryllan@gmail.com")
+        PASSWORD = os.environ.get("CHARLIE_PASSWORD", "mypassword")
         
         login_res = requests.post(
             f"{BASE_URL_STOCKS}/auth/login", 
-            json={"email": EMAIL, "password": PASSWORD}
+            json={"email": EMAIL, "password": PASSWORD},
+            timeout=5
         )
         login_res.raise_for_status()
-        id_token = login_res.json()['authentication']['IdToken']
+        
+        auth_payload = login_res.json().get('authentication', {})
+        id_token = auth_payload.get('IdToken')
+        
+        if not id_token:
+            raise ValueError("Auth succeeded but IdToken is missing from response")
 
-        # get stock prices for the specific range
+        # fetch stock prices
         stock_url = f"{BASE_URL_STOCKS}/stocks/{company_symbol}/prices"
-        stock_params = {"from": from_date_str, "to": to_date_str}
         stock_resp = requests.get(
             stock_url, 
             headers={"Authorization": f"Bearer {id_token}"}, 
-            params=stock_params
+            params={"from": from_str, "to": to_str},
+            timeout=5
         )
         stock_resp.raise_for_status()
         
-        # GET CVE GROWTH
-        cve_data_points = get_internal_cve_growth(company_name, days_to_trace)
-        growth_lookup = {item["x"]: item["y"] for item in cve_data_points}
+        # fetch growth data
+        growth_lookup = get_internal_cve_growth(company_name, from_str, to_str)
 
-        ### MERGE DATA ###
+        # merge the two data
         merged_data = []
-        for entry in stock_resp.json().get("data", []):
-            date_key = entry["date"]
+        stock_data = stock_resp.json().get("data", [])
+        
+        for entry in stock_data:
+            date_key = entry.get("date")
+            # Calculate diff, defaulting to 0 if keys are missing
+            open_p = entry.get("open", 0)
+            close_p = entry.get("close", 0)
+            
             merged_data.append({
                 "date": date_key,
-                "price_diff": round(entry["close"] - entry["open"], 2),
+                "price_diff": round(close_p - open_p, 2),
                 "cve_growth": growth_lookup.get(date_key, 0)
             })
 
-        # RETURN STANDARDIZED RESPONSE
+        # RETURN STANDARDISED RESPONSE
         return {
             "statusCode": 200,
             "headers": {
@@ -158,7 +151,7 @@ def stocks_cve_growth_lambda(event, context):
             },
             "body": json.dumps({
                 "company": company_name,
-                "period": {"from": from_date_str, "to": to_date_str},
+                "period": {"from": from_str, "to": to_str},
                 "merged_results": merged_data
             })
         }
