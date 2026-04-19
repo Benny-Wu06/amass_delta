@@ -86,8 +86,8 @@ def get_news_lambda(event, context):
             news_params["sentiment"] = sentiment
 
         # login
-        EMAIL = os.environ.get("CHARLIE_EMAIL")
-        PASSWORD = os.environ.get("CHARLIE_PASSWORD")
+        EMAIL = os.environ.get("CHARLIE_EMAIL", CHARLIE_EMAIL)
+        PASSWORD = os.environ.get("CHARLIE_PASSWORD", CHARLIE_PASSWORD)
         
         login_res = requests.post(
             f"{CHARLIE_BASE_URL}/auth/login", 
