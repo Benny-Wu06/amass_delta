@@ -7,7 +7,15 @@ from unittest.mock import MagicMock, patch
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 with patch("boto3.client"):
-    from addSubscription import lambda_handler, make_event, add_company_to_watchlist
+    from addSubscription import lambda_handler, add_company_to_watchlist
+
+def make_event(watchlist_id=None, body=None):
+    event = {}
+    if watchlist_id is not None:
+        event["pathParameters"] = {"id": watchlist_id}
+    if body is not None:
+        event["body"] = json.dumps(body) if isinstance(body, dict) else body
+    return event
 
 
 def test_missing_watchlist_id():

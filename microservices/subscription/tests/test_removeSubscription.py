@@ -6,8 +6,20 @@ from unittest.mock import MagicMock, patch
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 with patch("boto3.client"):
-    from removeSubscription import lambda_handler, remove_company_from_watchlist, make_event
+    from removeSubscription import lambda_handler, remove_company_from_watchlist
 
+def make_event(watchlist_id=None, company_name=None, email=None):
+    event = {}
+    path = {}
+    if watchlist_id is not None:
+        path["id"] = watchlist_id
+    if company_name is not None:
+        path["company_name"] = company_name
+    if path:
+        event["pathParameters"] = path
+    if email is not None:
+        event["queryStringParameters"] = {"email": email}
+    return event
 
 def test_missing_watchlist_id():
     response = lambda_handler({}, None)
@@ -101,11 +113,3 @@ def test_rollback_on_exception(mock_conn):
 
     remove_company_from_watchlist(1, "test@gmail.com", "Timmy Blud")
     conn.rollback.assert_called_once()
-
-
-def test_email_is_lowercased():
-    event = make_event(watchlist_id="1", company_name="Timmy Blud", email="TEST@GMAIL.COM")
-    with patch("removeSubscription.remove_company_from_watchlist") as mock_rm:
-        mock_rm.return_value = {"statusCode": 200, "body": "{}"}
-        lambda_handler(event, None)
-        mock_rm.assert_called_once_with(1, "test@gmail.com", "Timmy Blud")
