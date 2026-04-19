@@ -19,11 +19,6 @@ resource "aws_iam_role" "integration_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "company_vulnerabilities_insights" {
-  role       = aws_iam_role.integration_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
-}
-
 resource "aws_lambda_function" "stocks_cve_growth_lambda" {
   filename      = data.archive_file.stocks_cve_growth_zip.output_path
   function_name = "integration_stocks_cve_growth"
