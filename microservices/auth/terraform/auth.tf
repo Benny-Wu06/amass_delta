@@ -50,7 +50,7 @@ resource "aws_lambda_function" "auth_lambda" {
     "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-psycopg2-binary:1",
     "arn:aws:lambda:ap-southeast-2:580247275435:layer:LambdaInsightsExtension:21",
     "arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p312-requests:23",
-    "arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64"
+    "arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:4"
   ]
 
   vpc_config {
