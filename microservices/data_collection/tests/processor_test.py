@@ -85,6 +85,7 @@ def make_mock_db():
     ]
 
     mock_cur.fetchall.return_value = [(1,), (2,), (3,)]
+    mock_cur.rowcount = 1
 
     return mock_conn, mock_cur
 
