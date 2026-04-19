@@ -42,7 +42,7 @@ resource "aws_lambda_function" "auth_lambda" {
   function_name    = "auth-service"
   role             = aws_iam_role.auth_role.arn
   handler          = "auth_lambda.auth_lambda"
-  runtime          = "python3.11"
+  runtime          = "python3.12"
   timeout          = 30
   source_code_hash = data.archive_file.auth_zip.output_base64sha256
 
