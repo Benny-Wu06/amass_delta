@@ -141,7 +141,7 @@ variable "db_password" {
 }
 
 variable "ses_from_email" {
-  type        = string
+  type = string
 }
 
 output "db_endpoint" {
