@@ -20,11 +20,6 @@ resource "aws_lambda_function" "get_news_lambda" {
 
   source_code_hash = data.archive_file.get_news_zip.output_base64sha256
 
-  vpc_config {
-    subnet_ids         = var.subnet_ids
-    security_group_ids = [aws_security_group.integration_sg.id]
-  }
-
   environment {
     variables = {
       DB_HOST          = var.db_address
