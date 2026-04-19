@@ -1,0 +1,7 @@
+package/
+*.zip
+__pycache__/
+*.pyc
+.terraform/
+*.tfstate
+*.tfstate.backup
