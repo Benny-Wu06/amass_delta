@@ -50,6 +50,7 @@ jobs:
     env:
       TF_VAR_aws_suffix: "staging"
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+      TF_VAR_ses_from_email: ${{ secrets.SES_FROM_EMAIL }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: 'ap-southeast-2'
