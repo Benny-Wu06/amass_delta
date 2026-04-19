@@ -9,8 +9,22 @@ logger.setLevel(logging.INFO)
 
 # Variables definitions
 
-s3 = boto3.client("s3")
-sns = boto3.client("sns")
+s3 = None
+sns = None
+
+
+def _get_s3():
+    global s3
+    if s3 is None:
+        s3 = boto3.client("s3")
+    return s3
+
+
+def _get_sns():
+    global sns
+    if sns is None:
+        sns = boto3.client("sns")
+    return sns
 
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = 5432
@@ -90,7 +104,7 @@ def init_db(cur):
 
 
 def get_cisa_data():
-    response = s3.get_object(Bucket=BUCKET_NAME, Key=CISA_KEY)
+    response = _get_s3().get_object(Bucket=BUCKET_NAME, Key=CISA_KEY)
     raw = response["Body"].read().decode("utf-8")
     data = json.loads(raw)
     return data["vulnerabilities"]
@@ -282,7 +296,7 @@ def lambda_handler(event, context):
         logger.info("Inserted %d new vulnerabilities", inserted)
 
         if new_cves_by_company and SNS_TOPIC_ARN:
-            sns.publish(
+            _get_sns().publish(
                 TopicArn=SNS_TOPIC_ARN,
                 Message=json.dumps({"new_cves": new_cves_by_company}),
             )
