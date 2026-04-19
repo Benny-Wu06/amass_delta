@@ -35,8 +35,8 @@ VULNS_1 = [
 
 COMPANY_NAME_2 = "TestCorp2"
 VULNS_2 = [
-    ("CVE-2026-101", 5.5, 0.88, "2026-03-20"),
-    ("CVE-2026-102", 3.3, 0.55, "2026-03-21"),
+    ("CVE-2026-101", 5.5, 0.88, days_ago(10)),
+    ("CVE-2026-102", 3.3, 0.55, days_ago(9)),
 ]
 
 # FIXTRURES
@@ -137,7 +137,7 @@ def test_lambda_success():
     summary = body["summary"]
 
     assert summary["total_period_increase"] == 2
-    assert summary["peak_growth_day"] == "2026-03-20"
+    assert summary["peak_growth_day"] == days_ago(10)
 
 def test_lambda_unknown_company():
     event = {
