@@ -7,7 +7,7 @@ import Heatmap from 'src/components/Heatmap.jsx'
 import Graph from 'src/components/Graph.jsx'
 import Company from 'src/components/Company.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
-import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge } from '@coreui/react'
+import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge, CSpinner } from '@coreui/react'
 import { BASE_URL } from '../../vars'
 import VulnerabilityTable from '../vulnerabilities/VulnerabilityTable.jsx'
 
@@ -29,6 +29,7 @@ const CompanyPage = () => {
   const [graphData, setGraphData] = useState(null)
   const [growthData, setGrowthData] = useState([])
   const [stockVsCVEData, setStockVsCVEData] = useState(null)
+  const [news, setNews] = useState([])
   const [loading, setLoading] = useState(true)
   const companyName = company_name
 
@@ -37,6 +38,7 @@ const CompanyPage = () => {
     setGraphData(null);
     setStockVsCVEData(null);
     setHeatmapData([]);
+    setNews([]);
     setLoading(true);
 
     const parseLambdaData = (res) => {
@@ -50,14 +52,8 @@ const CompanyPage = () => {
         const response = await axios.get(`${BASE_URL}/v1/companies/${company_name}`)
         setCompanyData(response.data)
 
-        const ticker = SYMBOL_MAP[company_name];
-
-        if (ticker) {
-          fetchStockVsCVE(ticker);
-        } else {
-          console.error(`No symbol mapping found for: ${company_name}`);
-        }
-
+        const ticker = SYMBOL_MAP[company_name]
+        if (ticker) fetchStockVsCVE(ticker)
      } catch (e) { console.error(e); }
     }
 
@@ -113,6 +109,19 @@ const CompanyPage = () => {
         console.error('Failed fetching stock integration:', error)
       }
     }
+
+    const fetchNews = async (symbol) => {
+      try {
+        const response = await axios.get(`${BASE_URL}/v1/news/${symbol}`)
+        const data = parseLambdaData(response)
+        setNews(data.news_data || [])
+      } catch (error) {
+        console.error('Failed fetching news:', error)
+      }
+    }
+
+    const ticker = SYMBOL_MAP[company_name]
+    if (ticker) fetchNews(ticker)
 
     fetchCompany()
     fetchCompanyVulns()
@@ -192,6 +201,59 @@ const CompanyPage = () => {
       </CRow>
 
       <VulnerabilityTable vulns={vulns} />
+
+      {SYMBOL_MAP[company_name] && (
+        <CCard className="mt-4">
+          <CCardHeader className="fw-semibold">News & Sentiment</CCardHeader>
+          <CCardBody>
+            {news.length === 0 ? (
+              <div className="text-center py-4"><CSpinner color="primary" /></div>
+            ) : (
+              <div className="d-flex flex-column gap-3">
+                {news.slice(0, 10).map((article, i) => (
+                  <div key={i} className="d-flex gap-3 pb-3" style={{ borderBottom: '1px solid var(--cui-border-color)' }}>
+                    {article.banner_image && (
+                      <img
+                        src={article.banner_image}
+                        alt=""
+                        style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}
+                        onError={(e) => { e.target.style.display = 'none' }}
+                      />
+                    )}
+                    <div className="flex-grow-1 min-w-0">
+                      <a
+                        href={article.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="fw-semibold text-decoration-none d-block mb-1"
+                        style={{ lineHeight: 1.3 }}
+                      >
+                        {article.title}
+                      </a>
+                      <p className="text-muted small mb-1" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {article.summary}
+                      </p>
+                      <div className="d-flex align-items-center gap-2 flex-wrap">
+                        <span className="text-muted" style={{ fontSize: '0.75rem' }}>{article.source}</span>
+                        <CBadge
+                          color={
+                            article.ticker_sentiment_label?.includes('Bullish') ? 'success' :
+                            article.ticker_sentiment_label?.includes('Bearish') ? 'danger' : 'secondary'
+                          }
+                          shape="rounded-pill"
+                          style={{ fontSize: '0.7rem' }}
+                        >
+                          {article.ticker_sentiment_label || 'Neutral'}
+                        </CBadge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CCardBody>
+        </CCard>
+      )}
     </>
   )
 }
