@@ -46,9 +46,12 @@ def get_all_cves(sort_column):
         # Update query to select the correct fields and use the dynamic sort
         query = f"""
             SELECT 
-                v.cve_id, 
-                c.risk_index, 
-                c.risk_rating, 
+                v.cve_id,
+                v.vulnerability_name,
+                v.description, 
+                v.cvss_score, 
+                v.epss_score,
+                v.cvss_severity, 
                 v.date_added, 
                 v.due_date,
                 c.company_name
@@ -62,11 +65,14 @@ def get_all_cves(sort_column):
         cve_list = [
             {
                 "cve_id": row[0],
-                "risk_index": row[1],
-                "risk_rating": row[2],
-                "date_added": row[3],
-                "due_date": row[4],
-                "company_name": row[5]
+                "vulnerability_name": row[1],
+                "description": row[2],
+                "cvss_score": row[3],
+                "epss_score": row[4],
+                "severity": row[5],
+                "date_added": row[6],
+                "due_date": row[7],
+                "company_name": row[8]
             } for row in rows
         ]
 
