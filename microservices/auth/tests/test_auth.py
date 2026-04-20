@@ -1,15 +1,15 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
-from microservices.auth.app.main import app
-from microservices.auth.app.auth_utils import hash_password
+from microservices.auth.app_for_test.main import app
+from microservices.auth.app_for_test.auth_utils import hash_password
 
 client = TestClient(app)
 
 @pytest.fixture
 def mock_db():
     # patch where it is defined
-    with patch("microservices.auth.app.routes.get_db_connection") as mocked_get_conn:
+    with patch("microservices.auth.app_for_test.routes.get_db_connection") as mocked_get_conn:
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         
