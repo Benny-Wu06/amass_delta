@@ -22,6 +22,26 @@ def lambda_handler(event, context):
     
     return get_all_cves(sort_by)
 
+def calculate_risk(avg_cvss, avg_epss):
+    if avg_cvss is None or avg_epss is None:
+        return 0, "UNKNOWN"
+    
+    if avg_cvss == 0 or avg_epss == 0:
+        return 0, "UNKNOWN"
+
+    risk_index = round((float(avg_cvss) / 10) * 0.6 + float(avg_epss) * 0.4, 4)
+
+    if risk_index >= 0.8:
+        rating = "CRITICAL"
+    elif risk_index >= 0.6:
+        rating = "HIGH"
+    elif risk_index >= 0.4:
+        rating = "MEDIUM"
+    else:
+        rating = "LOW"
+
+    return risk_index, rating
+
 def get_all_cves(sort_column):
     conn = None
 
@@ -47,9 +67,10 @@ def get_all_cves(sort_column):
         query = f"""
             SELECT 
                 v.cve_id, 
-                c.risk_index, 
-                c.risk_rating, 
-                v.date_added, 
+                v.cvss_score, 
+                v.epss_score, 
+                v.date_added,
+                v.description, 
                 v.due_date,
                 c.company_name
             FROM vulnerabilities v
@@ -59,16 +80,18 @@ def get_all_cves(sort_column):
         cur.execute(query)
         rows = cur.fetchall()
         
-        cve_list = [
-            {
+        cve_list = []
+        for row in rows:
+            risk_index, risk_rating = calculate_risk(row[1], row[2])
+            cve_list.append({
                 "cve_id": row[0],
-                "risk_index": row[1],
-                "risk_rating": row[2],
+                "risk_index": risk_index,
+                "risk_rating": risk_rating,
                 "date_added": row[3],
-                "due_date": row[4],
-                "company_name": row[5]
-            } for row in rows
-        ]
+                "description": row[4],
+                "due_date": row[5],
+                "company_name": row[6]
+            })
 
         return {
             "statusCode": 200,
