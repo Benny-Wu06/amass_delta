@@ -25,7 +25,7 @@ def test_get_all_cves_success(mock_connect):
     assert response["statusCode"] == 200
     assert body["cves"][0]["cve_id"] == "CVE-2024-0002"
     assert body["cves"][0]["company_name"] == "Google"
-    assert body["cves"][0]["severity"] == "Medium"
+    assert body["cves"][0]["cvss_severity"] == "Medium"
     
 
 @patch('psycopg2.connect')

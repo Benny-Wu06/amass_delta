@@ -37,7 +37,7 @@ def test_get_cves_data_integrity():
             "description", 
             "cvss_score", 
             "epss_score", 
-            "severity",
+            "cvss_severity",
             "date_added", 
             "due_date", 
             "company_name"
@@ -48,7 +48,7 @@ def test_get_cves_data_integrity():
         assert isinstance(first_cve["cve_id"], str)
         assert isinstance(first_cve["cvss_score"], (int, float, type(None)))
         assert isinstance(first_cve["epss_score"], (int, float, type(None)))
-        assert isinstance(first_cve["severity"], (str, type(None)))
+        assert isinstance(first_cve["cvss_severity"], (str, type(None)))
         assert isinstance(first_cve["company_name"], (str, type(None)))
 
 def test_get_cves_sorting_logic_live():

@@ -69,7 +69,7 @@ def get_all_cves(sort_column):
                 "description": row[2],
                 "cvss_score": float(row[3]) if row[3] is not None else 0.0,
                 "epss_score": float(row[4]) if row[4] is not None else 0.0,
-                "severity": row[5] if row[5] is not None else "Unassigned",
+                "cvss_severity": row[5],
                 "date_added": row[6],
                 "due_date": row[7],
                 "company_name": row[8] or "N/A"

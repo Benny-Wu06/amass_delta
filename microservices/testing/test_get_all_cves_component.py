@@ -43,7 +43,7 @@ def test_lambda_contract_success(mock_connect):
     first_cve = body["cves"][0]
     assert first_cve["cve_id"] == "CVE-2026-0001"
     assert first_cve["vulnerability_name"] == "Heartbleed 2.0"
-    assert first_cve["severity"] == "Critical"
+    assert first_cve["cvss_severity"] == "Critical"
     assert first_cve["company_name"] == "Google"
 
 @patch('psycopg2.connect')
