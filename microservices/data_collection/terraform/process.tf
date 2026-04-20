@@ -66,7 +66,7 @@ resource "aws_iam_role_policy" "processor_policy" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:ListBucket"]
+        Action   = ["s3:GetObject", "s3:ListBucket", "s3:PutObject"]
         Resource = ["${var.raw_bucket_arn}/*", "${var.raw_bucket_arn}"]
       },
       {

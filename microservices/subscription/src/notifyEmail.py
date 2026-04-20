@@ -8,6 +8,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 ses = boto3.client("ses")
+s3 = boto3.client("s3")
 
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = 5432
@@ -40,12 +41,24 @@ def lambda_handler(event, context):
             logger.error("No SNS records in event")
             return {"statusCode": 400, "body": "No SNS records"}
 
-        sns_message = records[0]["Sns"]["Message"]
-        payload = json.loads(sns_message)
+        sns_message_raw = records[0]["Sns"]["Message"]
+        sns_data = json.loads(sns_message_raw)
+        bucket = sns_data.get("bucket")
+        key = sns_data.get("key")
+        
+        if not bucket or not key:
+            logger.error("SNS message missing S3 pointer (bucket/key)")
+            return {"statusCode": 400, "body": "Invalid SNS payload structure"}
+
+        logger.info(f"Fetching payload from s3://{bucket}/{key}")
+        response = s3.get_object(Bucket=bucket, Key=key)
+        payload_raw = response["Body"].read().decode("utf-8")
+        payload = json.loads(payload_raw)
         new_cves_by_company = payload.get("new_cves", {})
-    except (KeyError, json.JSONDecodeError) as e:
-        logger.error("Failed to parse SNS payload: %s", str(e))
-        return {"statusCode": 400, "body": "Invalid SNS payload"}
+
+    except (KeyError, json.JSONDecodeError, Exception) as e:
+        logger.error("Failed to retrieve or parse payload: %s", str(e))
+        return {"statusCode": 500, "body": f"Data retrieval failed: {str(e)}"}
 
     if not new_cves_by_company:
         logger.info("No new CVEs in payload")

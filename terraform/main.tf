@@ -192,6 +192,9 @@ module "data_collection" {
 
 module "subscription" {
   source            = "../microservices/subscription/terraform"
+  raw_bucket_arn    = aws_s3_bucket.cisa_bucket.arn
+  raw_bucket_id     = aws_s3_bucket.cisa_bucket.id
+  bucket_id         = aws_s3_bucket.cisa_bucket.id
   vpc_id            = aws_vpc.main.id
   subnet_ids        = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
   db_address        = aws_db_instance.postgres.address
@@ -264,8 +267,8 @@ resource "aws_vpc_endpoint" "s3" {
   ]
 }
 
-resource "aws_security_group" "vpc_endpoints_sg" {
-  name   = "amass-vpc-endpoints-sg"
+resource "aws_security_group" "ses_endpoint_sg" {
+  name   = "ses-endpoint-sg"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -274,22 +277,6 @@ resource "aws_security_group" "vpc_endpoints_sg" {
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
   }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_vpc_endpoint" "sns" {
-  vpc_id              = aws_vpc.main.id
-  service_name        = "com.amazonaws.ap-southeast-2.sns"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-  security_group_ids  = [aws_security_group.vpc_endpoints_sg.id]
-  private_dns_enabled = true
 }
 
 resource "aws_vpc_endpoint" "ses" {
@@ -297,9 +284,38 @@ resource "aws_vpc_endpoint" "ses" {
   service_name        = "com.amazonaws.ap-southeast-2.email"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-  security_group_ids  = [aws_security_group.vpc_endpoints_sg.id]
+  security_group_ids  = [aws_security_group.ses_endpoint_sg.id]
   private_dns_enabled = true
 }
+
+resource "aws_security_group" "sns_endpoint_sg" {
+  name        = "sns-endpoint-sg"
+  description = "Allow VPC traffic to SNS"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+  }
+
+  tags = { Name = "amass-sns-endpoint-sg" }
+}
+
+resource "aws_vpc_endpoint" "sns" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-southeast-2.sns"
+  vpc_endpoint_type = "Interface"
+
+  subnet_ids          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  security_group_ids  = [aws_security_group.sns_endpoint_sg.id]
+  private_dns_enabled = true
+
+  tags = { Name = "amass-sns-endpoint" }
+}
+
+
 
 terraform {
   backend "s3" {}

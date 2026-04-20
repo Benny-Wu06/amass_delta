@@ -43,6 +43,11 @@ resource "aws_iam_role_policy" "notify_email_ses_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:ListBucket", "s3:PutObject"]
+        Resource = ["${var.raw_bucket_arn}/*", "${var.raw_bucket_arn}"]
+      },
+      {
       Effect   = "Allow"
       Action   = "ses:SendEmail"
       Resource = "*"
