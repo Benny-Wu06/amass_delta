@@ -71,7 +71,6 @@ const Login = () => {
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        {/* Styled Login Button */}
                         <CButton 
                           style={darkThemeColor} 
                           className="px-4 text-white" 
@@ -84,7 +83,6 @@ const Login = () => {
                   </CForm>
                 </CCardBody>
               </CCard>
-              {/* Styled Side Card */}
               <CCard 
                 className="text-white py-5" 
                 style={{ ...darkThemeColor, width: '44%' }}
