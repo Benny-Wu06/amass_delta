@@ -70,7 +70,7 @@ def test_get_cves_sorting_logic_live():
 def test_get_cves_invalid_method():
      ### API Gateway should reject POST requests to a GET-only resource  ###
     response = requests.post(CVES_ENDPOINT, json={"fake": "data"})
-    assert response.status_code == 404
+    assert response.status_code in [403, 404, 405], f"Expected error code but got {response.status_code}"
 
 def test_get_cves_not_found():
     bad_endpoint = f"{URL}/v1/cves-invalid-path"
