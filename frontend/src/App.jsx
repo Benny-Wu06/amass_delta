@@ -29,10 +29,10 @@ import './scss/examples.scss'
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
 
 // Pages
-const Login = React.lazy(() => import('./views/_defaults/pages/login/Login'))
-const Register = React.lazy(() => import('./views/_defaults/pages/register/Register'))
-const Page404 = React.lazy(() => import('./views/_defaults/pages/page404/Page404'))
-const Page500 = React.lazy(() => import('./views/_defaults/pages/page500/Page500'))
+const Login = React.lazy(() => import('./views/auth/Login'))
+const Register = React.lazy(() => import('./views/auth/Register'))
+// const Page404 = React.lazy(() => import('./views/auth/Page404'))
+// const Page500 = React.lazy(() => import('./views/auth/Page500'))
 
 /**
  * Main Application Component
@@ -96,8 +96,8 @@ const App = () => {
         <Routes>
           <Route exact path="/login" name="Login Page" element={<Login />} />
           <Route exact path="/register" name="Register Page" element={<Register />} />
-          <Route exact path="/404" name="Page 404" element={<Page404 />} />
-          <Route exact path="/500" name="Page 500" element={<Page500 />} />
+          {/* <Route exact path="/404" name="Page 404" element={<Page404 />} /> */}
+          {/* <Route exact path="/500" name="Page 500" element={<Page500 />} /> */}
 
           <Route 
             path="*" 
