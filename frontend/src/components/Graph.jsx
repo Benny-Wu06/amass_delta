@@ -39,6 +39,8 @@ const Graph = ({ header, rawResponse, type }) => {
   const options = {
     chart: { height: '350px', backgroundColor: 'transparent' },
     title: { text: null },
+    height: 350,
+    reflow: true,
     // STOPS THE CONSOLE WARNING
     accessibility: { enabled: false }, 
     credits: { enabled: false },
@@ -53,7 +55,7 @@ const Graph = ({ header, rawResponse, type }) => {
     },
     yAxis: [
       {
-        title: { text: isStockView ? 'Price Diff (%)' : 'CVE Count' },
+        title: { text: isStockView ? 'Price Diff' : 'CVE Count' },
         gridLineColor: '#3c4147'
       },
       {
@@ -91,15 +93,17 @@ const Graph = ({ header, rawResponse, type }) => {
   };
 
   return (
-    <CCol md={6}>
-      <CCard className="mb-4">
+    <CCard className="h-100 w-100">
         <CCardHeader>{header}</CCardHeader>
         <CCardBody>
-          <HighchartsReact highcharts={Highcharts} options={options} />
+        <HighchartsReact 
+            highcharts={Highcharts} 
+            options={options} 
+            containerProps={{ style: { height: '100%', width: '100%' } }}
+        />
         </CCardBody>
-      </CCard>
-    </CCol>
-  );
+    </CCard>
+  )
 }
 
 export default Graph;

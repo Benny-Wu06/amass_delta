@@ -17,15 +17,17 @@ const Heatmap = ({ header, data, type }) => {
   // Data Guard to prevent rendering before data arrives
   if (type === 'heatmap' && (!data || data.length === 0)) {
     return (
-      <CCol md={6}>
-        <CCard className="mb-4">
-          <CCardHeader>{header}</CCardHeader>
-          <CCardBody className="d-flex align-items-center justify-content-center" style={{ height: '350px' }}>
-            <div className="text-muted text-center">Loading Heatmap...</div>
-          </CCardBody>
+        <CCard className="mb-4 h-100 w-100">
+        <CCardHeader>{header}</CCardHeader>
+        <CCardBody>
+            <HighchartsReact 
+            highcharts={Highcharts} 
+            options={options} 
+            ref={chartComponentRef} 
+            />
+        </CCardBody>
         </CCard>
-      </CCol>
-    )
+    );
   }
 
   if (type === 'heatmap') {
@@ -88,31 +90,27 @@ const Heatmap = ({ header, data, type }) => {
     }
 
     return (
-      <CCol md={6}>
-        <CCard className="mb-4">
-          <CCardHeader>{header}</CCardHeader>
-          <CCardBody>
-            <HighchartsReact 
+        <CCard className="mb-4 h-100 w-100">
+            <CCardHeader>{header}</CCardHeader>
+            <CCardBody>
+                <HighchartsReact 
                 highcharts={Highcharts} 
                 options={options} 
                 ref={chartComponentRef} 
-            />
-          </CCardBody>
+                />
+            </CCardBody>
         </CCard>
-      </CCol>
-    )
-  }
+        );
+    }
 
   return (
-    <CCol md={6}>
-      <CCard className="mb-4">
+    <CCard className="mb-4 h-100 w-100">
         <CCardHeader>{header}</CCardHeader>
         <CCardBody className="d-flex align-items-center justify-content-center" style={{ height: '350px' }}>
-          <div className="text-muted">No Data Available</div>
+        <div className="text-muted">No Data Available</div>
         </CCardBody>
-      </CCard>
-    </CCol>
-  )
+    </CCard>
+  );
 }
 
 export default Heatmap

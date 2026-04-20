@@ -121,64 +121,74 @@ const CompanyPage = () => {
   }, [company_name])
 
   const latestDate = vulns && vulns.length > 0 
-    ? new Date(
-        Math.max(...vulns.map(v => {
-            const d = new Date(v.date_added || v.published_date);
-            return isNaN(d.getTime()) ? 0 : d.getTime();
-        }))
-        ).toLocaleDateString()
-    : 'No records found';
+  ? (() => {
+      const timestamps = vulns.map(v => {
+        const d = new Date(v.dateAdded); 
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+      });
+
+      const maxTimestamp = Math.max(...timestamps);
+
+      return maxTimestamp === 0 
+        ? 'No valid dates' 
+        : new Date(maxTimestamp).toLocaleDateString('en-AU'); 
+    })()
+  : 'No records found';
 
   return (
     <>
       <h2 className="mx-2 mb-4">{companyName}</h2>
       
-      <CRow className="mb-4">
-        <Heatmap header={'Company Risk Heatmap'} data={heatmapData} type="heatmap" />
-        <Graph header={'CVE Growth vs. Time'} rawResponse={graphData} />
+      {/* Row 1: Heatmap and Growth Graph */}
+      <CRow className="mb-4 d-flex align-items-stretch">
+        <CCol md={6} className="d-flex">
+            <Heatmap header={'Company Risk Heatmap'} data={heatmapData} type="heatmap" />
+        </CCol>
+        <CCol md={6} className="d-flex">
+            <Graph header={'CVE Growth vs. Time'} rawResponse={graphData} />
+        </CCol>
       </CRow>
 
-      <CRow className="mb-4">
-        {companyData ? (
-          <CCol md={6}>
-            <CCard className="h-100"> 
+      {/* Row 2: Metrics and Stock Integration */}
+      <CRow className="mb-4 d-flex align-items-stretch">
+        <CCol md={6} className="d-flex">
+          {companyData ? (
+            <CCard className="h-100 w-100"> 
               <CCardHeader>Metrics</CCardHeader>
-              <CCardBody>
+              <CCardBody className="d-flex flex-column justify-content-center">
                 <CRow>
                   <CCol xs={6}>
                     <p className="text-muted mb-0">Risk Index</p>
-                    <h3 className="text-warning">{companyData.risk_index}</h3>
+                    <h1 className="display-4 fw-bold text-warning">{companyData.risk_index}</h1>
                   </CCol>
                   <CCol xs={6}>
                     <p className="text-muted mb-0">Risk Rating</p>
-                    <h3>{companyData.risk_rating}</h3>
+                    <h1 className="display-4 fw-bold text-primary">{companyData.risk_rating}</h1>
                   </CCol>
                 </CRow>
                 <hr />
                 <div className="mt-3">
-                  <p><strong>CVE Count:</strong> {companyData.cve_count}</p>
-                  <p><strong>Avg CVSS:</strong> {companyData.avg_cvss}</p>
-                  <p><strong>Avg EPSS:</strong> {companyData.avg_epss}</p>
-                  <p><strong>Latest Update:</strong> {latestDate}</p>
+                  <p className="mb-1"><strong>CVE Count:</strong> {companyData.cve_count}</p>
+                  <p className="mb-1"><strong>Avg CVSS:</strong> {companyData.avg_cvss}</p>
+                  <p className="mb-1"><strong>Avg EPSS:</strong> {companyData.avg_epss}</p>
+                  <p className="mb-0"><strong>Most Recent Vulnerability:</strong> {latestDate}</p>
                 </div>
               </CCardBody>
             </CCard>
-          </CCol>
-        ) : (
-          <CCol md={6}>
-            <CCard className="h-100 d-flex align-items-center justify-content-center">
-              <div>Loading metrics...</div>
+          ) : (
+            <CCard className="h-100 w-100 d-flex align-items-center justify-content-center">
+              <div className="text-muted">Loading metrics...</div>
             </CCard>
-          </CCol>
-        )}
+          )}
+        </CCol>
 
-        
+        <CCol md={6} className="d-flex">
           <Graph 
             header={'Stock Price vs. CVE GROWTH'} 
             rawResponse={stockVsCVEData}
             type="stock_correlation"
-           />
-          
+          />
+        </CCol>
       </CRow>
 
       <VulnerabilityTable vulns={vulns} />
