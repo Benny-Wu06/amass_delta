@@ -292,6 +292,15 @@ resource "aws_vpc_endpoint" "sns" {
   private_dns_enabled = true
 }
 
+resource "aws_vpc_endpoint" "ses" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.ap-southeast-2.email"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  security_group_ids  = [aws_security_group.vpc_endpoints_sg.id]
+  private_dns_enabled = true
+}
+
 terraform {
   backend "s3" {}
 }
