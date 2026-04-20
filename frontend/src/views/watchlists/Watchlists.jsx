@@ -1,77 +1,205 @@
-import React from 'react'
-import classNames from 'classnames'
-
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { BASE_URL, getUserEmail } from '../../vars'
 import {
-  CAvatar,
   CButton,
-  CButtonGroup,
   CCard,
-  CCardTitle,
   CCardBody,
-  CCardFooter,
   CCardHeader,
   CCol,
-  CProgress,
+  CFormInput,
+  CInputGroup,
+  CInputGroupText,
+  CModal,
+  CModalBody,
+  CModalFooter,
+  CModalHeader,
+  CModalTitle,
   CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-  CLink,
+  CSpinner,
+  CBadge,
 } from '@coreui/react'
-import Company from 'src/components/Company.jsx'
-import SubscribeButton from 'src/components/SubscribeButton.jsx'
-import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
-import Watchlist from './Watchlist.jsx'
+import CIcon from '@coreui/icons-react'
+import { cilPlus, cilTrash, cilPen, cilBuilding } from '@coreui/icons'
 
 const Watchlists = () => {
-  // this is why typescript is helpful i think
+  const [watchlists, setWatchlists] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [creating, setCreating] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const navigate = useNavigate()
 
-  // get watchlists
+  const email = getUserEmail()
 
-  // fetch subscribed companies
-  const watchlists = [
-    {
-      id: 1,
-      name: 'diddy watchlist',
-    },
-    {
-      id: 2,
-      name: 'faang',
-    },
-    {
-      id: 3,
-      name: 'diddyblud watchlist',
-    },
-    {
-      id: 4,
-      name: 'fukumean',
-    },
-  ]
+  const fetchWatchlists = async () => {
+    if (!email) return
+    setLoading(true)
+    try {
+      const res = await axios.get(`${BASE_URL}/v2/watchlist`, { params: { email } })
+      const data = typeof res.data.body === 'string' ? JSON.parse(res.data.body) : res.data
+      setWatchlists(data.watchlists || [])
+    } catch (err) {
+      console.error('Failed to fetch watchlists:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchWatchlists()
+  }, [email])
+
+  const handleCreate = async () => {
+    if (!newName.trim()) return
+    setCreating(true)
+    try {
+      await axios.post(`${BASE_URL}/v2/watchlist`, { email, name: newName.trim() })
+      setNewName('')
+      setShowModal(false)
+      await fetchWatchlists()
+    } catch (err) {
+      console.error('Failed to create watchlist:', err)
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${BASE_URL}/v2/watchlist/${id}`, { data: { email } })
+      setDeleteTarget(null)
+      await fetchWatchlists()
+    } catch (err) {
+      console.error('Failed to delete watchlist:', err)
+    }
+  }
 
   return (
     <>
-      <CRow>
-        <CCol className="p-0" xs>
-          <CCard className="mb-4">
-            <CCardHeader>Your Watchlists</CCardHeader>
-            <CTable align="middle" className="mb-0 border" hover responsive>
-              <CTableHead className="text-nowrap">
-                <CTableRow>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Name</CTableHeaderCell>
-                </CTableRow>
-              </CTableHead>
-              <CTableBody>
-                {watchlists.map((watchlist, index) => (
-                  <Watchlist watchlist={watchlist} key={index}></Watchlist>
-                ))}
-              </CTableBody>
-            </CTable>
-          </CCard>
-        </CCol>
-      </CRow>
+      <div className="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h4 className="mb-0 fw-bold">Your Watchlists</h4>
+          <small className="text-muted">{watchlists.length} playlist{watchlists.length !== 1 ? 's' : ''}</small>
+        </div>
+        <CButton color="primary" onClick={() => setShowModal(true)}>
+          <CIcon icon={cilPlus} className="me-1" />
+          New Watchlist
+        </CButton>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-5">
+          <CSpinner color="primary" />
+        </div>
+      ) : watchlists.length === 0 ? (
+        <CCard className="border-dashed text-center py-5">
+          <CCardBody>
+            <p className="text-muted mb-3">No watchlists yet. Create one to start tracking companies.</p>
+            <CButton color="primary" variant="outline" onClick={() => setShowModal(true)}>
+              <CIcon icon={cilPlus} className="me-1" />
+              Create your first watchlist
+            </CButton>
+          </CCardBody>
+        </CCard>
+      ) : (
+        <CRow xs={{ cols: 1 }} sm={{ cols: 2 }} md={{ cols: 3 }} lg={{ cols: 4 }} className="g-3">
+          {watchlists.map((wl) => (
+            <CCol key={wl.id}>
+              <CCard
+                className="h-100 watchlist-card"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate(`/watchlists/${wl.id}`)}
+              >
+                <CCardBody className="d-flex flex-column">
+                  <div
+                    className="watchlist-card-icon mb-3 rounded d-flex align-items-center justify-content-center"
+                    style={{
+                      width: 48,
+                      height: 48,
+                      background: `hsl(${(wl.id * 47) % 360}, 60%, 50%)`,
+                    }}
+                  >
+                    <CIcon icon={cilBuilding} style={{ color: '#fff' }} size="lg" />
+                  </div>
+                  <div className="fw-semibold mb-1 text-truncate">{wl.name}</div>
+                  <div className="text-muted small mb-3">
+                    <CBadge color="secondary" shape="rounded-pill">
+                      {wl.company_count ?? 0} {wl.company_count === 1 ? 'company' : 'companies'}
+                    </CBadge>
+                  </div>
+                  <div className="mt-auto d-flex gap-2" onClick={(e) => e.stopPropagation()}>
+                    <CButton
+                      color="primary"
+                      size="sm"
+                      variant="outline"
+                      className="flex-grow-1"
+                      onClick={() => navigate(`/watchlists/${wl.id}`)}
+                    >
+                      <CIcon icon={cilPen} className="me-1" />
+                      Edit
+                    </CButton>
+                    <CButton
+                      color="danger"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setDeleteTarget(wl)}
+                    >
+                      <CIcon icon={cilTrash} />
+                    </CButton>
+                  </div>
+                </CCardBody>
+              </CCard>
+            </CCol>
+          ))}
+        </CRow>
+      )}
+
+      <CModal visible={showModal} onClose={() => setShowModal(false)} alignment="center">
+        <CModalHeader>
+          <CModalTitle>New Watchlist</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <CInputGroup>
+            <CInputGroupText>Name</CInputGroupText>
+            <CFormInput
+              placeholder="e.g. FAANG, Cloud Providers..."
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+              autoFocus
+            />
+          </CInputGroup>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" variant="ghost" onClick={() => setShowModal(false)}>
+            Cancel
+          </CButton>
+          <CButton color="primary" onClick={handleCreate} disabled={creating || !newName.trim()}>
+            {creating ? <CSpinner size="sm" className="me-1" /> : null}
+            Create
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      <CModal visible={!!deleteTarget} onClose={() => setDeleteTarget(null)} alignment="center">
+        <CModalHeader>
+          <CModalTitle>Delete Watchlist</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          Delete <strong>{deleteTarget?.name}</strong>? This can't be undone.
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" variant="ghost" onClick={() => setDeleteTarget(null)}>
+            Cancel
+          </CButton>
+          <CButton color="danger" onClick={() => handleDelete(deleteTarget?.id)}>
+            Delete
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </>
   )
 }
