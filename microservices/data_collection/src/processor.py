@@ -9,7 +9,22 @@ logger.setLevel(logging.INFO)
 
 # Variables definitions
 
-s3 = boto3.client("s3")
+s3 = None
+sns = None
+
+
+def _get_s3():
+    global s3
+    if s3 is None:
+        s3 = boto3.client("s3")
+    return s3
+
+
+def _get_sns():
+    global sns
+    if sns is None:
+        sns = boto3.client("sns")
+    return sns
 
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = 5432
@@ -17,6 +32,7 @@ DB_NAME = os.environ.get("DB_NAME", "postgres")
 DB_USER = os.environ.get("DB_USER", "postgres")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
+SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN")
 CISA_KEY = "enriched/enriched.json"
 cert_path = os.environ.get("CERT_PATH", "global-bundle.pem")
 
@@ -45,7 +61,7 @@ def init_db(cur):
     CREATE TABLE IF NOT EXISTS companies (
         id serial primary key,
         company_name text not null,
-        num_vulnerabilities integer, 
+        num_vulnerabilities integer,
         avg_cvss numeric,
         avg_epss numeric,
         risk_index numeric not null,
@@ -64,6 +80,22 @@ def init_db(cur):
         cvss_score numeric,
         epss_score numeric
     );
+
+    CREATE TABLE IF NOT EXISTS watchlists (
+        id serial primary key,
+        email text not null,
+        name text not null,
+        created_at timestamp default now(),
+        UNIQUE(email, name)
+    );
+
+    CREATE TABLE IF NOT EXISTS watchlist_companies (
+        id serial primary key,
+        watchlist_id integer not null references watchlists(id) ON DELETE CASCADE,
+        company_name text not null,
+        added_at timestamp default now(),
+        UNIQUE(watchlist_id, company_name)
+    );
     """
     cur.execute(schema_sql)
 
@@ -72,7 +104,7 @@ def init_db(cur):
 
 
 def get_cisa_data():
-    response = s3.get_object(Bucket=BUCKET_NAME, Key=CISA_KEY)
+    response = _get_s3().get_object(Bucket=BUCKET_NAME, Key=CISA_KEY)
     raw = response["Body"].read().decode("utf-8")
     data = json.loads(raw)
     return data["vulnerabilities"]
@@ -241,16 +273,34 @@ def lambda_handler(event, context):
     logger.info("Found %d vulnerabilities to process", len(vulnerabilities))
 
     inserted = 0
+    new_cves_by_company = {}
 
     try:
         for vuln in vulnerabilities:
             company_name = vuln.get("vendorProject", "Unknown")
             company_id = get_or_create_company(cur, company_name)
             insert_vulnerability(cur, vuln, company_id)
+            if cur.rowcount > 0:
+                new_cves_by_company.setdefault(company_name, []).append({
+                    "cve_id": vuln.get("cveID"),
+                    "name": vuln.get("vulnerabilityName"),
+                    "description": vuln.get("shortDescription"),
+                    "date_added": vuln.get("dateAdded"),
+                    "cvss_score": vuln.get("cvss_score"),
+                    "epss_score": vuln.get("epss_score"),
+                    "due_date": vuln.get("dueDate"),
+            })
             inserted += 1
 
         conn.commit()
-        logger.info("Inserted %d vulnerabilities", inserted)
+        logger.info("Inserted %d new vulnerabilities", inserted)
+
+        if new_cves_by_company and SNS_TOPIC_ARN:
+            _get_sns().publish(
+                TopicArn=SNS_TOPIC_ARN,
+                Message=json.dumps({"new_cves": new_cves_by_company}),
+            )
+        logger.info("New CVE event to SNS for %d companies", len(new_cves_by_company))
 
         logger.info("Updating company stats")
         update_all_company_stats(cur)
