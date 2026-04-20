@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   CAvatar,
   CBadge,
@@ -21,10 +22,27 @@ import {
   cilUser,
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
+import { STAGING_URL } from '../../vars'
 
 import avatar8 from './../../assets/images/avatars/8.jpg'
 
 const AppHeaderDropdown = () => {
+    const navigate = useNavigate()
+
+  const handleLogout = async (e) => {
+    e.preventDefault() // Prevent the default href="#" behavior
+
+    try {
+      await axios.post(`${STAGING_URL}/auth/logout`) 
+    } catch (error) {
+      console.error("Logout notification failed, clearing local session anyway.", error)
+    } finally {
+      
+      localStorage.removeItem('user')
+      
+      navigate('/login')
+    }
+  }
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0 pe-0" caret={false}>
@@ -35,31 +53,24 @@ const AppHeaderDropdown = () => {
         <CDropdownItem href="#">
           <CIcon icon={cilBell} className="me-2" />
           Updates
-          <CBadge color="info" className="ms-2">
-            42
-          </CBadge>
+          <CBadge color="info" className="ms-2">42</CBadge>
         </CDropdownItem>
         <CDropdownItem href="#">
           <CIcon icon={cilEnvelopeOpen} className="me-2" />
           Messages
-          <CBadge color="success" className="ms-2">
-            42
-          </CBadge>
+          <CBadge color="success" className="ms-2">42</CBadge>
         </CDropdownItem>
         <CDropdownItem href="#">
           <CIcon icon={cilTask} className="me-2" />
           Tasks
-          <CBadge color="danger" className="ms-2">
-            42
-          </CBadge>
+          <CBadge color="danger" className="ms-2">42</CBadge>
         </CDropdownItem>
         <CDropdownItem href="#">
           <CIcon icon={cilCommentSquare} className="me-2" />
           Comments
-          <CBadge color="warning" className="ms-2">
-            42
-          </CBadge>
+          <CBadge color="warning" className="ms-2">42</CBadge>
         </CDropdownItem>
+
         <CDropdownHeader className="bg-body-secondary fw-semibold my-2">Settings</CDropdownHeader>
         <CDropdownItem href="#">
           <CIcon icon={cilUser} className="me-2" />
@@ -72,21 +83,19 @@ const AppHeaderDropdown = () => {
         <CDropdownItem href="#">
           <CIcon icon={cilCreditCard} className="me-2" />
           Payments
-          <CBadge color="secondary" className="ms-2">
-            42
-          </CBadge>
+          <CBadge color="secondary" className="ms-2">42</CBadge>
         </CDropdownItem>
         <CDropdownItem href="#">
           <CIcon icon={cilFile} className="me-2" />
           Projects
-          <CBadge color="primary" className="ms-2">
-            42
-          </CBadge>
+          <CBadge color="primary" className="ms-2">42</CBadge>
         </CDropdownItem>
+
         <CDropdownDivider />
-        <CDropdownItem href="#">
+        {/* The functional logout button */}
+        <CDropdownItem onClick={handleLogout} style={{ cursor: 'pointer' }}>
           <CIcon icon={cilLockLocked} className="me-2" />
-          Lock Account
+          Logout
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
