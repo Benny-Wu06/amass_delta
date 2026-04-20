@@ -33,11 +33,9 @@ def test_get_cves_data_integrity():
         # Check for all required fields in the live response
         expected_keys = {
             "cve_id", 
-            "vulnerability_name", 
+            "risk_index",   
+            "risk_rating",
             "description", 
-            "cvss_score", 
-            "epss_score", 
-            "cvss_severity",
             "date_added", 
             "due_date", 
             "company_name"
@@ -46,9 +44,9 @@ def test_get_cves_data_integrity():
         
         # Verify data types from the live wire
         assert isinstance(first_cve["cve_id"], str)
-        assert isinstance(first_cve["cvss_score"], (int, float, type(None)))
-        assert isinstance(first_cve["epss_score"], (int, float, type(None)))
-        assert isinstance(first_cve["cvss_severity"], (str, type(None)))
+        assert isinstance(first_cve["risk_index"], (int, float))
+        assert isinstance(first_cve["risk_rating"], str)
+        assert isinstance(first_cve["description"], (str, type(None)))
         assert isinstance(first_cve["company_name"], (str, type(None)))
 
 def test_get_cves_sorting_logic_live():
@@ -65,7 +63,7 @@ def test_get_cves_sorting_logic_live():
     data_latest = resp_latest.json()
     
     if data_latest["count"] > 0:
-        assert "vulnerability_name" in data_latest["cves"][0]
+        assert "risk_rating" in data_latest["cves"][0]
 
 def test_get_cves_invalid_method():
      ### API Gateway should reject POST requests to a GET-only resource  ###
