@@ -11,7 +11,7 @@ import {
   CSpinner,
 } from '@coreui/react'
 import axios from 'axios'
-import { BASE_URL } from '../../vars'
+import { BASE_URL } from '@/vars'
 
 const VulnInfo = ({}) => {
   const { cveId } = useParams()

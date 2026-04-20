@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
-import { BASE_URL } from '../../../vars'
+import { BASE_URL } from '@/vars'
 import {
   CButton,
   CCard,

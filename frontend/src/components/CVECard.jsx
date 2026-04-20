@@ -1,7 +1,7 @@
 import { useForkedRef } from '@coreui/react'
 import axios from 'axios'
 import React from 'react'
-import { BASE_URL } from '../vars'
+import { BASE_URL } from '@/vars'
 import { useState, useEffect } from 'react'
 
 const CVECard = ({ item, onClick }) => {
