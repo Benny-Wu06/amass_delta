@@ -56,7 +56,6 @@ export const routes = [
   { path: '/companies/:company_name', name: 'Company', element: CompanyPage },
   { path: '/login', name: 'Login', element: Login },
   { path: '/register', name: 'Register', element: Register },
-
 ]
 
 export default routes

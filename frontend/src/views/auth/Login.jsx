@@ -48,16 +48,26 @@ const Login = () => {
                     <h1>Login</h1>
                     <p className="text-body-secondary">Sign In to your account</p>
                     <CInputGroup className="mb-3">
-                      <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
+                      <CInputGroupText>
+                        <CIcon icon={cilUser} />
+                      </CInputGroupText>
                       <CFormInput placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
-                      <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
-                      <CFormInput type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+                      <CInputGroupText>
+                        <CIcon icon={cilLockLocked} />
+                      </CInputGroupText>
+                      <CFormInput
+                        type="password"
+                        placeholder="Password"
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4" type="submit">Login</CButton>
+                        <CButton color="primary" className="px-4" type="submit">
+                          Login
+                        </CButton>
                       </CCol>
                     </CRow>
                   </CForm>
@@ -69,7 +79,9 @@ const Login = () => {
                     <h2>Sign up</h2>
                     <p>Register to start monitoring vulnerabilities.</p>
                     <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>Register Now!</CButton>
+                      <CButton color="primary" className="mt-3" active tabIndex={-1}>
+                        Register Now!
+                      </CButton>
                     </Link>
                   </div>
                 </CCardBody>

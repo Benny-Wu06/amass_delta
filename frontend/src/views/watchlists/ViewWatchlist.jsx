@@ -36,11 +36,12 @@ import {
   cilShieldAlt,
 } from '@coreui/icons'
 
+// TODO FIX BADGES
 const RATING_COLORS = {
-  CRITICAL: 'danger',
-  HIGH: 'warning',
-  MEDIUM: 'info',
-  LOW: 'success',
+  CRITICAL: 'critical',
+  HIGH: 'high',
+  MEDIUM: 'medium',
+  LOW: 'low',
 }
 
 const ViewWatchlist = () => {
@@ -122,8 +123,7 @@ const ViewWatchlist = () => {
 
   const existingNames = new Set((watchlist?.companies || []).map((c) => c.company_name))
   const filteredCompanies = allCompanies.filter(
-    (name) =>
-      !existingNames.has(name) && name.toLowerCase().includes(companySearch.toLowerCase()),
+    (name) => !existingNames.has(name) && name.toLowerCase().includes(companySearch.toLowerCase()),
   )
 
   if (loading) {
@@ -141,13 +141,19 @@ const ViewWatchlist = () => {
   return (
     <>
       <div className="d-flex align-items-center gap-3 mb-4">
-        <CButton color="secondary" variant="ghost" size="sm" onClick={() => navigate('/watchlists')}>
+        <CButton
+          color="secondary"
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/watchlists')}
+        >
           <CIcon icon={cilArrowLeft} />
         </CButton>
         <div className="flex-grow-1">
           <h4 className="mb-0 fw-bold">{watchlist.name}</h4>
           <small className="text-muted">
-            {watchlist.companies?.length ?? 0} {watchlist.companies?.length === 1 ? 'company' : 'companies'}
+            {watchlist.companies?.length ?? 0}{' '}
+            {watchlist.companies?.length === 1 ? 'company' : 'companies'}
           </small>
         </div>
         <CButton color="primary" onClick={handleOpenAdd}>
@@ -157,7 +163,7 @@ const ViewWatchlist = () => {
       </div>
 
       <CCard>
-        <CCardHeader className="d-flex align-items-center">
+        <CCardHeader className="d-flex justify-content-start">
           <CIcon icon={cilBuilding} className="me-2 text-primary" />
           Companies
         </CCardHeader>
@@ -175,10 +181,16 @@ const ViewWatchlist = () => {
               <CTableRow>
                 <CTableHeaderCell className="bg-body-tertiary">Company</CTableHeaderCell>
                 <CTableHeaderCell className="bg-body-tertiary text-center">CVEs</CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary text-center">Risk Index</CTableHeaderCell>
+                <CTableHeaderCell className="bg-body-tertiary text-center">
+                  Risk Index
+                </CTableHeaderCell>
                 <CTableHeaderCell className="bg-body-tertiary text-center">Rating</CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary text-center">Avg CVSS</CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary text-center">Avg EPSS</CTableHeaderCell>
+                <CTableHeaderCell className="bg-body-tertiary text-center">
+                  Avg CVSS
+                </CTableHeaderCell>
+                <CTableHeaderCell className="bg-body-tertiary text-center">
+                  Avg EPSS
+                </CTableHeaderCell>
                 <CTableHeaderCell className="bg-body-tertiary" />
               </CTableRow>
             </CTableHead>
@@ -196,16 +208,16 @@ const ViewWatchlist = () => {
                     {company.num_vulnerabilities ?? '—'}
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
-                    {company.risk_index != null
-                      ? `${(company.risk_index * 100).toFixed(1)}%`
-                      : '—'}
+                    {company.risk_index != null ? `${(company.risk_index * 100).toFixed(1)}%` : '—'}
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
                     {company.risk_rating ? (
                       <CBadge color={RATING_COLORS[company.risk_rating] || 'secondary'}>
                         {company.risk_rating}
                       </CBadge>
-                    ) : '—'}
+                    ) : (
+                      '—'
+                    )}
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
                     {company.avg_cvss?.toFixed(1) ?? '—'}
@@ -231,7 +243,12 @@ const ViewWatchlist = () => {
         )}
       </CCard>
 
-      <CModal visible={showAddModal} onClose={() => setShowAddModal(false)} alignment="center" size="lg">
+      <CModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        alignment="center"
+        size="lg"
+      >
         <CModalHeader>
           <CModalTitle>Add Company to Watchlist</CModalTitle>
         </CModalHeader>
@@ -273,7 +290,7 @@ const ViewWatchlist = () => {
           </div>
         </CModalBody>
         <CModalFooter>
-          <CButton color="secondary" variant="ghost" onClick={() => setShowAddModal(false)}>
+          <CButton color="primary" onClick={() => setShowAddModal(false)}>
             Done
           </CButton>
         </CModalFooter>

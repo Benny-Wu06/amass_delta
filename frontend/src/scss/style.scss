@@ -18,6 +18,14 @@ $cyber-text-dim: #6e7681;
 $cyber-border:   rgba(0, 212, 255, 0.12);
 
 // ================================================================
+$critical:  #ff3b3b;
+$high:  rgb(255, 193, 7);
+$medium:  '#f0c040';
+$low:  '#00e676';
+
+// ================================================================
+
+// ================================================================
 // FORCE DARK CYBER BASE
 // ================================================================
 
@@ -355,6 +363,30 @@ body {
   text-transform: uppercase !important;
   padding: 0.3em 0.65em !important;
   border-radius: 3px !important;
+
+  &.bg-critical {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #ff3b3b !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
+
+  &.bg-high {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #ff8c00 !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
+
+  &.bg-medium {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #f0c040 !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
+
+  &.bg-low {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #00e676 !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
 
   &.bg-danger {
     background-color: rgba(255, 45, 85, 0.16) !important;

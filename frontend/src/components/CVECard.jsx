@@ -10,14 +10,14 @@ const CVECard = ({ item, onClick }) => {
   }
 
   const ratingLabel = (rating) => {
-  const map = {
-    CRITICAL: { color: '#ff3b3b', bg: 'rgba(255,59,59,0.12)' },
-    HIGH:     { color: '#ff8c00', bg: 'rgba(255,140,0,0.12)' },
-    MEDIUM:   { color: '#f0c040', bg: 'rgba(240,192,64,0.12)' },
-    LOW:      { color: '#00e676', bg: 'rgba(0,230,118,0.12)' },
+    const map = {
+      CRITICAL: { color: '#ff3b3b', bg: 'rgba(255,59,59,0.12)' },
+      HIGH: { color: '#ff8c00', bg: 'rgba(255,140,0,0.12)' },
+      MEDIUM: { color: '#f0c040', bg: 'rgba(240,192,64,0.12)' },
+      LOW: { color: '#00e676', bg: 'rgba(0,230,118,0.12)' },
+    }
+    return map[rating] || { color: '#6e7681', bg: 'rgba(110,118,129,0.12)' }
   }
-  return map[rating] || { color: '#6e7681', bg: 'rgba(110,118,129,0.12)' }
-}
 
   const color = riskColor(item.risk_index ?? 0)
   const badge = ratingLabel(item.risk_rating)

@@ -97,8 +97,10 @@ const Watchlists = () => {
       ) : watchlists.length === 0 ? (
         <CCard className="border-dashed text-center py-5">
           <CCardBody>
-            <p className="text-muted mb-3">No watchlists yet. Create one to start tracking companies.</p>
-            <CButton color='primary' onClick={() => setShowModal(true)}>
+            <p className="text-muted mb-3">
+              No watchlists yet. Create one to start tracking companies.
+            </p>
+            <CButton color="primary" onClick={() => setShowModal(true)}>
               <CIcon icon={cilPlus} className="me-1" />
               Create your first watchlist
             </CButton>

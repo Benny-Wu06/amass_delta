@@ -36,7 +36,7 @@ import { cilSearch } from '@coreui/icons'
 const AllCompanies = () => {
   const [companyNames, setCompanyNames] = useState([])
   const [numCompanies, setNumCompanies] = useState(0)
-  const [searchTerm, setSearchTerm] = useState('') 
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -53,7 +53,7 @@ const AllCompanies = () => {
   }, [])
 
   const filteredCompanies = companyNames.filter((name) =>
-    name.toLowerCase().includes(searchTerm.toLowerCase())
+    name.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   return (
@@ -63,7 +63,8 @@ const AllCompanies = () => {
           <CCard className="mb-4">
             <CCardHeader>
               <div>
-                <strong>Companies</strong> <small className="text-muted">({filteredCompanies.length})</small>
+                <strong>Companies</strong>{' '}
+                <small className="text-muted">({filteredCompanies.length})</small>
               </div>
               <div style={{ width: '300px' }}>
                 <CInputGroup size="sm">

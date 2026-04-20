@@ -19,10 +19,15 @@ import {
   CButton,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilSearch, cilFilter, cilUser, cilShieldAlt, cilBuilding, cilArrowRight } from '@coreui/icons'
+import {
+  cilSearch,
+  cilFilter,
+  cilUser,
+  cilShieldAlt,
+  cilBuilding,
+  cilArrowRight,
+} from '@coreui/icons'
 import CVECard from 'src/components/CVECard'
-
-
 
 const Dashboard = () => {
   const [vulns, setVulns] = useState([])
@@ -54,9 +59,7 @@ const Dashboard = () => {
           params: { sort_by: sortBy },
         })
         const parsed =
-          typeof response.data.body === 'string'
-            ? JSON.parse(response.data.body)
-            : response.data
+          typeof response.data.body === 'string' ? JSON.parse(response.data.body) : response.data
         setVulns(parsed.cves || [])
       } catch (err) {
         console.error('Error fetching CVEs:', err)
@@ -70,8 +73,7 @@ const Dashboard = () => {
   const filtered = vulns.filter((item) => {
     const s = searchTerm.toLowerCase()
     const matchSearch =
-      item.cve_id.toLowerCase().includes(s) ||
-      (item.company_name || '').toLowerCase().includes(s)
+      item.cve_id.toLowerCase().includes(s) || (item.company_name || '').toLowerCase().includes(s)
 
     if (dateRange === 'all') return matchSearch
     const d = new Date(sortBy === 'date_added' ? item.date_added : item.due_date)
@@ -100,7 +102,10 @@ const Dashboard = () => {
             <div className="mt-3">
               <div className="d-flex align-items-center justify-content-between mb-2">
                 <span className="text-muted small">Your Watchlists</span>
-                <Link to="/watchlists" className="text-muted small text-decoration-none d-flex align-items-center gap-1">
+                <Link
+                  to="/watchlists"
+                  className="text-muted small text-decoration-none d-flex align-items-center gap-1"
+                >
                   View all <CIcon icon={cilArrowRight} size="sm" />
                 </Link>
               </div>
@@ -127,7 +132,8 @@ const Dashboard = () => {
                         <div className="fw-semibold text-truncate small">{wl.name}</div>
                         <div className="mt-1">
                           <CBadge color="secondary" shape="rounded-pill">
-                            {wl.company_count ?? 0} {wl.company_count === 1 ? 'company' : 'companies'}
+                            {wl.company_count ?? 0}{' '}
+                            {wl.company_count === 1 ? 'company' : 'companies'}
                           </CBadge>
                         </div>
                       </CCardBody>

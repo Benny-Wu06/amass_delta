@@ -22,7 +22,7 @@ import {
   CDropdown,
   CDropdownToggle,
   CDropdownMenu,
-  CDropdownItem
+  CDropdownItem,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilSearch, cilFilter } from '@coreui/icons'
@@ -35,7 +35,7 @@ const Vulnerabilities = () => {
   const [dateRange, setDateRange] = useState('all')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
-  
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -43,12 +43,11 @@ const Vulnerabilities = () => {
       setLoading(true)
       try {
         const response = await axios.get(`${BASE_URL}/v1/cves`, {
-          params: { sort_by: sortBy }
+          params: { sort_by: sortBy },
         })
-        
-        const parsedBody = typeof response.data.body === 'string' 
-          ? JSON.parse(response.data.body) 
-          : response.data
+
+        const parsedBody =
+          typeof response.data.body === 'string' ? JSON.parse(response.data.body) : response.data
 
         setVulns(parsedBody.cves || [])
       } catch (error) {
@@ -61,33 +60,36 @@ const Vulnerabilities = () => {
     fetchCVEs()
   }, [sortBy])
 
-
   const filteredVulns = vulns.filter((item) => {
     const search = searchTerm.toLowerCase()
-    const matchesSearch = item.cve_id.toLowerCase().includes(search) || 
-                          item.company_name.toLowerCase().includes(search)
+    const matchesSearch =
+      item.cve_id.toLowerCase().includes(search) || item.company_name.toLowerCase().includes(search)
 
     const itemDate = new Date(sortBy === 'date_added' ? item.date_added : item.due_date)
 
-    const matchesCustomDate = (!startDate || itemDate >= new Date(startDate)) &&
-                              (!endDate || itemDate <= new Date(endDate))
+    const matchesCustomDate =
+      (!startDate || itemDate >= new Date(startDate)) && (!endDate || itemDate <= new Date(endDate))
 
     let matchesPreset = true
     if (dateRange !== 'all') {
-        const filterDate = new Date()
-        filterDate.setDate(filterDate.getDate() - parseInt(dateRange))
-        matchesPreset = itemDate >= filterDate
+      const filterDate = new Date()
+      filterDate.setDate(filterDate.getDate() - parseInt(dateRange))
+      matchesPreset = itemDate >= filterDate
     }
-    
+
     return matchesSearch && matchesCustomDate && matchesPreset
   })
 
   const getBadgeColor = (rating) => {
     switch (rating) {
-      case 'CRITICAL': return 'danger'
-      case 'HIGH': return 'warning'
-      case 'MEDIUM': return 'info'
-      default: return 'secondary'
+      case 'CRITICAL':
+        return 'danger'
+      case 'HIGH':
+        return 'warning'
+      case 'MEDIUM':
+        return 'info'
+      default:
+        return 'secondary'
     }
   }
 
@@ -117,7 +119,10 @@ const Vulnerabilities = () => {
                     size="sm"
                     style={{ minWidth: 0, width: '130px' }}
                     value={startDate}
-                    onChange={(e) => { setStartDate(e.target.value); setDateRange('all') }}
+                    onChange={(e) => {
+                      setStartDate(e.target.value)
+                      setDateRange('all')
+                    }}
                   />
                   <span className="small text-muted">to</span>
                   <CFormInput
@@ -125,11 +130,16 @@ const Vulnerabilities = () => {
                     size="sm"
                     style={{ minWidth: 0, width: '130px' }}
                     value={endDate}
-                    onChange={(e) => { setEndDate(e.target.value); setDateRange('all') }}
+                    onChange={(e) => {
+                      setEndDate(e.target.value)
+                      setDateRange('all')
+                    }}
                   />
                 </div>
                 <CInputGroup size="sm" style={{ width: '220px', minWidth: '150px' }}>
-                  <CInputGroupText><CIcon icon={cilSearch} /></CInputGroupText>
+                  <CInputGroupText>
+                    <CIcon icon={cilSearch} />
+                  </CInputGroupText>
                   <CFormInput
                     placeholder="Search CVE or Company..."
                     value={searchTerm}
@@ -153,21 +163,31 @@ const Vulnerabilities = () => {
               </div>
             </div>
           </CCardHeader>
-          
+
           {loading ? (
-            <div className="text-center p-5"><CSpinner color="primary" /></div>
+            <div className="text-center p-5">
+              <CSpinner color="primary" />
+            </div>
           ) : (
             <CTable align="middle" className="mb-0 border" hover responsive>
               <CTableHead>
                 <CTableRow>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">CVE-ID</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    CVE-ID
+                  </CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary">Vendor</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Risk Index</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Rating</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Risk Index
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Rating
+                  </CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary text-center text-primary fw-bold">
                     {sortBy === 'date_added' ? 'Date Added' : 'Due Date'}
                   </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Actions</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Actions
+                  </CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
@@ -177,23 +197,19 @@ const Vulnerabilities = () => {
                       <CTableDataCell className="text-center font-monospace small">
                         {item.cve_id}
                       </CTableDataCell>
-                      <CTableDataCell className="fw-semibold">
-                        {item.company_name}
-                      </CTableDataCell>
+                      <CTableDataCell className="fw-semibold">{item.company_name}</CTableDataCell>
                       <CTableDataCell className="text-center">
                         {(item.risk_index * 100).toFixed(1)}%
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
-                        <CBadge color={getBadgeColor(item.risk_rating)}>
-                          {item.risk_rating}
-                        </CBadge>
+                        <CBadge color={getBadgeColor(item.risk_rating)}>{item.risk_rating}</CBadge>
                       </CTableDataCell>
                       <CTableDataCell className="text-center small">
                         {sortBy === 'date_added' ? item.date_added : item.due_date}
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
-                        <CButton 
-                          color="primary" 
+                        <CButton
+                          color="primary"
                           size="sm"
                           onClick={() => navigate(`/vulnerabilities/${item.cve_id}`)}
                         >
