@@ -17,16 +17,12 @@ const Heatmap = ({ header, data, type }) => {
   // Data Guard to prevent rendering before data arrives
   if (type === 'heatmap' && (!data || data.length === 0)) {
     return (
-        <CCard className="mb-4 h-100 w-100">
+      <CCard className="mb-4 h-100 w-100">
         <CCardHeader>{header}</CCardHeader>
-        <CCardBody>
-            <HighchartsReact 
-            highcharts={Highcharts} 
-            options={options} 
-            ref={chartComponentRef} 
-            />
+        <CCardBody className="d-flex align-items-center justify-content-center" style={{ minHeight: '350px' }}>
+          <div className="text-muted text-center">Loading Heatmap Data...</div>
         </CCardBody>
-        </CCard>
+      </CCard>
     );
   }
 
