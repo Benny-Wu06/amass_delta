@@ -9,8 +9,14 @@ with patch("boto3.client"):
     from notifyEmail import lambda_handler, build_alerts_by_email, send_alert_email
 
 
-def make_sns_event(payload):
-    return {"Records": [{"Sns": {"Message": json.dumps(payload)}}]}
+def make_sns_event(payload, bucket="test-bucket", key="test-key"):
+    return {"Records": [{"Sns": {"Message": json.dumps({"bucket": bucket, "key": key})}}]}
+
+
+def make_s3_body(payload):
+    body_mock = MagicMock()
+    body_mock.read.return_value = json.dumps(payload).encode("utf-8")
+    return {"Body": body_mock}
 
 
 SAMPLE_CVES = {
@@ -39,32 +45,37 @@ def test_empty_records_returns_400():
     assert response["statusCode"] == 400
 
 
-def test_invalid_sns_message_json_returns_400():
+def test_invalid_sns_message_json_returns_500():
     event = {"Records": [{"Sns": {"Message": "not-json"}}]}
     response = lambda_handler(event, None)
-    assert response["statusCode"] == 400
-    assert response["body"] == "Invalid SNS payload"
+    assert response["statusCode"] == 500
 
 
-def test_no_new_cves_returns_200():
-    response = lambda_handler(make_sns_event({"new_cves": {}}), None)
+@patch("notifyEmail.s3")
+def test_no_new_cves_returns_200(mock_s3):
+    mock_s3.get_object.return_value = make_s3_body({"new_cves": {}})
+    response = lambda_handler(make_sns_event({}), None)
     assert response["statusCode"] == 200
     assert response["body"] == "No CVEs to alert on"
 
 
 @patch("notifyEmail.build_alerts_by_email")
-def test_no_subscribers_returns_200(mock_build):
+@patch("notifyEmail.s3")
+def test_no_subscribers_returns_200(mock_s3, mock_build):
+    mock_s3.get_object.return_value = make_s3_body({"new_cves": SAMPLE_CVES})
     mock_build.return_value = {}
-    response = lambda_handler(make_sns_event({"new_cves": SAMPLE_CVES}), None)
+    response = lambda_handler(make_sns_event({}), None)
     assert response["statusCode"] == 200
     assert response["body"] == "No subscribers to alert"
 
 
 @patch("notifyEmail.send_alert_email")
 @patch("notifyEmail.build_alerts_by_email")
-def test_sends_emails_to_all_subscribers(mock_build, mock_send):
+@patch("notifyEmail.s3")
+def test_sends_emails_to_all_subscribers(mock_s3, mock_build, mock_send):
+    mock_s3.get_object.return_value = make_s3_body({"new_cves": SAMPLE_CVES})
     mock_build.return_value = {"test@gmail.com": SAMPLE_CVES, "other@gmail.com": SAMPLE_CVES}
-    response = lambda_handler(make_sns_event({"new_cves": SAMPLE_CVES}), None)
+    response = lambda_handler(make_sns_event({}), None)
     assert response["statusCode"] == 200
     assert json.loads(response["body"]) == {"sent": 2, "failed": 0}
     assert mock_send.call_count == 2
@@ -72,10 +83,12 @@ def test_sends_emails_to_all_subscribers(mock_build, mock_send):
 
 @patch("notifyEmail.send_alert_email")
 @patch("notifyEmail.build_alerts_by_email")
-def test_failed_emails_counted(mock_build, mock_send):
+@patch("notifyEmail.s3")
+def test_failed_emails_counted(mock_s3, mock_build, mock_send):
+    mock_s3.get_object.return_value = make_s3_body({"new_cves": SAMPLE_CVES})
     mock_build.return_value = {"test@gmail.com": SAMPLE_CVES, "bad@gmail.com": SAMPLE_CVES}
     mock_send.side_effect = [None, Exception("SES error")]
-    response = lambda_handler(make_sns_event({"new_cves": SAMPLE_CVES}), None)
+    response = lambda_handler(make_sns_event({}), None)
     assert json.loads(response["body"]) == {"sent": 1, "failed": 1}
 
 
