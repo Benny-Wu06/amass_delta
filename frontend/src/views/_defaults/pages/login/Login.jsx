@@ -29,12 +29,15 @@ const Login = () => {
       const response = await axios.post(`${STAGING_URL}/auth/login`, { email, password })
       if (response.data.access_token) {
         localStorage.setItem('user', JSON.stringify(response.data))
-        navigate('/dashboard') // Or wherever your home route is
+        navigate('/dashboard')
       }
     } catch (error) {
       alert('Login failed: ' + (error.response?.data?.detail || 'Unknown error'))
     }
   }
+
+
+  const darkThemeColor = { backgroundColor: '#4a68a1', border: 'none' }
 
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex align-items-center">
@@ -42,34 +45,64 @@ const Login = () => {
         <CRow className="justify-content-center">
           <CCol md={8}>
             <CCardGroup>
-              <CCard className="p-4">
+              <CCard className="p-4 shadow-sm">
                 <CCardBody>
                   <CForm onSubmit={handleLogin}>
-                    <h1>Login</h1>
+                    <h1 style={{ color: '#4a68a1' }}>Login</h1>
                     <p className="text-body-secondary">Sign In to your account</p>
                     <CInputGroup className="mb-3">
-                      <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
-                      <CFormInput placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+                      <CInputGroupText>
+                        <CIcon icon={cilUser} />
+                      </CInputGroupText>
+                      <CFormInput 
+                        placeholder="Email" 
+                        onChange={(e) => setEmail(e.target.value)} 
+                      />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
-                      <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
-                      <CFormInput type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+                      <CInputGroupText>
+                        <CIcon icon={cilLockLocked} />
+                      </CInputGroupText>
+                      <CFormInput 
+                        type="password" 
+                        placeholder="Password" 
+                        onChange={(e) => setPassword(e.target.value)} 
+                      />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4" type="submit">Login</CButton>
+                        {/* Styled Login Button */}
+                        <CButton 
+                          style={darkThemeColor} 
+                          className="px-4 text-white" 
+                          type="submit"
+                        >
+                          Login
+                        </CButton>
                       </CCol>
                     </CRow>
                   </CForm>
                 </CCardBody>
               </CCard>
-              <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
+              {/* Styled Side Card */}
+              <CCard 
+                className="text-white py-5" 
+                style={{ ...darkThemeColor, width: '44%' }}
+              >
                 <CCardBody className="text-center">
                   <div>
                     <h2>Sign up</h2>
-                    <p>Register to start monitoring vulnerabilities.</p>
+                    <p className="opacity-75">Register to start monitoring vulnerabilities.</p>
                     <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>Register Now!</CButton>
+                      <CButton 
+                        color="light" 
+                        variant="outline" 
+                        className="mt-3 px-4 fw-bold" 
+                        active 
+                        tabIndex={-1}
+                      >
+                        Register Now!
+                      </CButton>
                     </Link>
                   </div>
                 </CCardBody>
