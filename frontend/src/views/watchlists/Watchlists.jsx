@@ -82,7 +82,7 @@ const Watchlists = () => {
       <div className="d-flex align-items-center justify-content-between mb-4">
         <div>
           <h4 className="mb-0 fw-bold">Your Watchlists</h4>
-          <small className="text-muted">{watchlists.length} playlist{watchlists.length !== 1 ? 's' : ''}</small>
+          <small className="text-muted">{watchlists.length} watchlists</small>
         </div>
         <CButton color="primary" onClick={() => setShowModal(true)}>
           <CIcon icon={cilPlus} className="me-1" />
@@ -98,7 +98,7 @@ const Watchlists = () => {
         <CCard className="border-dashed text-center py-5">
           <CCardBody>
             <p className="text-muted mb-3">No watchlists yet. Create one to start tracking companies.</p>
-            <CButton color="primary" variant="outline" onClick={() => setShowModal(true)}>
+            <CButton color='primary' onClick={() => setShowModal(true)}>
               <CIcon icon={cilPlus} className="me-1" />
               Create your first watchlist
             </CButton>
