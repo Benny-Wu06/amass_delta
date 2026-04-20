@@ -3,6 +3,7 @@ import logging
 import os
 import boto3
 import psycopg2
+import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -170,7 +171,11 @@ def insert_vulnerability(cur, vuln, company_id):
             epss_score,
             epss_percentile
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (cve_id) DO NOTHING
+        ON CONFLICT (cve_id)
+        DO UPDATE SET 
+        cvss_score = EXCLUDED.cvss_score,
+        epss_score = EXCLUDED.epss_score,
+        due_date   = EXCLUDED.due_date
     """,
         (
             vuln.get("cveID"),
@@ -295,10 +300,30 @@ def lambda_handler(event, context):
         conn.commit()
         logger.info("Inserted %d new vulnerabilities", inserted)
 
+
         if new_cves_by_company and SNS_TOPIC_ARN:
+            if not BUCKET_NAME:
+                logger.error("BUCKET_NAME environment variable is not set!")
+                return {"statusCode": 500, "body": "Configuration error"}
+
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            s3_key = f"temp-payloads/{timestamp}_{context.aws_request_id}.json"
+            
+            logger.info("Uploading payload to s3://%s/%s", BUCKET_NAME, s3_key)
+            
+            # Use BUCKET_NAME consistently
+            _get_s3().put_object(
+                Bucket=BUCKET_NAME, 
+                Key=s3_key,
+                Body=json.dumps({"new_cves": new_cves_by_company}),
+                ContentType="application/json"
+            )
             _get_sns().publish(
                 TopicArn=SNS_TOPIC_ARN,
-                Message=json.dumps({"new_cves": new_cves_by_company}),
+                Message=json.dumps({
+                    "bucket": BUCKET_NAME,
+                    "key": s3_key
+                }),
             )
         logger.info("New CVE event to SNS for %d companies", len(new_cves_by_company))
 

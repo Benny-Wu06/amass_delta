@@ -38,3 +38,15 @@ variable "ses_from_email" {
 variable "sns_topic_arn" {
   type        = string
 }
+
+variable "raw_bucket_arn" {
+  type = string
+}
+
+variable "raw_bucket_id" {
+  type = string
+}
+
+variable "bucket_id" {
+  type        = string
+}
