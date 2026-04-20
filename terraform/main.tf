@@ -264,6 +264,27 @@ resource "aws_vpc_endpoint" "s3" {
   ]
 }
 
+resource "aws_security_group" "ses_endpoint_sg" {
+  name   = "ses-endpoint-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+
+resource "aws_vpc_endpoint" "ses" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.ap-southeast-2.email"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  security_group_ids  = [aws_security_group.ses_endpoint_sg.id]
+  private_dns_enabled = true
+}
+
 terraform {
   backend "s3" {}
 }
