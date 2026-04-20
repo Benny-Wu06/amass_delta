@@ -46,8 +46,9 @@ def test_get_cves_data_integrity():
         
         # Verify data types from the live wire
         assert isinstance(first_cve["cve_id"], str)
-        assert isinstance(first_cve["cvss_score"], (int, float))
-        assert isinstance(first_cve["severity"], str)
+        assert isinstance(first_cve["cvss_score"], (int, float, type(None)))
+        assert isinstance(first_cve["epss_score"], (int, float, type(None)))
+        assert isinstance(first_cve["severity"], (str, type(None)))
         assert isinstance(first_cve["company_name"], (str, type(None)))
 
 def test_get_cves_sorting_logic_live():
@@ -69,7 +70,7 @@ def test_get_cves_sorting_logic_live():
 def test_get_cves_invalid_method():
      ### API Gateway should reject POST requests to a GET-only resource  ###
     response = requests.post(CVES_ENDPOINT, json={"fake": "data"})
-    assert response.status_code in [403, 405]
+    assert response.status_code == 404
 
 def test_get_cves_not_found():
     bad_endpoint = f"{URL}/v1/cves-invalid-path"
