@@ -33,7 +33,6 @@ const Register = () => {
     }
   }
 
-  // Consistent Dark Background styling
   const darkThemeColor = { backgroundColor: '#4a68a1', border: 'none' }
 
   return (
@@ -44,7 +43,6 @@ const Register = () => {
             <CCard className="mx-4 shadow-sm">
               <CCardBody className="p-4">
                 <CForm onSubmit={handleRegister}>
-                  {/* Styled Header */}
                   <h1 style={{ color: '#4a68a1' }}>Register</h1>
                   <p className="text-body-secondary">Create your account</p>
                   
