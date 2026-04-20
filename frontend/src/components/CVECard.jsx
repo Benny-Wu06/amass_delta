@@ -5,22 +5,6 @@ import { BASE_URL } from '../vars'
 import { useState, useEffect } from 'react'
 
 const CVECard = ({ item, onClick }) => {
-  const [cveDescription, setCveDescription] = useState(null)
-  console.log(item)
-
-  // useEffect(() => {
-  //   const getCveDescription = async () => {
-  //     try {
-  //       const response = await axios.get(`${BASE_URL}/v1/vulnerabilities/${item.cve_id}`)
-  //       console.log(response.data)
-  //       setCveDescription(response.data.description)
-  //     } catch (error) {
-  //       console.log('coudlnt get cve description', error)
-  //     }
-  //   }
-  //   getCveDescription()
-  // }, [item])
-
   const riskColor = (index) => {
     // index is 0–1; map to green → yellow → orange → red
     if (index >= 0.75) return '#ff3b3b'
@@ -55,7 +39,7 @@ const CVECard = ({ item, onClick }) => {
 
         <div className="cve-company">{item.company_name}</div>
 
-        <div className="cve-description">{cveDescription || 'No description available.'}</div>
+        <div className="cve-description">{item.description || 'No description available.'}</div>
 
         <div className="cve-card-footer">
           <span className="cve-badge" style={{ color: badge.color, background: badge.bg }}>
