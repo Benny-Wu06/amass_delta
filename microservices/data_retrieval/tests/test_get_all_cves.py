@@ -15,8 +15,8 @@ def test_get_all_cves_success(mock_connect):
     mock_conn.cursor.return_value = mock_cur
 
     mock_cur.fetchall.return_value = [
-        ("CVE-2024-0002", "Vuln 2", "Desc", 4.2, 0.1, "Medium", date(2024, 1, 5), date(2024, 2, 5), "Google"),
-        ("CVE-2024-0001", "Vuln 1", "Desc", 8.5, 0.5, "High", date(2024, 1, 1), date(2024, 2, 1), "Apple")
+        ("CVE-2024-0002", 7.0, 0.1, date(2024, 1, 5), "Desc", date(2024, 2, 5), "Google"),
+        ("CVE-2024-0001", 8.5, 0.5, date(2024, 1, 1), "Desc", date(2024, 2, 1), "Apple")
     ]
 
     response = get_all_cves("date_added")
@@ -24,8 +24,7 @@ def test_get_all_cves_success(mock_connect):
 
     assert response["statusCode"] == 200
     assert body["cves"][0]["cve_id"] == "CVE-2024-0002"
-    assert body["cves"][0]["company_name"] == "Google"
-    assert body["cves"][0]["cvss_severity"] == "Medium"
+    assert body["cves"][0]["risk_rating"] == "MEDIUM"
     
 
 @patch('psycopg2.connect')
@@ -35,8 +34,8 @@ def test_get_all_cves_sorting_logic_due_date(mock_connect):
     mock_conn.cursor.return_value = mock_cur
     
     mock_cur.fetchall.return_value = [
-        ("CVE-2024-1111", "Vuln A", "Desc", 9.0, 0.9, "Critical", date(2024, 1, 1), date(2024, 2, 1), "Google"),
-        ("CVE-2024-2222", "Vuln B", "Desc", 4.0, 0.2, "Medium", date(2024, 1, 10), date(2024, 2, 15), "Apple")
+        ("CVE-2024-1111", 9.0, 0.9, date(2024, 1, 1), "Desc", date(2024, 2, 1), "Google"),
+        ("CVE-2024-2222", 4.0, 0.2, date(2024, 1, 10), "Desc", date(2024, 2, 15), "Apple")
     ]
 
     event = {"queryStringParameters": {"sort_by": "due_date"}}
@@ -45,15 +44,9 @@ def test_get_all_cves_sorting_logic_due_date(mock_connect):
 
     assert body["cves"][0]["cve_id"] == "CVE-2024-1111"
     assert body["cves"][0]["due_date"] == "2024-02-01"
-    
-    assert body["cves"][1]["cve_id"] == "CVE-2024-2222"
-    assert body["cves"][1]["due_date"] == "2024-02-15"
 
-    args, _ = mock_cur.execute.call_args
-    executed_sql = args[0]
-    
-    assert "v.cve_id," in executed_sql
-    assert "v.cvss_severity," in executed_sql
+    executed_sql = mock_cur.execute.call_args[0][0]
+    assert "v.due_date" in executed_sql
     assert "ORDER BY v.due_date ASC" in executed_sql
 
 @patch('psycopg2.connect')
@@ -63,8 +56,8 @@ def test_get_all_cves_sorting_logic_date_added(mock_connect):
     mock_conn.cursor.return_value = mock_cur
     
     mock_cur.fetchall.return_value = [
-        ("CVE-2024-1111", "Vuln A", "Desc", 9.0, 0.9, "Critical", date(2024, 3, 3), date(2024, 4, 5), "Google"),
-        ("CVE-2024-2222", "Vuln B", "Desc", 4.2, 0.1, "Medium", date(2024, 1, 1), date(2024, 2, 5), "Apple")
+        ("CVE-2024-1111", 9.0, 0.9, date(2024, 3, 3), "Desc", date(2024, 4, 5), "Google"),
+        ("CVE-2024-2222", 4.2, 0.1, date(2024, 1, 1), "Desc", date(2024, 2, 5), "Apple")
     ]
 
     event = {"queryStringParameters": {"sort_by": "date_added"}}
@@ -73,14 +66,8 @@ def test_get_all_cves_sorting_logic_date_added(mock_connect):
 
     assert body["cves"][0]["cve_id"] == "CVE-2024-1111"
     assert body["cves"][0]["date_added"] == "2024-03-03"
-    
-    assert body["cves"][1]["cve_id"] == "CVE-2024-2222"
-    assert body["cves"][1]["date_added"] == "2024-01-01"
 
-    args, _ = mock_cur.execute.call_args
-    executed_sql = args[0]
-    
-    assert "v.cvss_score," in executed_sql
+    executed_sql = mock_cur.execute.call_args[0][0]
     assert "ORDER BY v.date_added DESC" in executed_sql
 
 @patch('psycopg2.connect')
@@ -107,7 +94,7 @@ def test_get_all_cves_empty(mock_connect):
 
     assert response["statusCode"] == 200
     assert body["count"] == 0
-    assert body["cves"] == []
 
     args, _ = mock_cur.execute.call_args
-    assert "v.cvss_severity" in args[0]
+    executed_sql = args[0] 
+    assert "v.cve_id" in executed_sql

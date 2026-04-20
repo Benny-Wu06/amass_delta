@@ -16,7 +16,7 @@ def test_lambda_contract_success(mock_connect):
     mock_connect.return_value = mock_conn
     mock_conn.cursor.return_value = mock_cur
     mock_cur.fetchall.return_value = [
-        ("CVE-2026-0001", "Heartbleed 2.0", "Critical vuln", 9.8, 0.95, "Critical", date(2026, 4, 1), date(2026, 5, 1), "Google")
+        ("CVE-2026-0001", 9.8, 0.95, date(2026, 4, 1), "Critical vuln", date(2026, 5, 1), "Google")
     ]
 
     # Simulate a real API Gateway Event
@@ -42,9 +42,12 @@ def test_lambda_contract_success(mock_connect):
     
     first_cve = body["cves"][0]
     assert first_cve["cve_id"] == "CVE-2026-0001"
-    assert first_cve["vulnerability_name"] == "Heartbleed 2.0"
-    assert first_cve["cvss_severity"] == "Critical"
+    assert first_cve["risk_rating"] == "CRITICAL"  
+    assert "risk_index" in first_cve              
     assert first_cve["company_name"] == "Google"
+
+    assert "vulnerability_name" not in first_cve
+    assert "cvss_severity" not in first_cve
 
 @patch('psycopg2.connect')
 def test_lambda_default_behavior_no_params(mock_connect):
@@ -60,7 +63,7 @@ def test_lambda_default_behavior_no_params(mock_connect):
         assert response["statusCode"] == 200
         
         actual_query = mock_cur.execute.call_args[0][0]
-        assert "v.cvss_severity" in actual_query
+        assert "v.cve_id" in actual_query
         assert "ORDER BY v.date_added DESC" in actual_query
 
 def test_lambda_missing_env_vars():
