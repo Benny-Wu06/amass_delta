@@ -36,9 +36,13 @@ variable "bucket_id" {
 }
 
 variable "api_id" {
-  type = string
+  type        = string
 }
 
 variable "api_execution_arn" {
-  type = string
+  type        = string
+}
+
+variable "sns_topic_arn" {
+  type        = string
 }
