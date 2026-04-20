@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { STAGING_URL } from '../../../../vars'
+import { BASE_URL } from '../../../../vars'
 import { CButton, CCard, CCardBody, CCol, CContainer, CForm, CFormInput, CInputGroup, CInputGroupText, CRow } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
@@ -14,7 +14,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault()
     try {
-      await axios.post(`${STAGING_URL}/auth/signup`, { email, password })
+      await axios.post(`${BASE_URL}/auth/signup`, { email, password })
       alert('Registration successful! Please login.')
       navigate('/login')
     } catch (error) {

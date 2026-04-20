@@ -2,7 +2,7 @@ import { useFetcher, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge, CCallout, CSpinner } from '@coreui/react'
 import axios from 'axios'
-import { STAGING_URL } from '../../vars'
+import { BASE_URL } from '../../vars'
 
 const VulnInfo = ({}) => {
   const { cveId } = useParams()
@@ -12,7 +12,7 @@ const VulnInfo = ({}) => {
   useEffect(() => {
     const fetchCveInfo = async () => {
       try {
-        const response = await axios.get(`${STAGING_URL}/v1/vulnerabilities/${cveId}`)
+        const response = await axios.get(`${BASE_URL}/v1/vulnerabilities/${cveId}`)
         const data = typeof response.data.body === 'string' 
           ? JSON.parse(response.data.body) 
           : response.data
@@ -47,7 +47,7 @@ const VulnInfo = ({}) => {
 
       <CCard className="mb-4 shadow-sm">
         <CCardHeader className="bg-dark text-white">
-          <h4 className="mb-0">{cveInfo.name || 'Vulnerability Details'}</h4>
+          <h4 className="mb-0">{cveInfo.company_name || 'Vulnerability Details'}</h4>
         </CCardHeader>
         <CCardBody>
           <CRow>
@@ -124,12 +124,11 @@ const VulnInfo = ({}) => {
             <CCardBody>
               <h6>Action Required</h6>
               <p>
-                Based on the CISA KEV listing (Added: {cveInfo.dateAdded}), 
+                Based on the CISA KEV listing (Added: {cveInfo.dateAdded}),
                 this vulnerability requires remediation by <strong>{cveInfo.dueDate}</strong>.
               </p>
               <CCallout color="warning">
-                Update the affected software to the latest version. For 7-Zip, 
-                ensure versions are updated to address the Mark-of-the-Web bypass.
+                {cveInfo.description || 'Update the affected software to the latest patched version.'}
               </CCallout>
             </CCardBody>
           </CCard>

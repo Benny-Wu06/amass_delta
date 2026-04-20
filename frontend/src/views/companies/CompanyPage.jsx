@@ -8,7 +8,7 @@ import Graph from 'src/components/Graph.jsx'
 import Company from 'src/components/Company.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge } from '@coreui/react'
-import { STAGING_URL } from '../../vars'
+import { BASE_URL } from '../../vars'
 import VulnerabilityTable from '../vulnerabilities/VulnerabilityTable.jsx'
 
 const SYMBOL_MAP = {
@@ -47,7 +47,7 @@ const CompanyPage = () => {
 
     const fetchCompany = async () => {
       try {
-        const response = await axios.get(`${STAGING_URL}/v1/companies/${company_name}`)
+        const response = await axios.get(`${BASE_URL}/v1/companies/${company_name}`)
         setCompanyData(response.data)
 
         const ticker = SYMBOL_MAP[company_name];
@@ -64,7 +64,7 @@ const CompanyPage = () => {
     const fetchCompanyVulns = async () => {
       try {
         const response = await axios.get(
-          `${STAGING_URL}/v1/companies/${company_name}/vulnerabilities`,
+          `${BASE_URL}/v1/companies/${company_name}/vulnerabilities`,
         )
         console.log(response.data)
         setVulns(response.data.vulnerabilities)
@@ -76,7 +76,7 @@ const CompanyPage = () => {
     const fetchCompanyHeatmap = async () => {
       try {
         const response = await axios.get(
-          `${STAGING_URL}/v1/heatmap/${company_name}`,
+          `${BASE_URL}/v1/heatmap/${company_name}`,
         )
         let grid = [];
     
@@ -93,7 +93,7 @@ const CompanyPage = () => {
     const fetchCompanyGraph = async () => {
       try {
         const response = await axios.get(
-          `${STAGING_URL}/v1/growth/${company_name}`,
+          `${BASE_URL}/v1/growth/${company_name}`,
         )
         
         console.log("Axios Response Data:", response.data);
@@ -106,7 +106,7 @@ const CompanyPage = () => {
 
     const fetchStockVsCVE = async (symbol) => {
       try {
-        const response = await axios.get(`${STAGING_URL}/v1/integration/${symbol}`)
+        const response = await axios.get(`${BASE_URL}/v1/integration/${symbol}`)
         const data = parseLambdaData(response)
         setStockVsCVEData(data)
       } catch (error) {
