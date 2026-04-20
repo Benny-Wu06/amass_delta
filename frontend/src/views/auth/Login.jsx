@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
-import { STAGING_URL } from '../../../../vars'
+import { BASE_URL } from '../../../vars'
 import {
   CButton,
   CCard,
@@ -26,7 +26,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post(`${STAGING_URL}/auth/login`, { email, password })
+      const response = await axios.post(`${BASE_URL}/auth/login`, { email, password })
       if (response.data.access_token) {
         localStorage.setItem('user', JSON.stringify(response.data))
         navigate('/dashboard')
@@ -54,28 +54,21 @@ const Login = () => {
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput 
-                        placeholder="Email" 
-                        onChange={(e) => setEmail(e.target.value)} 
-                      />
+                      <CFormInput placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
                         <CIcon icon={cilLockLocked} />
                       </CInputGroupText>
-                      <CFormInput 
-                        type="password" 
-                        placeholder="Password" 
-                        onChange={(e) => setPassword(e.target.value)} 
+                      <CFormInput
+                        type="password"
+                        placeholder="Password"
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton 
-                          style={darkThemeColor} 
-                          className="px-4 text-white" 
-                          type="submit"
-                        >
+                        <CButton color="primary" className="px-4" type="submit">
                           Login
                         </CButton>
                       </CCol>
@@ -92,13 +85,7 @@ const Login = () => {
                     <h2>Sign up</h2>
                     <p className="opacity-75">Register to start monitoring vulnerabilities.</p>
                     <Link to="/register">
-                      <CButton 
-                        color="light" 
-                        variant="outline" 
-                        className="mt-3 px-4 fw-bold" 
-                        active 
-                        tabIndex={-1}
-                      >
+                      <CButton color="primary" className="mt-3" active tabIndex={-1}>
                         Register Now!
                       </CButton>
                     </Link>

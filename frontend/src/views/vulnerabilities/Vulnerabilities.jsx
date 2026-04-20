@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { STAGING_URL } from '../../vars'
+import { BASE_URL } from '../../vars'
 import {
   CCard,
   CCardHeader,
@@ -22,7 +22,7 @@ import {
   CDropdown,
   CDropdownToggle,
   CDropdownMenu,
-  CDropdownItem
+  CDropdownItem,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilSearch, cilFilter } from '@coreui/icons'
@@ -35,20 +35,19 @@ const Vulnerabilities = () => {
   const [dateRange, setDateRange] = useState('all')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
-  
+
   const navigate = useNavigate()
 
   useEffect(() => {
     const fetchCVEs = async () => {
       setLoading(true)
       try {
-        const response = await axios.get(`${STAGING_URL}/v1/cves`, {
-          params: { sort_by: sortBy }
+        const response = await axios.get(`${BASE_URL}/v1/cves`, {
+          params: { sort_by: sortBy },
         })
-        
-        const parsedBody = typeof response.data.body === 'string' 
-          ? JSON.parse(response.data.body) 
-          : response.data
+
+        const parsedBody =
+          typeof response.data.body === 'string' ? JSON.parse(response.data.body) : response.data
 
         setVulns(parsedBody.cves || [])
       } catch (error) {
@@ -61,33 +60,36 @@ const Vulnerabilities = () => {
     fetchCVEs()
   }, [sortBy])
 
-
   const filteredVulns = vulns.filter((item) => {
     const search = searchTerm.toLowerCase()
-    const matchesSearch = item.cve_id.toLowerCase().includes(search) || 
-                          item.company_name.toLowerCase().includes(search)
+    const matchesSearch =
+      item.cve_id.toLowerCase().includes(search) || item.company_name.toLowerCase().includes(search)
 
     const itemDate = new Date(sortBy === 'date_added' ? item.date_added : item.due_date)
 
-    const matchesCustomDate = (!startDate || itemDate >= new Date(startDate)) &&
-                              (!endDate || itemDate <= new Date(endDate))
+    const matchesCustomDate =
+      (!startDate || itemDate >= new Date(startDate)) && (!endDate || itemDate <= new Date(endDate))
 
     let matchesPreset = true
     if (dateRange !== 'all') {
-        const filterDate = new Date()
-        filterDate.setDate(filterDate.getDate() - parseInt(dateRange))
-        matchesPreset = itemDate >= filterDate
+      const filterDate = new Date()
+      filterDate.setDate(filterDate.getDate() - parseInt(dateRange))
+      matchesPreset = itemDate >= filterDate
     }
-    
+
     return matchesSearch && matchesCustomDate && matchesPreset
   })
 
   const getBadgeColor = (rating) => {
     switch (rating) {
-      case 'CRITICAL': return 'danger'
-      case 'HIGH': return 'warning'
-      case 'MEDIUM': return 'info'
-      default: return 'secondary'
+      case 'CRITICAL':
+        return 'danger'
+      case 'HIGH':
+        return 'warning'
+      case 'MEDIUM':
+        return 'info'
+      default:
+        return 'secondary'
     }
   }
 
@@ -95,82 +97,97 @@ const Vulnerabilities = () => {
     <CRow>
       <CCol className="p-0" xs>
         <CCard className="mb-4">
-          <CCardHeader className="d-flex justify-content-between align-items-center">
-            <strong>Vulnerability Feed</strong>
-            <div className="d-flex align-items-center gap-2">
-                {/* Date filter dropdown*/}
-              <CDropdown variant="btn-group">
-                <CDropdownToggle color="secondary" size="sm" variant="outline">
-                  <CIcon icon={cilFilter} className="me-1" />
-                  {dateRange === 'all' ? 'All Dates' : `Last ${dateRange} Days`}
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem onClick={() => setDateRange('all')}>All Time</CDropdownItem>
-                  <CDropdownItem onClick={() => setDateRange('7')}>Last 7 Days</CDropdownItem>
-                  <CDropdownItem onClick={() => setDateRange('30')}>Last 30 Days</CDropdownItem>
-                  <CDropdownItem onClick={() => setDateRange('90')}>Last 90 Days</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-              <div className="d-flex align-items-center gap-1 border-start ps-2">
-              <CFormInput 
-                type="date" 
-                size="sm" 
-                style={{ width: '130px' }}
-                value={startDate}
-                onChange={(e) => { setStartDate(e.target.value); setDateRange('all'); }} 
-              />
-                <span className="small text-muted">to</span>
-                <CFormInput 
-                    type="date" 
-                    size="sm" 
-                    style={{ width: '130px' }}
+          <CCardHeader>
+            <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <strong>Vulnerability Feed</strong>
+              <div className="d-flex flex-wrap align-items-center gap-2">
+                <CDropdown variant="btn-group">
+                  <CDropdownToggle color="secondary" size="sm" variant="outline">
+                    <CIcon icon={cilFilter} className="me-1" />
+                    {dateRange === 'all' ? 'All Dates' : `Last ${dateRange} Days`}
+                  </CDropdownToggle>
+                  <CDropdownMenu>
+                    <CDropdownItem onClick={() => setDateRange('all')}>All Time</CDropdownItem>
+                    <CDropdownItem onClick={() => setDateRange('7')}>Last 7 Days</CDropdownItem>
+                    <CDropdownItem onClick={() => setDateRange('30')}>Last 30 Days</CDropdownItem>
+                    <CDropdownItem onClick={() => setDateRange('90')}>Last 90 Days</CDropdownItem>
+                  </CDropdownMenu>
+                </CDropdown>
+                <div className="d-flex align-items-center gap-1">
+                  <CFormInput
+                    type="date"
+                    size="sm"
+                    style={{ minWidth: 0, width: '130px' }}
+                    value={startDate}
+                    onChange={(e) => {
+                      setStartDate(e.target.value)
+                      setDateRange('all')
+                    }}
+                  />
+                  <span className="small text-muted">to</span>
+                  <CFormInput
+                    type="date"
+                    size="sm"
+                    style={{ minWidth: 0, width: '130px' }}
                     value={endDate}
-                    onChange={(e) => { setEndDate(e.target.value); setDateRange('all'); }} 
-                />
+                    onChange={(e) => {
+                      setEndDate(e.target.value)
+                      setDateRange('all')
+                    }}
+                  />
                 </div>
-                {/* Search bar*/}
-              <div style={{ width: '250px' }}>
-                <CInputGroup size="sm">
-                  <CInputGroupText><CIcon icon={cilSearch} /></CInputGroupText>
-                  <CFormInput 
-                    placeholder="Search CVE or Company..." 
+                <CInputGroup size="sm" style={{ width: '220px', minWidth: '150px' }}>
+                  <CInputGroupText>
+                    <CIcon icon={cilSearch} />
+                  </CInputGroupText>
+                  <CFormInput
+                    placeholder="Search CVE or Company..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </CInputGroup>
-                {/* Sort buttons*/}
-              </div>
-                <div>
-                <button 
-                    className={`btn btn-sm ${sortBy === 'date_added' ? 'btn-primary' : 'btn-outline-secondary'} me-2`}
+                <div className="btn-group btn-group-sm">
+                  <button
+                    className={`btn btn-sm ${sortBy === 'date_added' ? 'btn-primary' : 'btn-outline-secondary'}`}
                     onClick={() => setSortBy('date_added')}
-                >
+                  >
                     Date Added
-                </button>
-                <button 
+                  </button>
+                  <button
                     className={`btn btn-sm ${sortBy === 'due_date' ? 'btn-primary' : 'btn-outline-secondary'}`}
                     onClick={() => setSortBy('due_date')}
-                >
+                  >
                     Due Date
-                </button>
+                  </button>
                 </div>
+              </div>
             </div>
           </CCardHeader>
-          
+
           {loading ? (
-            <div className="text-center p-5"><CSpinner color="primary" /></div>
+            <div className="text-center p-5">
+              <CSpinner color="primary" />
+            </div>
           ) : (
             <CTable align="middle" className="mb-0 border" hover responsive>
               <CTableHead>
                 <CTableRow>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">CVE-ID</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    CVE-ID
+                  </CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary">Vendor</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Risk Index</CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Rating</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Risk Index
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Rating
+                  </CTableHeaderCell>
                   <CTableHeaderCell className="bg-body-tertiary text-center text-primary fw-bold">
                     {sortBy === 'date_added' ? 'Date Added' : 'Due Date'}
                   </CTableHeaderCell>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Actions</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">
+                    Actions
+                  </CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
@@ -180,23 +197,19 @@ const Vulnerabilities = () => {
                       <CTableDataCell className="text-center font-monospace small">
                         {item.cve_id}
                       </CTableDataCell>
-                      <CTableDataCell className="fw-semibold">
-                        {item.company_name}
-                      </CTableDataCell>
+                      <CTableDataCell className="fw-semibold">{item.company_name}</CTableDataCell>
                       <CTableDataCell className="text-center">
                         {(item.risk_index * 100).toFixed(1)}%
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
-                        <CBadge color={getBadgeColor(item.risk_rating)}>
-                          {item.risk_rating}
-                        </CBadge>
+                        <CBadge color={getBadgeColor(item.risk_rating)}>{item.risk_rating}</CBadge>
                       </CTableDataCell>
                       <CTableDataCell className="text-center small">
                         {sortBy === 'date_added' ? item.date_added : item.due_date}
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
-                        <CButton 
-                          color="primary" 
+                        <CButton
+                          color="primary"
                           size="sm"
                           onClick={() => navigate(`/vulnerabilities/${item.cve_id}`)}
                         >

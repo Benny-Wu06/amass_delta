@@ -1,8 +1,17 @@
 import { useFetcher, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge, CCallout, CSpinner } from '@coreui/react'
+import {
+  CRow,
+  CCol,
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CBadge,
+  CCallout,
+  CSpinner,
+} from '@coreui/react'
 import axios from 'axios'
-import { STAGING_URL } from '../../vars'
+import { BASE_URL } from '../../vars'
 
 const VulnInfo = ({}) => {
   const { cveId } = useParams()
@@ -12,10 +21,9 @@ const VulnInfo = ({}) => {
   useEffect(() => {
     const fetchCveInfo = async () => {
       try {
-        const response = await axios.get(`${STAGING_URL}/v1/vulnerabilities/${cveId}`)
-        const data = typeof response.data.body === 'string' 
-          ? JSON.parse(response.data.body) 
-          : response.data
+        const response = await axios.get(`${BASE_URL}/v1/vulnerabilities/${cveId}`)
+        const data =
+          typeof response.data.body === 'string' ? JSON.parse(response.data.body) : response.data
 
         setCveInfo(data)
       } catch (error) {
@@ -27,7 +35,12 @@ const VulnInfo = ({}) => {
     fetchCveInfo()
   }, [cveId])
 
-  if (loading) return <div className="text-center p-5"><CSpinner color="primary" /></div>
+  if (loading)
+    return (
+      <div className="text-center p-5">
+        <CSpinner color="primary" />
+      </div>
+    )
   if (!cveInfo) return <div className="text-center p-5">Vulnerability not found.</div>
 
   const getRatingColor = (rating) => {
@@ -47,7 +60,7 @@ const VulnInfo = ({}) => {
 
       <CCard className="mb-4 shadow-sm">
         <CCardHeader className="bg-dark text-white">
-          <h4 className="mb-0">{cveInfo.name || 'Vulnerability Details'}</h4>
+          <h4 className="mb-0">{cveInfo.company_name || 'Vulnerability Details'}</h4>
         </CCardHeader>
         <CCardBody>
           <CRow>
@@ -79,38 +92,39 @@ const VulnInfo = ({}) => {
             <CCardBody>
               <CRow className="g-3">
                 {[
-                    { 
-                        label: 'Risk Index', 
-                        value: `${(cveInfo.risk_index * 100).toFixed(1)}%`, 
-                        color: 'primary' 
-                    },
-                    { 
-                        label: 'CVSS Score', 
-                        value: cveInfo.cvss, 
-                        color: cveInfo.cvss >= 9 ? 'danger' : cveInfo.cvss >= 7 ? 'warning' : 'info' 
-                    },
-                    { 
-                        label: 'EPSS Score', 
-                        value: cveInfo.epss?.toFixed(4), 
-                        color: cveInfo.epss > 0.1 ? 'danger' : 'secondary' 
-                    },
-                    { 
-                        label: 'Risk Rating', 
-                        value: cveInfo.risk_rating, 
-                        color: getRatingColor(cveInfo.risk_rating) 
-                    },
-                    ].map((metric, i) => (
-                    <CCol xs={6} key={i}>
-                        <div className="p-3 border border-secondary rounded bg-dark text-center shadow-sm h-100">
-                        <div className="text-white fw-bold text-uppercase mb-2" style={{ fontSize: '0.7rem', letterSpacing: '0.05rem', opacity: 0.7 }}>
-                            {metric.label}
-                        </div>
-                        <div className={`fs-3 fw-bold text-${metric.color}`}>
-                            {metric.value}
-                        </div>
-                        </div>
-                    </CCol>
-                    ))}
+                  {
+                    label: 'Risk Index',
+                    value: `${(cveInfo.risk_index * 100).toFixed(1)}%`,
+                    color: 'primary',
+                  },
+                  {
+                    label: 'CVSS Score',
+                    value: cveInfo.cvss,
+                    color: cveInfo.cvss >= 9 ? 'danger' : cveInfo.cvss >= 7 ? 'warning' : 'info',
+                  },
+                  {
+                    label: 'EPSS Score',
+                    value: cveInfo.epss?.toFixed(4),
+                    color: cveInfo.epss > 0.1 ? 'danger' : 'secondary',
+                  },
+                  {
+                    label: 'Risk Rating',
+                    value: cveInfo.risk_rating,
+                    color: getRatingColor(cveInfo.risk_rating),
+                  },
+                ].map((metric, i) => (
+                  <CCol xs={6} key={i}>
+                    <div className="p-3 border border-secondary rounded bg-dark text-center shadow-sm h-100">
+                      <div
+                        className="text-white fw-bold text-uppercase mb-2"
+                        style={{ fontSize: '0.7rem', letterSpacing: '0.05rem', opacity: 0.7 }}
+                      >
+                        {metric.label}
+                      </div>
+                      <div className={`fs-3 fw-bold text-${metric.color}`}>{metric.value}</div>
+                    </div>
+                  </CCol>
+                ))}
               </CRow>
             </CCardBody>
           </CCard>
@@ -124,12 +138,12 @@ const VulnInfo = ({}) => {
             <CCardBody>
               <h6>Action Required</h6>
               <p>
-                Based on the CISA KEV listing (Added: {cveInfo.dateAdded}), 
-                this vulnerability requires remediation by <strong>{cveInfo.dueDate}</strong>.
+                Based on the CISA KEV listing (Added: {cveInfo.dateAdded}), this vulnerability
+                requires remediation by <strong>{cveInfo.dueDate}</strong>.
               </p>
               <CCallout color="warning">
-                Update the affected software to the latest version. For 7-Zip, 
-                ensure versions are updated to address the Mark-of-the-Web bypass.
+                {cveInfo.description ||
+                  'Update the affected software to the latest patched version.'}
               </CCallout>
             </CCardBody>
           </CCard>

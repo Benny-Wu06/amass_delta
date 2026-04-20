@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { STAGING_URL } from '../../../../vars'
+import { BASE_URL } from '../../../vars'
 import {
   CButton,
   CCard,
@@ -25,7 +25,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault()
     try {
-      await axios.post(`${STAGING_URL}/auth/signup`, { email, password })
+      await axios.post(`${BASE_URL}/auth/signup`, { email, password })
       alert('Registration successful! Please login.')
       navigate('/login')
     } catch (error) {
@@ -50,29 +50,22 @@ const Register = () => {
                     <CInputGroupText>
                       <CIcon icon={cilUser} />
                     </CInputGroupText>
-                    <CFormInput 
-                      placeholder="Email" 
-                      onChange={(e) => setEmail(e.target.value)} 
-                    />
+                    <CFormInput placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
                   </CInputGroup>
                   
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
                       <CIcon icon={cilLockLocked} />
                     </CInputGroupText>
-                    <CFormInput 
-                      type="password" 
-                      placeholder="Password" 
-                      onChange={(e) => setPassword(e.target.value)} 
+                    <CFormInput
+                      type="password"
+                      placeholder="Password"
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </CInputGroup>
                   
                   <div className="d-grid">
-                    <CButton 
-                      style={darkThemeColor} 
-                      className="text-white fw-bold py-2" 
-                      type="submit"
-                    >
+                    <CButton color="success" type="submit">
                       Create Account
                     </CButton>
                   </div>
