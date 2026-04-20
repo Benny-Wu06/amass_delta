@@ -170,7 +170,11 @@ def insert_vulnerability(cur, vuln, company_id):
             epss_score,
             epss_percentile
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (cve_id) DO NOTHING
+        ON CONFLICT (cve_id)
+        DO UPDATE SET 
+        cvss_score = EXCLUDED.cvss_score,
+        epss_score = EXCLUDED.epss_score,
+        due_date   = EXCLUDED.due_date
     """,
         (
             vuln.get("cveID"),
