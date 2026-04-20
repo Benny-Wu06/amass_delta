@@ -24,13 +24,14 @@ resource "aws_lambda_function" "data_processor" {
 
   environment {
     variables = {
-    DB_HOST     = var.db_address
-    DB_NAME     = var.db_name
-    DB_USER     = var.db_user
-    DB_PASSWORD = var.db_password
-    BUCKET_NAME = var.raw_bucket_id
-        }
+      DB_HOST       = var.db_address
+      DB_NAME       = var.db_name
+      DB_USER       = var.db_user
+      DB_PASSWORD   = var.db_password
+      BUCKET_NAME   = var.raw_bucket_id
+      SNS_TOPIC_ARN = var.sns_topic_arn
     }
+  }
 }
 
 resource "aws_security_group" "lambda_processor_sg" {
@@ -67,6 +68,11 @@ resource "aws_iam_role_policy" "processor_policy" {
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:ListBucket"]
         Resource = ["${var.raw_bucket_arn}/*", "${var.raw_bucket_arn}"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["sns:Publish"]
+        Resource = var.sns_topic_arn
       },
       {
         Effect = "Allow"
