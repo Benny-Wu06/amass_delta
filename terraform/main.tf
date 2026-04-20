@@ -264,6 +264,34 @@ resource "aws_vpc_endpoint" "s3" {
   ]
 }
 
+resource "aws_security_group" "vpc_endpoints_sg" {
+  name   = "amass-vpc-endpoints-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_vpc_endpoint" "sns" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.ap-southeast-2.sns"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  security_group_ids  = [aws_security_group.vpc_endpoints_sg.id]
+  private_dns_enabled = true
+}
+
 terraform {
   backend "s3" {}
 }
