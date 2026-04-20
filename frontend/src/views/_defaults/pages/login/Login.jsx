@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
-import { STAGING_URL } from '../../../../vars'
+import { BASE_URL } from '../../../../vars'
 import {
   CButton,
   CCard,
@@ -26,9 +26,9 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post(`${STAGING_URL}/auth/login`, { email, password })
+      const response = await axios.post(`${BASE_URL}/auth/login`, { email, password })
       if (response.data.access_token) {
-        localStorage.setItem('user', JSON.stringify(response.data))
+        localStorage.setItem('user', JSON.stringify({ ...response.data, email }))
         navigate('/dashboard') // Or wherever your home route is
       }
     } catch (error) {
