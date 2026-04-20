@@ -69,7 +69,8 @@ def get_all_cves(sort_column):
                 v.cve_id, 
                 v.cvss_score, 
                 v.epss_score, 
-                v.date_added, 
+                v.date_added,
+                v.description, 
                 v.due_date,
                 c.company_name
             FROM vulnerabilities v
@@ -87,8 +88,9 @@ def get_all_cves(sort_column):
                 "risk_index": risk_index,
                 "risk_rating": risk_rating,
                 "date_added": row[3],
-                "due_date": row[4],
-                "company_name": row[5]
+                "description": row[4],
+                "due_date": row[5],
+                "company_name": row[6]
             })
 
         return {
