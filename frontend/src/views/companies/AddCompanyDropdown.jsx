@@ -55,7 +55,7 @@ const AddCompanyDropdown = ({ companyName }) => {
     }
   }
 
-    const handleToggle = (newOpen) => {
+  const handleToggle = (newOpen) => {
     setIsOpen(newOpen)
     if (newOpen) {
       fetchWatchlists()
@@ -169,7 +169,6 @@ const AddCompanyDropdown = ({ companyName }) => {
             disabled={saving}
             className="fw-bold px-4 text-dark"
           >
-            {saving ? <CSpinner size="sm" className="me-1" /> : null}
             Done
           </CButton>
         </div>
