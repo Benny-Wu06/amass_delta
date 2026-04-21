@@ -79,10 +79,11 @@ const AllCompanies = () => {
                 </CInputGroup>
               </div>
             </CCardHeader>
-            <CTable align="middle" className="mb-0 border" hover responsive>
+            <CTable className="mb-0 border" hover responsive>
               <CTableHead className="text-nowrap">
                 <CTableRow>
-                  <CTableHeaderCell className="bg-body-tertiary text-center">Name</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary">Name</CTableHeaderCell>
+                  <CTableHeaderCell className="bg-body-tertiary text-center">Action</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
@@ -92,7 +93,7 @@ const AllCompanies = () => {
                   ))
                 ) : (
                   <CTableRow>
-                    <CTableDataCell className="text-center p-3 text-muted">
+                    <CTableDataCell className="p-3 text-muted">
                       No companies found matching "{searchTerm}"
                     </CTableDataCell>
                   </CTableRow>
