@@ -18,7 +18,6 @@ import {
   CModalTitle,
   CRow,
   CSpinner,
-  CBadge,
   CTable,
   CTableBody,
   CTableDataCell,
@@ -36,12 +35,11 @@ import {
   cilShieldAlt,
 } from '@coreui/icons'
 
-// TODO FIX BADGES
-const RATING_COLORS = {
-  CRITICAL: 'critical',
-  HIGH: 'high',
-  MEDIUM: 'medium',
-  LOW: 'low',
+const RATING_STYLES = {
+  CRITICAL: { color: '#ff3b3b', background: 'rgba(255,59,59,0.12)' },
+  HIGH: { color: '#ff8c00', background: 'rgba(255,140,0,0.12)' },
+  MEDIUM: { color: '#f0c040', background: 'rgba(240,192,64,0.12)' },
+  LOW: { color: '#00e676', background: 'rgba(0,230,118,0.12)' },
 }
 
 const ViewWatchlist = () => {
@@ -212,9 +210,20 @@ const ViewWatchlist = () => {
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
                     {company.risk_rating ? (
-                      <CBadge color={RATING_COLORS[company.risk_rating] || 'secondary'}>
+                      <span
+                        style={{
+                          ...(RATING_STYLES[company.risk_rating] || {
+                            color: '#6e7681',
+                            background: 'rgba(110,118,129,0.12)',
+                          }),
+                          padding: '2px 8px',
+                          borderRadius: 4,
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                        }}
+                      >
                         {company.risk_rating}
-                      </CBadge>
+                      </span>
                     ) : (
                       '—'
                     )}
