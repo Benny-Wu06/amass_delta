@@ -55,6 +55,62 @@ const AddCompanyDropdown = ({ companyName }) => {
     }
   }
 
+    const handleToggle = (newOpen) => {
+    setIsOpen(newOpen)
+    if (newOpen) {
+      fetchWatchlists()
+    }
+  }
+
+  const handleToggleItem = (e, watchlistId) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setPendingLists((prev) =>
+      prev.includes(watchlistId) ? prev.filter((id) => id !== watchlistId) : [...prev, watchlistId],
+    )
+  }
+
+  const handleCancel = () => {
+    setPendingLists([])
+    setInitialLists([])
+    setIsOpen(false)
+  }
+
+  const handleDone = async () => {
+    const toAdd = pendingLists.filter((id) => !initialLists.includes(id))
+    const toRemove = initialLists.filter((id) => !pendingLists.includes(id))
+
+    if (toAdd.length === 0 && toRemove.length === 0) {
+      setIsOpen(false)
+      return
+    }
+
+    setSaving(true)
+    try {
+      await Promise.all([
+        ...toAdd.map((watchlistId) =>
+          axios.post(`${BASE_URL}/v2/watchlist/${watchlistId}/companies`, {
+            email,
+            company_name: companyName,
+          }),
+        ),
+        ...toRemove.map((watchlistId) =>
+          axios.delete(
+            `${BASE_URL}/v2/watchlist/${watchlistId}/companies/${encodeURIComponent(companyName)}`,
+            { params: { email } },
+          ),
+        ),
+      ])
+    } catch (err) {
+      console.error('Failed to update watchlists:', err)
+    } finally {
+      setSaving(false)
+      setInitialLists([])
+      setPendingLists([])
+      setIsOpen(false)
+    }
+  }
+
   return (
     <CDropdown
       visible={isOpen}
@@ -75,7 +131,25 @@ const AddCompanyDropdown = ({ companyName }) => {
         ) : watchlists.length === 0 ? (
           <div className="px-3 py-2 text-muted small">No watchlists found</div>
         ) : (
-
+          watchlists.map((watchlist) => {
+            const isSelected = pendingLists.includes(watchlist.id)
+            return (
+              <CDropdownItem
+                key={watchlist.id}
+                onClick={(e) => handleToggleItem(e, watchlist.id)}
+                className="d-flex align-items-center justify-content-between"
+                style={{ cursor: 'pointer' }}
+              >
+                <span>{watchlist.name}</span>
+                <CFormCheck
+                  id={`check-${watchlist.id}`}
+                  checked={isSelected}
+                  onChange={() => {}}
+                  style={{ pointerEvents: 'none', margin: 0 }}
+                />
+              </CDropdownItem>
+            )
+          })
         )}
 
         <div className="d-flex justify-content-end align-items-center mt-2 pt-3 pb-2 px-3 border-top">
