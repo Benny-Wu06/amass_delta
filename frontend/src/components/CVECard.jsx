@@ -1,30 +1,17 @@
-import { useForkedRef } from '@coreui/react'
-import axios from 'axios'
 import React from 'react'
-import { BASE_URL } from '@/vars'
-import { useState, useEffect } from 'react'
 
 const CVECard = ({ item, onClick }) => {
-  const riskColor = (index) => {
-    // index is 0–1; map to green → yellow → orange → red
-    if (index >= 0.75) return '#ff3b3b'
-    if (index >= 0.5) return '#ff8c00'
-    if (index >= 0.25) return '#f0c040'
-    return '#00e676'
-  }
-
-  const ratingLabel = (rating) => {
+  const riskStyle = (rating) => {
     const map = {
       CRITICAL: { color: '#ff3b3b', bg: 'rgba(255,59,59,0.12)' },
       HIGH: { color: '#ff8c00', bg: 'rgba(255,140,0,0.12)' },
       MEDIUM: { color: '#f0c040', bg: 'rgba(240,192,64,0.12)' },
-      LOW: { color: '#00e676', bg: 'rgba(0,230,118,0.12)' },
+      LOW: { color: '#07d000d4', bg: 'rgba(26,122,74,0.12)' },
     }
     return map[rating] || { color: '#6e7681', bg: 'rgba(110,118,129,0.12)' }
   }
 
-  const color = riskColor(item.risk_index ?? 0)
-  const badge = ratingLabel(item.risk_rating)
+  const { color, bg } = riskStyle(item.risk_rating)
 
   return (
     <div className="cve-card" onClick={onClick}>
@@ -42,7 +29,7 @@ const CVECard = ({ item, onClick }) => {
         <div className="cve-description">{item.description || 'No description available.'}</div>
 
         <div className="cve-card-footer">
-          <span className="cve-badge" style={{ color: badge.color, background: badge.bg }}>
+          <span className="cve-badge" style={{ color, background: bg }}>
             {item.risk_rating}
           </span>
           <span className="cve-meta">
