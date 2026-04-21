@@ -160,12 +160,39 @@ const CompanyPage = () => {
               <CCardBody className="d-flex flex-column justify-content-center">
                 <CRow>
                   <CCol xs={6}>
-                    <p className="text-muted mb-0">Risk Index</p>
-                    <h1 className="display-4 fw-bold text-warning">{companyData.risk_index}</h1>
+                    <p className="fw-bold mb-0">Risk Index</p>
+                    <h1
+                      className="display-4 fw-bold"
+                      style={{
+                        color:
+                          companyData.risk_index >= 0.75
+                            ? '#ff3b3b'
+                            : companyData.risk_index >= 0.5
+                              ? '#ff8c00'
+                              : companyData.risk_index >= 0.25
+                                ? '#f0c040'
+                                : '#00e676',
+                      }}
+                    >
+                      {companyData.risk_index}
+                    </h1>
                   </CCol>
                   <CCol xs={6}>
-                    <p className="text-muted mb-0">Risk Rating</p>
-                    <h1 className="display-4 fw-bold text-primary">{companyData.risk_rating}</h1>
+                    <p className="fw-bold mb-0">Risk Rating</p>
+                    <h1
+                      className="display-4 fw-bold"
+                      style={{
+                        color:
+                          {
+                            CRITICAL: '#ff3b3b',
+                            HIGH: '#ff8c00',
+                            MEDIUM: '#f0c040',
+                            LOW: '#00e676',
+                          }[companyData.risk_rating] || '#6e7681',
+                      }}
+                    >
+                      {companyData.risk_rating}
+                    </h1>
                   </CCol>
                 </CRow>
                 <hr />

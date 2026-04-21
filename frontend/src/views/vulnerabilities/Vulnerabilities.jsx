@@ -14,7 +14,6 @@ import {
   CTableHeaderCell,
   CTableRow,
   CSpinner,
-  CBadge,
   CButton,
   CFormInput,
   CInputGroup,
@@ -80,17 +79,14 @@ const Vulnerabilities = () => {
     return matchesSearch && matchesCustomDate && matchesPreset
   })
 
-  const getBadgeColor = (rating) => {
-    switch (rating) {
-      case 'CRITICAL':
-        return 'danger'
-      case 'HIGH':
-        return 'warning'
-      case 'MEDIUM':
-        return 'info'
-      default:
-        return 'secondary'
+  const ratingStyle = (rating) => {
+    const map = {
+      CRITICAL: { color: '#ff3b3b', background: 'rgba(255,59,59,0.12)' },
+      HIGH: { color: '#ff8c00', background: 'rgba(255,140,0,0.12)' },
+      MEDIUM: { color: '#f0c040', background: 'rgba(240,192,64,0.12)' },
+      LOW: { color: '#07d000d4', background: 'rgba(26,122,74,0.12)' },
     }
+    return map[rating] || { color: '#6e7681', background: 'rgba(110,118,129,0.12)' }
   }
 
   return (
@@ -193,7 +189,11 @@ const Vulnerabilities = () => {
               <CTableBody>
                 {filteredVulns.length > 0 ? (
                   filteredVulns.map((item) => (
-                    <CTableRow key={item.cve_id}>
+                    <CTableRow
+                      key={item.cve_id}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => navigate(`/vulnerabilities/${item.cve_id}`)}
+                    >
                       <CTableDataCell className="text-center font-monospace small">
                         {item.cve_id}
                       </CTableDataCell>
@@ -202,12 +202,22 @@ const Vulnerabilities = () => {
                         {(item.risk_index * 100).toFixed(1)}%
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
-                        <CBadge color={getBadgeColor(item.risk_rating)}>{item.risk_rating}</CBadge>
+                        <span
+                          style={{
+                            ...ratingStyle(item.risk_rating),
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            fontWeight: 600,
+                            fontSize: '0.75rem',
+                          }}
+                        >
+                          {item.risk_rating || '—'}
+                        </span>
                       </CTableDataCell>
                       <CTableDataCell className="text-center small">
                         {sortBy === 'date_added' ? item.date_added : item.due_date}
                       </CTableDataCell>
-                      <CTableDataCell className="text-center">
+                      <CTableDataCell className="text-center" onClick={(e) => e.stopPropagation()}>
                         <CButton
                           color="primary"
                           size="sm"

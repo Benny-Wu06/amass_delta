@@ -26,6 +26,7 @@ import {
   cilShieldAlt,
   cilBuilding,
   cilArrowRight,
+  cilPlus,
 } from '@coreui/icons'
 import CVECard from 'src/components/CVECard'
 
@@ -36,19 +37,42 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [dateRange, setDateRange] = useState('all')
   const [watchlists, setWatchlists] = useState([])
+  const [watchlistCompanies, setWatchlistCompanies] = useState(new Set())
+  const [watchlistsLoaded, setWatchlistsLoaded] = useState(false)
   const navigate = useNavigate()
 
   const userEmail = getUserEmail()
 
   useEffect(() => {
     if (!userEmail) return
-    axios
-      .get(`${BASE_URL}/v2/watchlist`, { params: { email: userEmail } })
-      .then((res) => {
+    const fetchWatchlistData = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/v2/watchlist`, { params: { email: userEmail } })
         const data = typeof res.data.body === 'string' ? JSON.parse(res.data.body) : res.data
-        setWatchlists(data.watchlists || [])
-      })
-      .catch(() => {})
+        const lists = data.watchlists || []
+        setWatchlists(lists)
+
+        const details = await Promise.all(
+          lists.map((wl) =>
+            axios
+              .get(`${BASE_URL}/v2/watchlist/${wl.id}`, { params: { email: userEmail } })
+              .then((r) => (typeof r.data.body === 'string' ? JSON.parse(r.data.body) : r.data))
+              .catch(() => null),
+          ),
+        )
+
+        const companies = new Set()
+        details.forEach((detail) => {
+          ;(detail?.companies || []).forEach((c) => companies.add(c.company_name))
+        })
+        setWatchlistCompanies(companies)
+      } catch {
+        // leave watchlistCompanies empty
+      } finally {
+        setWatchlistsLoaded(true)
+      }
+    }
+    fetchWatchlistData()
   }, [userEmail])
 
   useEffect(() => {
@@ -71,6 +95,8 @@ const Dashboard = () => {
   }, [sortBy])
 
   const filtered = vulns.filter((item) => {
+    if (watchlistCompanies.size > 0 && !watchlistCompanies.has(item.company_name)) return false
+
     const s = searchTerm.toLowerCase()
     const matchSearch =
       item.cve_id.toLowerCase().includes(s) || (item.company_name || '').toLowerCase().includes(s)
@@ -81,6 +107,9 @@ const Dashboard = () => {
     cutoff.setDate(cutoff.getDate() - parseInt(dateRange))
     return matchSearch && d >= cutoff
   })
+
+  const noWatchlists = watchlistsLoaded && watchlists.length === 0
+  const noCompanies = watchlistsLoaded && watchlists.length > 0 && watchlistCompanies.size === 0
 
   return (
     <div className="cve-dashboard">
@@ -94,7 +123,7 @@ const Dashboard = () => {
             </div>
             <div className="d-flex align-items-center gap-2 text-muted small">
               <CIcon icon={cilShieldAlt} className="text-danger" />
-              <span>{vulns.length} tracked vulnerabilities</span>
+              <span>{filtered.length} tracked vulnerabilities</span>
             </div>
           </div>
 
@@ -195,9 +224,25 @@ const Dashboard = () => {
       </div>
 
       {/* Grid */}
-      {loading ? (
+      {loading || !watchlistsLoaded ? (
         <div className="cve-loading">
           <CSpinner color="primary" />
+        </div>
+      ) : noWatchlists ? (
+        <div className="cve-empty">
+          <p className="mb-3 text-muted">Add companies to a watchlist to see their CVEs here.</p>
+          <CButton color="primary" onClick={() => navigate('/watchlists')}>
+            <CIcon icon={cilPlus} className="me-1" />
+            Go to Watchlists
+          </CButton>
+        </div>
+      ) : noCompanies ? (
+        <div className="cve-empty">
+          <p className="mb-3 text-muted">Your watchlists have no companies yet.</p>
+          <CButton color="primary" onClick={() => navigate('/watchlists')}>
+            <CIcon icon={cilBuilding} className="me-1" />
+            Add Companies
+          </CButton>
         </div>
       ) : filtered.length === 0 ? (
         <div className="cve-empty">No results found</div>
