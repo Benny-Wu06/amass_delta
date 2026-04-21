@@ -479,6 +479,49 @@ body {
   }
 }
 
+.btn-outline-primary {
+  background-color: transparent !important;
+  border: 1px solid $cyber-accent !important;
+  color: $cyber-accent !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  transition: all 0.18s ease !important;
+
+  &:hover {
+    background-color: rgba(0, 212, 255, 0.14) !important;
+    box-shadow: 0 0 14px rgba(0, 212, 255, 0.25) !important;
+    color: $cyber-accent !important;
+  }
+
+  &:active,
+  &:focus {
+    background-color: rgba(0, 212, 255, 0.2) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.2) !important;
+    color: $cyber-accent !important;
+  }
+}
+
+.btn-ghost-primary,
+.btn-ghost-secondary {
+  background-color: transparent !important;
+  border: none !important;
+  color: $cyber-text-dim !important;
+  transition: all 0.18s ease !important;
+
+  &:hover {
+    background-color: rgba(0, 212, 255, 0.08) !important;
+    color: $cyber-accent !important;
+  }
+
+  &:active,
+  &:focus {
+    background-color: rgba(0, 212, 255, 0.12) !important;
+    color: $cyber-accent !important;
+  }
+}
+
 // ================================================================
 // FORMS
 // ================================================================
