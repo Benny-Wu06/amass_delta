@@ -155,7 +155,6 @@ const Watchlists = () => {
                     <CButton
                       color="primary"
                       size="sm"
-                      variant="outline"
                       className="flex-grow-1"
                       onClick={() => navigate(`/watchlists/${wl.id}`)}
                     >
