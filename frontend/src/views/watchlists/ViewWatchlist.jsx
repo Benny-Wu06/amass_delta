@@ -39,7 +39,7 @@ const RATING_STYLES = {
   CRITICAL: { color: '#ff3b3b', background: 'rgba(255,59,59,0.12)' },
   HIGH: { color: '#ff8c00', background: 'rgba(255,140,0,0.12)' },
   MEDIUM: { color: '#f0c040', background: 'rgba(240,192,64,0.12)' },
-  LOW: { color: '#00e676', background: 'rgba(0,230,118,0.12)' },
+  LOW: { color: '#07d000d4', background: 'rgba(26,122,74,0.12)' },
 }
 
 const ViewWatchlist = () => {
