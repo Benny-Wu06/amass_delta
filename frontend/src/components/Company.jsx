@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { CCard, CCardBody, CCardLink, CCardSubtitle, CCardText, CCardTitle } from '@coreui/react'
-import { BASE_URL } from '../vars'
+import { BASE_URL } from '@/vars'
 
 const Company = ({ className, company, company_name }) => {
   const [companyData, setCompanyData] = useState(null)

@@ -8,7 +8,7 @@ import Graph from 'src/components/Graph.jsx'
 import Company from 'src/components/Company.jsx'
 import dreamybull from 'src/assets/images/dreamybull_suit.jpg'
 import { CRow, CCol, CCard, CCardHeader, CCardBody, CBadge, CSpinner } from '@coreui/react'
-import { BASE_URL } from '../../vars'
+import { BASE_URL } from '@/vars'
 import VulnerabilityTable from '../vulnerabilities/VulnerabilityTable.jsx'
 
 const SYMBOL_MAP = {
