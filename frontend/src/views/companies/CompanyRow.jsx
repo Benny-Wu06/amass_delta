@@ -11,9 +11,9 @@ const CompanyRow = ({ companyName }) => {
   return (
     <>
       <CTableRow>
-        <CTableDataCell className="text-center">{companyName}</CTableDataCell>
+        <CTableDataCell className='mx-4'>{companyName}</CTableDataCell>
         <CTableDataCell className="text-center">
-          <CButton
+          <CButton className='mx-2'
             color="primary"
             onClick={() => {
               navigate(`/companies/${companyName}`)
@@ -21,7 +21,7 @@ const CompanyRow = ({ companyName }) => {
           >
             View
           </CButton>
-          <AddCompanyDropdown></AddCompanyDropdown>
+          <AddCompanyDropdown companyName={companyName} />
         </CTableDataCell>
       </CTableRow>
     </>
