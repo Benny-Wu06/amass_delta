@@ -28,6 +28,8 @@ const Watchlists = () => {
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
+  const [emailInput, setEmailInput] = useState('')
+  const [sharedEmails, setSharedEmails] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const navigate = useNavigate()
@@ -52,12 +54,29 @@ const Watchlists = () => {
     fetchWatchlists()
   }, [email])
 
+  const handleAddEmail = () => {
+    const trimmed = emailInput.trim()
+    if (!trimmed || sharedEmails.includes(trimmed)) return
+    setSharedEmails((prev) => [...prev, trimmed])
+    setEmailInput('')
+  }
+
+  const handleRemoveEmail = (target) => {
+    setSharedEmails((prev) => prev.filter((e) => e !== target))
+  }
+
   const handleCreate = async () => {
     if (!newName.trim()) return
     setCreating(true)
     try {
-      await axios.post(`${BASE_URL}/v2/watchlist`, { email, name: newName.trim() })
+      await axios.post(`${BASE_URL}/v2/watchlist`, {
+        email,
+        name: newName.trim(),
+        shared_with: sharedEmails,
+      })
       setNewName('')
+      setEmailInput('')
+      setSharedEmails([])
       setShowModal(false)
       await fetchWatchlists()
     } catch (err) {
@@ -159,12 +178,20 @@ const Watchlists = () => {
         </CRow>
       )}
 
-      <CModal visible={showModal} onClose={() => setShowModal(false)} alignment="center">
+      <CModal
+        visible={showModal}
+        onClose={() => {
+          setShowModal(false)
+          setEmailInput('')
+          setSharedEmails([])
+        }}
+        alignment="center"
+      >
         <CModalHeader>
           <CModalTitle>New Watchlist</CModalTitle>
         </CModalHeader>
         <CModalBody>
-          <CInputGroup>
+          <CInputGroup className="mb-3">
             <CInputGroupText>Name</CInputGroupText>
             <CFormInput
               placeholder="e.g. FAANG, Cloud Providers..."
@@ -174,6 +201,39 @@ const Watchlists = () => {
               autoFocus
             />
           </CInputGroup>
+          <CInputGroup>
+            <CInputGroupText>Email</CInputGroupText>
+            <CFormInput
+              placeholder="Add collaborator email..."
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddEmail()}
+            />
+            <CButton color="primary" onClick={handleAddEmail}>
+              <CIcon icon={cilPlus} />
+            </CButton>
+          </CInputGroup>
+          {sharedEmails.length > 0 && (
+            <div className="d-flex flex-wrap gap-2 mt-2">
+              {sharedEmails.map((e) => (
+                <CBadge
+                  key={e}
+                  color="secondary"
+                  shape="rounded-pill"
+                  className="d-flex align-items-center gap-1 px-2 py-1"
+                  style={{ fontSize: '0.8rem' }}
+                >
+                  {e}
+                  <CIcon
+                    icon={cilTrash}
+                    size="sm"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleRemoveEmail(e)}
+                  />
+                </CBadge>
+              ))}
+            </div>
+          )}
         </CModalBody>
         <CModalFooter>
           <CButton color="secondary" variant="ghost" onClick={() => setShowModal(false)}>

@@ -793,7 +793,7 @@ a {
 }
 
 .cve-company {
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 600;
   color: $cyber-text;
   white-space: nowrap;
@@ -834,7 +834,10 @@ a {
 
 .cve-meta {
   font-size: 0.65rem;
-  color: $cyber-text-dim;
+  color: white;
+  opacity: 0.8;
+  // color: $cyber-text-dim;
+  // font-weight: bold;
   flex: 1;
   text-align: center;
 }
