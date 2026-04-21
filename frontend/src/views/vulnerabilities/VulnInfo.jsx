@@ -95,7 +95,14 @@ const VulnInfo = ({}) => {
                   {
                     label: 'Risk Index',
                     value: `${(cveInfo.risk_index * 100).toFixed(1)}%`,
-                    color: 'primary',
+                    hexColor:
+                      cveInfo.risk_index >= 0.75
+                        ? '#ff3b3b'
+                        : cveInfo.risk_index >= 0.5
+                          ? '#ff8c00'
+                          : cveInfo.risk_index >= 0.25
+                            ? '#f0c040'
+                            : '#07d000d4',
                   },
                   {
                     label: 'CVSS Score',
@@ -121,7 +128,14 @@ const VulnInfo = ({}) => {
                       >
                         {metric.label}
                       </div>
-                      <div className={`fs-3 fw-bold text-${metric.color}`}>{metric.value}</div>
+                      <div
+                        className={
+                          metric.hexColor ? 'fs-3 fw-bold' : `fs-3 fw-bold text-${metric.color}`
+                        }
+                        style={metric.hexColor ? { color: metric.hexColor } : undefined}
+                      >
+                        {metric.value}
+                      </div>
                     </div>
                   </CCol>
                 ))}

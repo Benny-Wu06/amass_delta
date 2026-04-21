@@ -189,7 +189,11 @@ const Vulnerabilities = () => {
               <CTableBody>
                 {filteredVulns.length > 0 ? (
                   filteredVulns.map((item) => (
-                    <CTableRow key={item.cve_id}>
+                    <CTableRow
+                      key={item.cve_id}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => navigate(`/vulnerabilities/${item.cve_id}`)}
+                    >
                       <CTableDataCell className="text-center font-monospace small">
                         {item.cve_id}
                       </CTableDataCell>
@@ -213,7 +217,7 @@ const Vulnerabilities = () => {
                       <CTableDataCell className="text-center small">
                         {sortBy === 'date_added' ? item.date_added : item.due_date}
                       </CTableDataCell>
-                      <CTableDataCell className="text-center">
+                      <CTableDataCell className="text-center" onClick={(e) => e.stopPropagation()}>
                         <CButton
                           color="primary"
                           size="sm"

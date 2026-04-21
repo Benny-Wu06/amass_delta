@@ -36,7 +36,7 @@ const CVECard = ({ item, onClick }) => {
             {item.due_date ? `Due ${item.due_date}` : item.date_added}
           </span>
           <span className="cve-score" style={{ color }}>
-            {item.risk_index != null ? (item.risk_index * 100).toFixed(1) : '—'}%
+            {item.risk_index != null ? (item.risk_index * 100).toFixed(1) : '—'}%1
           </span>
         </div>
       </div>
