@@ -1,0 +1,923 @@
+@use "@coreui/coreui/scss/coreui" as * with (
+  $enable-deprecation-messages: false,
+);
+@use "@coreui/chartjs/scss/coreui-chartjs";
+@use "vendors/simplebar";
+
+// ================================================================
+// AMASS DELTA — CYBER SECURITY THEME
+// ================================================================
+
+$cyber-bg:       #0a0d14;
+$cyber-surface:  #0d1117;
+$cyber-sidebar:  #06090f;
+$cyber-header:   #080b12;
+$cyber-accent:   #00d4ff;
+$cyber-text:     #c9d1d9;
+$cyber-text-dim: #6e7681;
+$cyber-border:   rgba(0, 212, 255, 0.12);
+
+// ================================================================
+$critical:  #ff3b3b;
+$high:  rgb(255, 193, 7);
+$medium:  '#f0c040';
+$low:  '#00e676';
+
+// ================================================================
+
+// ================================================================
+// FORCE DARK CYBER BASE
+// ================================================================
+
+html,
+body {
+  background-color: $cyber-bg !important;
+  color: $cyber-text !important;
+}
+
+body {
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.022) 1px, transparent 1px);
+  background-size: 60px 60px;
+  background-attachment: fixed;
+}
+
+// ================================================================
+// CSS CUSTOM PROPERTY OVERRIDES
+// ================================================================
+
+:root,
+[data-coreui-theme="dark"],
+[data-coreui-theme="light"] {
+  --cui-body-bg:                       #{$cyber-bg};
+  --cui-body-color:                    #{$cyber-text};
+  --cui-secondary-color:               #{$cyber-text-dim};
+  --cui-tertiary-bg:                   rgba(0, 212, 255, 0.04);
+  --cui-tertiary-color:                #{$cyber-text-dim};
+  --cui-border-color:                  #{$cyber-border};
+  --cui-border-color-translucent:      rgba(0, 212, 255, 0.08);
+
+  --cui-primary:                       #{$cyber-accent};
+  --cui-primary-rgb:                   0, 212, 255;
+  --cui-link-color:                    #{$cyber-accent};
+  --cui-link-hover-color:              #33ddff;
+
+  // Cards
+  --cui-card-bg:                       #{$cyber-surface};
+  --cui-card-border-color:             #{$cyber-border};
+  --cui-card-cap-bg:                   rgba(0, 212, 255, 0.04);
+  --cui-card-color:                    #{$cyber-text};
+
+  // Sidebar
+  --cui-sidebar-bg:                    #{$cyber-sidebar};
+  --cui-sidebar-color:                 rgba(201, 209, 217, 0.7);
+  --cui-sidebar-border-color:          #{$cyber-border};
+  --cui-sidebar-brand-bg:              #{$cyber-sidebar};
+  --cui-sidebar-brand-color:           #{$cyber-accent};
+  --cui-sidebar-nav-title-color:       #{$cyber-text-dim};
+  --cui-sidebar-nav-link-color:        rgba(201, 209, 217, 0.6);
+  --cui-sidebar-nav-link-icon-color:   #{$cyber-text-dim};
+  --cui-sidebar-nav-link-hover-color:  #{$cyber-accent};
+  --cui-sidebar-nav-link-hover-bg:     rgba(0, 212, 255, 0.07);
+  --cui-sidebar-nav-link-hover-icon-color: #{$cyber-accent};
+  --cui-sidebar-nav-link-active-color: #{$cyber-accent};
+  --cui-sidebar-nav-link-active-bg:    rgba(0, 212, 255, 0.1);
+  --cui-sidebar-nav-link-active-icon-color: #{$cyber-accent};
+  --cui-sidebar-footer-bg:             #{$cyber-sidebar};
+  --cui-sidebar-footer-border-color:   #{$cyber-border};
+
+  // Header
+  --cui-header-bg:                     #{$cyber-header};
+  --cui-header-color:                  #{$cyber-text};
+  --cui-header-border-color:           #{$cyber-border};
+  --cui-header-hover-color:            #{$cyber-accent};
+
+  // Tables
+  --cui-table-color:                   #{$cyber-text};
+  --cui-table-bg:                      transparent;
+  --cui-table-border-color:            #{$cyber-border};
+  --cui-table-hover-bg:                rgba(0, 212, 255, 0.05);
+  --cui-table-striped-bg:              rgba(0, 212, 255, 0.02);
+
+  // Forms
+  --cui-input-bg:                      rgba(0, 0, 0, 0.28);
+  --cui-input-color:                   #{$cyber-text};
+  --cui-input-border-color:            rgba(0, 212, 255, 0.2);
+  --cui-input-placeholder-color:       #{$cyber-text-dim};
+  --cui-input-focus-bg:                rgba(0, 212, 255, 0.04);
+  --cui-input-focus-border-color:      #{$cyber-accent};
+  --cui-input-focus-box-shadow:        0 0 0 0.2rem rgba(0, 212, 255, 0.15);
+  --cui-input-group-addon-bg:          rgba(0, 212, 255, 0.06);
+  --cui-input-group-addon-border-color: rgba(0, 212, 255, 0.2);
+  --cui-input-group-addon-color:       #{$cyber-text-dim};
+
+  // Dropdowns
+  --cui-dropdown-bg:                   #{$cyber-surface};
+  --cui-dropdown-border-color:         #{$cyber-border};
+  --cui-dropdown-link-color:           #{$cyber-text};
+  --cui-dropdown-link-hover-color:     #{$cyber-accent};
+  --cui-dropdown-link-hover-bg:        rgba(0, 212, 255, 0.08);
+  --cui-dropdown-link-active-color:    #{$cyber-accent};
+  --cui-dropdown-link-active-bg:       rgba(0, 212, 255, 0.12);
+  --cui-dropdown-divider-bg:           #{$cyber-border};
+  --cui-dropdown-header-color:         #{$cyber-text-dim};
+
+  // Footer
+  --cui-footer-bg:                     #{$cyber-sidebar};
+  --cui-footer-color:                  #{$cyber-text-dim};
+  --cui-footer-border-color:           #{$cyber-border};
+}
+
+// ================================================================
+// LAYOUT
+// ================================================================
+
+.wrapper {
+  width: 100%;
+  padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
+  will-change: auto;
+  @include transition(padding .15s);
+}
+
+.header > .container-fluid,
+.sidebar-header {
+  min-height: calc(4rem + 1px); // stylelint-disable-line function-disallowed-list
+}
+
+.sidebar-brand-full {
+  margin-left: 3px;
+}
+
+.sidebar-header {
+  .nav-underline-border {
+    --cui-nav-underline-border-link-padding-x: 1rem;
+    --cui-nav-underline-border-gap: 0;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    min-height: calc(4rem + 1px); // stylelint-disable-line function-disallowed-list
+  }
+}
+
+.sidebar-toggler {
+  margin-inline-start: auto;
+}
+
+.sidebar-narrow,
+.sidebar-narrow-unfoldable:not(:hover) {
+  .sidebar-toggler {
+    margin-inline-end: auto;
+  }
+}
+
+.header > .container-fluid + .container-fluid {
+  min-height: 3rem;
+}
+
+.footer {
+  min-height: calc(3rem + 1px); // stylelint-disable-line function-disallowed-list
+}
+
+// ================================================================
+// HEADER
+// ================================================================
+
+.header {
+  background-color: $cyber-header !important;
+  border-bottom: 1px solid $cyber-border !important;
+
+  &.shadow-sm {
+    box-shadow: 0 2px 24px rgba(0, 212, 255, 0.08) !important;
+  }
+
+  .nav-link {
+    color: rgba(201, 209, 217, 0.75);
+    transition: color 0.2s;
+
+    &:hover {
+      color: $cyber-accent !important;
+    }
+  }
+
+  .vr {
+    border-color: $cyber-border;
+    opacity: 1;
+  }
+}
+
+// ================================================================
+// SIDEBAR
+// ================================================================
+
+.sidebar {
+  background-color: $cyber-sidebar !important;
+  border-right: 1px solid $cyber-border !important;
+
+  .sidebar-header {
+    background-color: $cyber-sidebar !important;
+    border-bottom: 1px solid $cyber-border !important;
+  }
+
+  .sidebar-footer {
+    background-color: $cyber-sidebar !important;
+    border-top: 1px solid $cyber-border !important;
+  }
+
+  .nav-title {
+    font-size: 0.63rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    color: $cyber-text-dim !important;
+    padding-top: 1.1rem !important;
+  }
+}
+
+// ================================================================
+// SIDEBAR NAV — UNDERLINE HOVER TRANSITION
+// ================================================================
+
+.sidebar .nav-link {
+  position: relative;
+  transition: color 0.2s ease, background-color 0.2s ease !important;
+  overflow: hidden;
+
+  // Animated bottom underline
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1rem;
+    right: 1rem;
+    height: 1px;
+    background-color: $cyber-accent;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.25s ease;
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
+  }
+
+  // Active item: persistent underline + left border glow
+  &.active {
+    border-left: 2px solid $cyber-accent !important;
+
+    &::after {
+      transform: scaleX(1);
+      opacity: 0.5;
+    }
+  }
+}
+
+// ================================================================
+// CARDS
+// ================================================================
+
+.card {
+  background-color: $cyber-surface !important;
+  border: 1px solid $cyber-border !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.45) !important;
+
+  .card-header {
+    background-color: rgba(0, 212, 255, 0.04) !important;
+    border-bottom: 1px solid $cyber-border !important;
+    border-left: 3px solid $cyber-accent !important;
+    color: $cyber-text !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 1rem !important;
+  }
+
+  .card-body {
+    color: $cyber-text;
+  }
+
+  .card-title {
+    color: $cyber-accent !important;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .card-subtitle {
+    font-size: 0.7rem !important;
+    color: $cyber-text-dim !important;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+}
+
+// ================================================================
+// TABLES
+// ================================================================
+
+.table {
+  color: $cyber-text !important;
+
+  thead th,
+  thead .table-header-cell {
+    font-size: 0.67rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: $cyber-text-dim !important;
+    background-color: rgba(0, 212, 255, 0.04) !important;
+    border-bottom: 1px solid $cyber-border !important;
+    white-space: nowrap;
+  }
+
+  tbody td,
+  tbody .table-data-cell {
+    color: $cyber-text !important;
+    border-color: $cyber-border !important;
+    vertical-align: middle;
+  }
+
+  &.border {
+    border-color: $cyber-border !important;
+  }
+
+  tbody tr:hover td {
+    background-color: rgba(0, 212, 255, 0.04) !important;
+  }
+}
+
+// ================================================================
+// BADGES
+// ================================================================
+
+.badge {
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  padding: 0.3em 0.65em !important;
+  border-radius: 3px !important;
+
+  &.bg-critical {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #ff3b3b !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
+
+  &.bg-high {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #ff8c00 !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
+
+  &.bg-medium {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #f0c040 !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
+
+  &.bg-low {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #00e676 !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
+
+  &.bg-danger {
+    background-color: rgba(255, 45, 85, 0.16) !important;
+    color: #ff6b8a !important;
+    border: 1px solid rgba(255, 45, 85, 0.35) !important;
+  }
+
+  &.bg-warning {
+    background-color: rgba(255, 140, 0, 0.16) !important;
+    color: #ffb347 !important;
+    border: 1px solid rgba(255, 140, 0, 0.35) !important;
+  }
+
+  &.bg-info {
+    background-color: rgba(0, 212, 255, 0.14) !important;
+    color: $cyber-accent !important;
+    border: 1px solid rgba(0, 212, 255, 0.3) !important;
+  }
+
+  &.bg-secondary {
+    background-color: rgba(110, 118, 129, 0.16) !important;
+    color: #8b949e !important;
+    border: 1px solid rgba(110, 118, 129, 0.28) !important;
+  }
+
+  &.bg-success {
+    background-color: rgba(0, 255, 136, 0.14) !important;
+    color: #00ff88 !important;
+    border: 1px solid rgba(0, 255, 136, 0.3) !important;
+  }
+}
+
+// ================================================================
+// BUTTONS
+// ================================================================
+
+.btn-primary {
+  background-color: transparent !important;
+  border: 1px solid $cyber-accent !important;
+  color: $cyber-accent !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  transition: all 0.18s ease !important;
+
+  &:hover {
+    background-color: rgba(0, 212, 255, 0.14) !important;
+    box-shadow: 0 0 14px rgba(0, 212, 255, 0.25) !important;
+    color: $cyber-accent !important;
+  }
+
+  &:active,
+  &:focus {
+    background-color: rgba(0, 212, 255, 0.2) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.2) !important;
+    color: $cyber-accent !important;
+  }
+}
+
+.btn-outline-secondary {
+  border-color: $cyber-border !important;
+  color: $cyber-text-dim !important;
+  font-size: 0.7rem !important;
+  transition: all 0.18s ease !important;
+
+  &:hover {
+    background-color: rgba(0, 212, 255, 0.08) !important;
+    border-color: rgba(0, 212, 255, 0.35) !important;
+    color: $cyber-accent !important;
+  }
+
+  &.active,
+  &:active {
+    background-color: rgba(0, 212, 255, 0.12) !important;
+    border-color: $cyber-accent !important;
+    color: $cyber-accent !important;
+  }
+}
+
+.btn-secondary {
+  background-color: rgba(0, 212, 255, 0.07) !important;
+  border-color: $cyber-border !important;
+  color: $cyber-text !important;
+
+  &:hover {
+    background-color: rgba(0, 212, 255, 0.14) !important;
+    border-color: rgba(0, 212, 255, 0.3) !important;
+    color: $cyber-accent !important;
+  }
+}
+
+.btn-outline-primary {
+  background-color: transparent !important;
+  border: 1px solid $cyber-accent !important;
+  color: $cyber-accent !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  transition: all 0.18s ease !important;
+
+  &:hover {
+    background-color: rgba(0, 212, 255, 0.14) !important;
+    box-shadow: 0 0 14px rgba(0, 212, 255, 0.25) !important;
+    color: $cyber-accent !important;
+  }
+
+  &:active,
+  &:focus {
+    background-color: rgba(0, 212, 255, 0.2) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.2) !important;
+    color: $cyber-accent !important;
+  }
+}
+
+.btn-ghost-primary,
+.btn-ghost-secondary {
+  background-color: transparent !important;
+  border: none !important;
+  color: $cyber-text-dim !important;
+  transition: all 0.18s ease !important;
+
+  &:hover {
+    background-color: rgba(0, 212, 255, 0.08) !important;
+    color: $cyber-accent !important;
+  }
+
+  &:active,
+  &:focus {
+    background-color: rgba(0, 212, 255, 0.12) !important;
+    color: $cyber-accent !important;
+  }
+}
+
+// ================================================================
+// FORMS
+// ================================================================
+
+.form-control,
+.form-select {
+  background-color: rgba(0, 0, 0, 0.28) !important;
+  border-color: rgba(0, 212, 255, 0.2) !important;
+  color: $cyber-text !important;
+  font-size: 0.82rem;
+
+  &:focus {
+    border-color: $cyber-accent !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.12) !important;
+    background-color: rgba(0, 212, 255, 0.03) !important;
+    color: $cyber-text !important;
+  }
+
+  &::placeholder {
+    color: $cyber-text-dim !important;
+  }
+
+  &[type="date"] {
+    color-scheme: dark;
+  }
+}
+
+.input-group-text {
+  background-color: rgba(0, 212, 255, 0.06) !important;
+  border-color: rgba(0, 212, 255, 0.2) !important;
+  color: $cyber-text-dim !important;
+}
+
+// ================================================================
+// DROPDOWNS
+// ================================================================
+
+.dropdown-menu {
+  background-color: $cyber-surface !important;
+  border: 1px solid $cyber-border !important;
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 212, 255, 0.04) !important;
+
+  .dropdown-item {
+    color: $cyber-text !important;
+    font-size: 0.82rem;
+
+    &:hover,
+    &:focus {
+      background-color: rgba(0, 212, 255, 0.08) !important;
+      color: $cyber-accent !important;
+    }
+
+    &.active {
+      background-color: rgba(0, 212, 255, 0.12) !important;
+      color: $cyber-accent !important;
+    }
+  }
+
+  .dropdown-divider {
+    border-top-color: $cyber-border !important;
+  }
+}
+
+// ================================================================
+// SPINNER / FOOTER / SCROLLBAR
+// ================================================================
+
+.spinner-border,
+.spinner-grow {
+  color: $cyber-accent !important;
+}
+
+.footer {
+  background-color: $cyber-sidebar !important;
+  border-top: 1px solid $cyber-border !important;
+  color: $cyber-text-dim !important;
+  font-size: 0.78rem;
+
+  a {
+    color: rgba(201, 209, 217, 0.5) !important;
+    text-decoration: none;
+
+    &:hover {
+      color: $cyber-accent !important;
+    }
+  }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: $cyber-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.22);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba(0, 212, 255, 0.42);
+  }
+}
+
+// ================================================================
+// GLOBAL UTILITIES
+// ================================================================
+
+.text-muted {
+  color: $cyber-text-dim !important;
+}
+
+.bg-body-tertiary {
+  background-color: rgba(0, 212, 255, 0.04) !important;
+}
+
+.font-monospace {
+  font-family: 'Consolas', 'SF Mono', 'Fira Code', 'Courier New', monospace !important;
+  color: $cyber-accent !important;
+}
+
+a {
+  color: $cyber-accent;
+  text-decoration: none;
+
+  &:hover {
+    color: #33ddff;
+  }
+}
+
+// ================================================================
+// CVE DASHBOARD — CARD GRID
+// ================================================================
+
+.cve-dashboard {
+  padding: 1.25rem 1.5rem;
+
+  @media (max-width: 575px) {
+    padding: 0.75rem;
+  }
+}
+
+.cve-account-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 575px) {
+    gap: 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+.cve-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+
+  @media (max-width: 575px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.cve-toolbar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.cve-toolbar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $cyber-accent;
+}
+
+.cve-count {
+  font-size: 0.75rem;
+  color: $cyber-text-dim;
+}
+
+.cve-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 575px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    > * {
+      width: 100%;
+    }
+
+    .cve-sort-group {
+      width: 100%;
+
+      .cve-sort-btn {
+        flex: 1;
+      }
+    }
+  }
+}
+
+.cve-sort-group {
+  display: flex;
+  border: 1px solid $cyber-border;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cve-sort-btn {
+  background: transparent;
+  border: none;
+  color: $cyber-text-dim;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: $cyber-text;
+    background: rgba(0, 212, 255, 0.06);
+  }
+
+  &.active {
+    background: rgba(0, 212, 255, 0.15);
+    color: $cyber-accent;
+  }
+}
+
+.cve-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.9rem;
+
+  @media (max-width: 575px) {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  @media (min-width: 576px) and (max-width: 767px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cve-card {
+  background: $cyber-surface;
+  border: 1px solid $cyber-border;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 212, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.cve-card-inner {
+  padding: 0.85rem 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cve-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.cve-id {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: $cyber-accent;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cve-running {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  color: $cyber-text-dim;
+  white-space: nowrap;
+}
+
+.cve-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cve-company {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $cyber-text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cve-description {
+  font-size: 0.72rem;
+  color: $cyber-text-dim;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+  min-height: 3.2em;
+}
+
+.cve-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid $cyber-border;
+}
+
+.cve-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+}
+
+.cve-meta {
+  font-size: 0.65rem;
+  color: white;
+  opacity: 0.8;
+  // color: $cyber-text-dim;
+  // font-weight: bold;
+  flex: 1;
+  text-align: center;
+}
+
+.cve-score {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  min-width: 2rem;
+  text-align: right;
+}
+
+.cve-risk-bar {
+  height: 3px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.cve-loading,
+.cve-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: $cyber-text-dim;
+}
+
+// ================================================================
+// DARK MODE COMPAT
+// ================================================================
+
+@include color-mode(dark) {
+  body {
+    background-color: $cyber-bg;
+  }
+
+  .footer {
+    --cui-footer-bg: #{$cyber-sidebar};
+  }
+}
