@@ -2,35 +2,28 @@
 sequenceDiagram
     actor User
     participant Frontend
-    participant API Gateway
-    participant StocksCVEGrowthLambda
-    participant CharlieAPI
-    participant RDS
+    participant Gateway as API Gateway
+    participant Lambda as StocksCVEGrowthLambda
+    participant Charlie as W1A_CHARLIE's API
+    participant DB as Database
 
-    User->>Frontend: Navigates to Companies page via navigation bar
-    User->>Frontend: Enters "Broadcom" into the search bar
+    activate User
 
-    Frontend->>Frontend: Validates AVGO ticker symbol
+    User->>+Frontend: Navigates to The Company: Broadcom
 
-    Frontend->>API Gateway: GET /v1/stocks/AVGO/cve-growth?from=...&to=...
-    API Gateway->>StocksCVEGrowthLambda: Invoke with AVGO symbol and timeframe
+    Frontend->>+Gateway: Call the API with AVGO as path parameter
+    Gateway->>+Lambda: Invoke the lambda with AVGO
 
     par Fetch stock prices and CVE data concurrently
-        StocksCVEGrowthLambda->>CharlieAPI: GET historical price data for AVGO
-        CharlieAPI-->>StocksCVEGrowthLambda: Returns daily open and close prices
+        Lambda->>+Charlie: GET historical price data for AVGO
+        Charlie-->>-Lambda: Returns open and close prices
 
-        StocksCVEGrowthLambda->>RDS: Query CVE records for Broadcom within timeframe
-        RDS-->>StocksCVEGrowthLambda: Returns daily CVE counts
+        Lambda->>+DB: Query CVE records for Broadcom
+        DB-->>-Lambda: Returns daily CVE counts
     end
 
-    StocksCVEGrowthLambda->>StocksCVEGrowthLambda: Calculates daily price difference (close - open) per day
-    StocksCVEGrowthLambda->>StocksCVEGrowthLambda: Merges stock price data with CVE growth counts by date
+    Lambda-->>-Gateway: Returns the JSON merged dataset
+    Gateway-->>-Frontend: Return merged dataset
 
-    StocksCVEGrowthLambda-->>API Gateway: Returns merged dataset
-    API Gateway-->>Frontend: 200 OK with merged dataset
-
-    Frontend->>Frontend: Generates dual-axis chart overlaying AVGO price trend with CVE growth bar graph
-
-    Frontend-->>User: Displays chart
-    User->>User: Reviews chart to identify if CVE disclosure spikes align with stock price dips
+    Frontend-->>-User: Displays merged data as dual-axis chart
 ```
