@@ -23,6 +23,7 @@ const AllCompanies = React.lazy(() => import('./views/companies/AllCompanies'))
 const CompanyPage = React.lazy(() => import('./views/companies/CompanyPage'))
 const Vulnerabilities = React.lazy(() => import('./views/vulnerabilities/Vulnerabilities'))
 const VulnInfo = React.lazy(() => import('./views/vulnerabilities/VulnInfo'))
+const PCScanner = React.lazy(() => import('./views/scanner/PCScanner'))
 const Login = React.lazy(() => import('./views/auth/Login'))
 const Register = React.lazy(() => import('./views/auth/Register'))
 
@@ -54,6 +55,7 @@ export const routes = [
   { path: '/vulnerabilities', name: 'Vulnerabilities', element: Vulnerabilities },
   { path: '/vulnerabilities/:cveId', name: 'VulnInfo', element: VulnInfo },
   { path: '/companies/:company_name', name: 'Company', element: CompanyPage },
+  { path: '/scanner', name: 'PC Scanner', element: PCScanner },
   { path: '/login', name: 'Login', element: Login },
   { path: '/register', name: 'Register', element: Register },
 ]

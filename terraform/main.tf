@@ -257,6 +257,12 @@ module "auth" {
   api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
 }
 
+module "scan_matcher" {
+  source            = "../microservices/scan_matcher/terraform"
+  api_id            = aws_apigatewayv2_api.unified_api.id
+  api_execution_arn = aws_apigatewayv2_api.unified_api.execution_arn
+}
+
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.ap-southeast-2.s3"
