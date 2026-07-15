@@ -6,13 +6,9 @@ New vulnerabilities get published every day. AMASS collects them, scores how dan
 
 ## Screenshots
 
-| Dashboard | Threat Monitor |
+| Company Dashboard | Stock Price vs. CVE Growth |
 |---|---|
-| ![Dashboard](stitch_designs/dashboard.png) | ![Threat Monitor](stitch_designs/threat.png) |
-
-| Endpoint Management | Landing Page |
-|---|---|
-| ![Endpoints](stitch_designs/endpoint.png) | ![Landing](stitch_designs/landing.png) |
+| ![Company Dashboard](frontendimg/company.png) | ![Stock Price vs. CVE Growth](frontendimg/stock.png) |
 
 ## What it does
 
@@ -47,8 +43,11 @@ npm install
 npm start
 ```
 
-**Docker (everything at once)**
+**Docker**
+
+The `Dockerfile` builds the CISA data-collection service:
 
 ```bash
-docker compose up --build
+docker build -t amass-data-collection .
+docker run --rm amass-data-collection
 ```
